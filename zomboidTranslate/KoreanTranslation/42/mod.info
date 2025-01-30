@@ -1,0 +1,8 @@
+name=[B42] 한글 패치
+id=b42KoreanTranslation
+description=ChatGPT로 번역한 한글 패치 모드입니다.
+modversion=1.2.1
+poster=poster.png
+versionMin=42.0.0
+author=꼼시
+icon=icon.png
