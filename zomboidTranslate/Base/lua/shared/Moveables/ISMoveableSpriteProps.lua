@@ -1329,24 +1329,14 @@ function ISMoveableSpriteProps:pickUpMoveableInternal( _character, _square, _obj
                     end
                 end
             end
-            if self.spriteProps and not self.spriteProps:Is(IsoFlagType.waterPiped) then
-                --print("water check");
-                if _object:hasModData() then
-                    --print("water check mod data");
-                    if _object:getModData().waterAmount then
-                        item:getModData().waterAmount = _object:getModData().waterAmount;
-                        item:getModData().taintedWater = _object:isTaintedWater();
-                    end
-                else
-                    --print("water check no mod");
-                    local waterAmount = tonumber(_object:getWaterAmount());
-                    if waterAmount then
-                        item:getModData().waterAmount = waterAmount;
-                        item:getModData().taintedWater = _object:isTaintedWater();
+
+            if self.spriteProps and self.spriteProps:Is(IsoFlagType.waterPiped) and _spriteName ~= "camping_01_16" then
+                -- empty water on pickup
+                if item:getFluidContainer() ~= nil then
+                    item:getFluidContainer():Empty();
                 end
-                end
-                --print("ITEM WATER AMOUNT = "..tostring(item:getModData().waterAmount));
             end
+
             triggerEvent("OnObjectAboutToBeRemoved", _object) -- Hack for RainCollectorBarrel, Trap, etc
             _square:transmitRemoveItemFromSquare(_object)
         end
@@ -2267,20 +2257,6 @@ function ISMoveableSpriteProps:placeMoveableInternal( _square, _item, _spriteNam
 --                obj:setUsesExternalWaterSource(true);
             end
 
-            if props:Is("waterAmount") and _spriteName ~= "camping_01_16" then
-                --print("water place");
-                obj:setWaterAmount(0); --set water to zero after moving
-                if (not props:Is(IsoFlagType.waterPiped)) and _item and _item:hasModData() then
-                    local modData = _item:getModData()
-                    if modData.waterAmount and tonumber(modData.waterAmount) then
-                        obj:setWaterAmount(tonumber(modData.waterAmount));
-                        obj:getModData().waterAmount = tonumber(modData.waterAmount);
-                        obj:getModData().taintedWater = modData.taintedWater;
-                        --print("setting water amount "..tostring(modData.waterAmount));
-                    end
-                end
-            end
-
             --if isGenericThump and props:Is("lightR") then
             --obj:createLightSource(10, 5, 5, 0, 0, nil, nil, _character);
             --end
@@ -2928,14 +2904,14 @@ function ISMoveableSpriteProps:getScrapItemsList(_character)
         chance = self:getChanceByDef(scrapDef, _character);
         addedAmount = 0;
         if scrapDef and chance then
-            if scrapDef.returnItems and #scrapDef.returnItems > 0 then
-                for i,v in ipairs(scrapDef.returnItems) do
-                    addedAmount = addedAmount + self:addScrapItemToList( items.usable, v.returnItem, v.maxAmount, v.chancePerRoll, chance, true );
-                end
+            local returnItems = scrapDef.returnItemsStatic or {};
+            if (not returnItems) or #returnItems < 1 then
+                returnItems = scrapDef.returnItems;
             end
-            if scrapDef.returnItemsStatic and #scrapDef.returnItemsStatic > 0 then
-                for i,v in ipairs(scrapDef.returnItemsStatic) do
-                    addedAmount = addedAmount + self:addScrapItemToList( items.usable, v.returnItem, v.maxAmount, v.chancePerRoll, chance, false );
+
+            if returnItems and #returnItems > 0 then
+                for i,v in ipairs(returnItems) do
+                    addedAmount = addedAmount + self:addScrapItemToList( items.usable, v.returnItem, v.maxAmount, v.chancePerRoll, chance, true );
                 end
             end
 
@@ -3283,7 +3259,7 @@ function ISMoveableSpriteProps:scrapObjectInternal( _character, _scrapDef, _squa
         -- Carpentry objects should return items from modData "need:", not MaterialN tile properties.
         -- i.e., Log Walls should give back sheets/rope/twine used to build it, not nails.
         if instanceof(object, "IsoThumpable") and object:hasModData() then
-            scrapDef = copyTable(_scrapDef)
+            --scrapDef = copyTable(_scrapDef)
             scrapDef.returnItems = {}
             scrapDef.returnItemsStatic = {}
             for k,v in pairs(self.object:getModData()) do

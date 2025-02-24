@@ -78,16 +78,23 @@ function ISShearAnimal:start()
 	end
 	self.character:setVariable("AnimalSizeY", current/range);
 	sendEvent(self.character, "ShearAnimal")
+
+	if self.shear:IsDrainable() then
+		self.sound = self.character:playSound("AnimalFoleyShearSheepElectric")
+	else
+		self.sound = self.character:playSound("AnimalFoleyShearSheepManual")
+	end
 end
 
 function ISShearAnimal:forceStop()
 	self.character:setVariable("shearanimal", false)
 	self.animal:getBehavior():setBlockMovement(false);
 	self.shear:setJobDelta(0.0);
-	ISBaseTimedAction.stop(self);
+	ISBaseTimedAction.forceStop(self);
 end
 
 function ISShearAnimal:stop()
+	self:stopSound()
 	self.character:setVariable("shearanimal", false)
 	self.animal:getBehavior():setBlockMovement(false);
 	self.shear:setJobDelta(0.0);
@@ -95,6 +102,7 @@ function ISShearAnimal:stop()
 end
 
 function ISShearAnimal:perform()
+	self:stopSound()
 	self.character:setVariable("shearanimal", false)
 	self.animal:getBehavior():setBlockMovement(false);
 	self.shear:setJobDelta(0.0);
@@ -132,6 +140,12 @@ function ISShearAnimal:getDuration()
 	--	return 1
 	--end
 	return (self.animal:getData():getWoolQuantity() * self.timePerLiter) + 1
+end
+
+function ISShearAnimal:stopSound()
+    if self.sound and self.character:getEmitter():isPlaying(self.sound) then
+        self.character:stopOrTriggerSound(self.sound);
+    end
 end
 
 function ISShearAnimal:new(character, animal, shear)

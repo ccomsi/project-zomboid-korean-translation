@@ -135,6 +135,11 @@ ProfessionVehicles.StepVan_Heralds = {
     Alternate = { "Base.StepVan", },
 }
 
+ProfessionVehicles.StepVan_MobileLibrary = {
+    Louisville = { "Base.StepVan", },
+    LAA = { "Base.StepVan", },
+}
+
 -- ProfessionVehicles.StepVanMail = {
 --     LAA = { "Base.StepVanMail", },
 -- }
@@ -158,6 +163,7 @@ ProfessionVehicles.VanBuilder = {
     "Base.PickUpVanKimbleKonstruction", "Base.PickUpVanMarchRidgeConstruction", "Base.VanBeckmans", "Base.VanKerrHomes",},
     LAA = { "Base.VanCoastToCoast", },
 }
+
 ProfessionVehicles.VanCarpenter = {
     Louisville = { "Base.StepVan_Jorgensen", "Base.PickUpVanLightsKentuckyLumber", },
     MarchRidge = {  "Base.PickUpVanYingsWood","Base.PickUpVanLightsKentuckyLumber", },

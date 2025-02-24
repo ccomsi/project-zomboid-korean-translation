@@ -1,8 +1,3 @@
---***********************************************************
---**                    ROBERT JOHNSON                     **
---**          Contextual menu with all our painting        **
---***********************************************************
-
 ISPaintMenu = {};
 
 local PaintMenuItems = {
@@ -46,14 +41,12 @@ ISPaintMenu.doPaintMenu = function(player, context, worldobjects, test)
 	if test and ISWorldObjectContextMenu.Test then return true end
 
 	local playerObj = getSpecificPlayer(player)
-
 	local playerInv = playerObj:getInventory()
 
-	local thump = nil;
-	local square = nil;
+    local square = nil;
+    local thump = nil;
     local paintableWall = nil;
     local paintableItem = nil;
-    local paperableWall = nil;
 
 	-- we get the thumpable item (like wall/door/furniture etc.) if exist on the tile we right clicked
 	for i,v in ipairs(worldobjects) do
@@ -66,9 +59,9 @@ ISPaintMenu.doPaintMenu = function(player, context, worldobjects, test)
 			thump = v;
         end
         if props and (props:Is("WallN") or props:Is("WallW") or
-                props:Is("DoorWallN") or props:Is("DoorWallW")) then
+                props:Is("DoorWallN") or props:Is("DoorWallW")) or
+                props:Is("WindowN") or props:Is("WindowW") then
             paintableWall = v;
--- 			paperableWall = v;
         end
     end
 
@@ -81,51 +74,57 @@ ISPaintMenu.doPaintMenu = function(player, context, worldobjects, test)
 	local plaster = playerInv:containsTypeRecurse("BucketPlasterFull")
 	local plasterTrowel = playerInv:containsTagRecurse("PlasterTrowel")
 
---     if the item can be plastered TODO: commented out for future development
+    -- Plaster
     if (joypad or (thump and thump:canBePlastered())) and ((playerObj:getPerkLevel(Perks.Woodwork) >= 4 and plaster and plasterTrowel) or ISBuildMenu.cheat) then
 		if test then return ISWorldObjectContextMenu.setTest() end
-		local plaster = context:addOption(getText("ContextMenu_Plaster"), worldobjects, ISPaintMenu.onPlaster, player, thump, square);
+		context:addOption(getText("ContextMenu_Plaster"), worldobjects, ISPaintMenu.onPlaster, player, thump, square);
 	elseif  (joypad or (thump and thump:canBePlastered())) and ((playerObj:getPerkLevel(Perks.Woodwork) >= 4 and (plaster or plasterTrowel))) then
 		if test then return ISWorldObjectContextMenu.setTest() end
-		local plaster = context:addOption(getText("ContextMenu_CantPlaster"), worldobjects, ISPaintMenu.onPlaster, player, thump, square);
-		plaster.notAvailable = true;
+		local opt = context:addOption(getText("ContextMenu_CantPlaster"), worldobjects, ISPaintMenu.onPlaster, player, thump, square);
+		opt.notAvailable = true;
 	end
+
+    -- Wallpaper
     if (((thump and thump:isPaintable()) or paintableWall) or joypad) and (paintBrush and wallpaper and wallpaperPaste and scissors) then
 		if test then return ISWorldObjectContextMenu.setTest() end
+
         local wallType
-        if paintableWall then wallType = paintableWall:getSprite():getProperties():Val("PaintingType");
-        else wallType = thump:getSprite():getProperties():Val("PaintingType");
+        if paintableWall then
+            wallType = paintableWall:getSprite():getProperties():Val("PaintingType")
+        else
+            wallType = thump:getSprite():getProperties():Val("PaintingType")
         end
-            local wallpaperOption = context:addOption(getText("ContextMenu_ApplyWallpaper"), worldobjects, nil);
-            local subMenuWallpaper= ISContextMenu:getNew(context);
---             -- we add our new menu to the option we want (here paint)
-            context:addSubMenu(wallpaperOption, subMenuWallpaper);
-            ISPaintMenu.player = player
-            for _,wme in ipairs( WallpaperMenuItems) do
---                 -- if (ISBuildMenu.cheat or playerInv:containsTypeRecurse(wme.paper)) and WallPaper[wallType][wme.paper] then
-                if (playerInv:containsTypeRecurse(wme.paper))
-                and WallPaper[wallType]
-                and WallPaper[wallType][wme.paper] then
-                    subMenuWallpaper:addOption(getText(wme.text),  worldobjects, ISPaintMenu.onPaper, player, item, wme.paper, wallType);
-                end
+
+        local wallpaperOption = context:addOption(getText("ContextMenu_ApplyWallpaper"), worldobjects, nil)
+        local subMenuWallpaper = ISContextMenu:getNew(context)
+        context:addSubMenu(wallpaperOption, subMenuWallpaper)
+
+        ISPaintMenu.player = player
+        for _,wme in ipairs(WallpaperMenuItems) do
+            if (playerInv:containsTypeRecurse(wme.paper))
+                    and WallPaper[wallType]
+                    and WallPaper[wallType][wme.paper] then
+                subMenuWallpaper:addOption(getText(wme.text), worldobjects, ISPaintMenu.onPaper, player, item, wme.paper, wallType)
             end
-            if subMenuWallpaper:isEmpty() then
-                context:removeLastOption()
-            end
---         end
+        end
+
+        if subMenuWallpaper:isEmpty() then
+            context:removeLastOption()
+        end
     end
 
-    -- paint various sign
+    -- Paint various sign
     if (paintableWall or joypad) and (ISBuildMenu.cheat or paintBrush) then
 		if test then return ISWorldObjectContextMenu.setTest() end
+
         local paintOption = context:addOption(getText("ContextMenu_PaintSign"), worldobjects, nil);
         local subMenuPaint = ISContextMenu:getNew(context);
-        -- we add our new menu to the option we want (here paint)
         context:addSubMenu(paintOption, subMenuPaint);
+
         ISPaintMenu.player = player
-        for _,pme in ipairs(PaintMenuItems) do
+        for _, pme in ipairs(PaintMenuItems) do
             if ISBuildMenu.cheat or playerInv:containsTypeRecurse(pme.paint) then
-                ISPaintMenu.addSignOption(subMenuPaint, getText(pme.text), paintableWall, pme.paint, pme.color[1], pme.color[2], pme.color[3]);
+                ISPaintMenu.addSignOption(subMenuPaint, getText(pme.text), paintableWall, pme.paint, pme.color[1], pme.color[2], pme.color[3])
             end
         end
         if subMenuPaint:isEmpty() then
@@ -133,36 +132,43 @@ ISPaintMenu.doPaintMenu = function(player, context, worldobjects, test)
         end
     end
 
-	-- if the item can be paint
+	-- Item paint
 	if joypad and (ISBuildMenu.cheat or paintBrush) then
 		local paintOption = context:addOption(getText("ContextMenu_Paint"), worldobjects, nil)
 		local subMenuPaint = ISContextMenu:getNew(context)
 		context:addSubMenu(paintOption, subMenuPaint)
-		for _,pme in ipairs(PaintMenuItems) do
+
+		for _, pme in ipairs(PaintMenuItems) do
 			if ISBuildMenu.cheat or playerInv:containsTypeRecurse(pme.paint) then
 				subMenuPaint:addOption(getText(pme.text), worldobjects, ISPaintMenu.onPaint, player, thump, pme.paint)
 			end
 		end
+
 		if subMenuPaint:isEmpty() then
 			context:removeLastOption()
 		end
 	elseif ((thump and thump:isPaintable()) or paintableItem) and (ISBuildMenu.cheat or paintBrush) then
-        local item = thump;
-        if paintableItem then item = paintableItem; end
-		if test then return ISWorldObjectContextMenu.setTest() end
-		local modData = nil;
-        if thump then thump:getModData(); end
+        if test then return ISWorldObjectContextMenu.setTest() end
+
+        local item = thump
+        if paintableItem then
+            item = paintableItem
+        end
+
 		local paintOption = context:addOption(getText("ContextMenu_Paint"), worldobjects, nil);
 		local subMenuPaint = ISContextMenu:getNew(context);
-		-- we add our new menu to the option we want (here paint)
 		context:addSubMenu(paintOption, subMenuPaint);
-        local addedMenu = false;
-        local wallType = "";
+
+        local addedMenu = false
+        local wallType
         if paintableItem then
-            wallType = paintableItem:getSprite():getProperties():Val("PaintingType");
+            wallType = paintableItem:getSprite():getProperties():Val("PaintingType")
+        end
+        if wallType == nil then
+            wallType = ISPaintMenu.getWallType(item)
         end
         for _,pme in ipairs(PaintMenuItems) do
-            if ((modData and Painting[modData["wallType"]][pme.paint]) or (Painting[wallType] and Painting[wallType][pme.paint])) and (ISBuildMenu.cheat or playerInv:containsTypeRecurse(pme.paint)) then
+            if ((Painting[wallType] and Painting[wallType][pme.paint])) and (ISBuildMenu.cheat or playerInv:containsTypeRecurse(pme.paint)) then
                 subMenuPaint:addOption(getText(pme.text), worldobjects, ISPaintMenu.onPaint, player, item, pme.paint);
                 addedMenu = true;
             end
@@ -177,6 +183,19 @@ ISPaintMenu.doPaintMenu = function(player, context, worldobjects, test)
             context:removeLastOption();
         end
 	end
+end
+
+ISPaintMenu.getWallType = function(obj)
+    local props = obj:getProperties()
+    if props:Is("WallN") or props:Is("WallW") then
+        return "wall"
+    end
+    if props:Is("WindowN") or props:Is("WindowW") then
+        return "windowsframe"
+    end
+    if props:Is("DoorWallN") or props:Is("DoorWallW") then
+        return "doorframe"
+    end
 end
 
 ISPaintMenu.addSignOption = function(subMenuPaint, name, wall, painting, r,g,b)

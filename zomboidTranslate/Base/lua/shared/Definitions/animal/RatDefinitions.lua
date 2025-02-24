@@ -121,6 +121,7 @@ AnimalDefinitions.animals["ratbaby"].thirstHungerTrigger = 0.2;
 AnimalDefinitions.animals["ratbaby"].eatFromMother = true;
 AnimalDefinitions.animals["ratbaby"].addTrackingXp = false; -- don't add tracking/sneaking xp when near rats, only deer & bunnies have that
 AnimalDefinitions.animals["ratbaby"].corpseSize = 0;
+AnimalDefinitions.animals["ratbaby"].dung = "Dung_Rat";
 
 
 AnimalDefinitions.animals = AnimalDefinitions.animals or {};
@@ -177,6 +178,7 @@ AnimalDefinitions.animals["ratfemale"].minMilk = 1;
 AnimalDefinitions.animals["ratfemale"].maxMilk = 2;
 AnimalDefinitions.animals["ratfemale"].addTrackingXp = false;
 AnimalDefinitions.animals["ratfemale"].corpseSize = 0;
+AnimalDefinitions.animals["ratfemale"].dung = "Dung_Rat";
 
 
 AnimalDefinitions.animals["rat"] = {};
@@ -227,6 +229,7 @@ AnimalDefinitions.animals["rat"].distToEat = 1;
 AnimalDefinitions.animals["rat"].turnDelta = 0.95;
 AnimalDefinitions.animals["rat"].addTrackingXp = false;
 AnimalDefinitions.animals["rat"].corpseSize = AnimalDefinitions.animals["ratfemale"].corpseSize
+AnimalDefinitions.animals["rat"].dung = "Dung_Rat";
 
 local rat_sounds = {
 	pain = { name = "AnimalVoiceRatPain", slot = "voice", priority = 50 },

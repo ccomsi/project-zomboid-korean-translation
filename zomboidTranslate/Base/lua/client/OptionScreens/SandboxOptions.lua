@@ -963,6 +963,7 @@ function SandboxOptionsScreen:addPresetToList(fileName, text, userDefined)
     local newPreset = {}
     newPreset.name = fileName
     newPreset.options = SandboxOptions.new()
+    newPreset.userDefined = userDefined
     if userDefined then
         newPreset.options:loadPresetFile(newPreset.name)
     else

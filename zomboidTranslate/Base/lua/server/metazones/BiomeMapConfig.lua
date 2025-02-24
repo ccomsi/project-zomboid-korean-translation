@@ -2,6 +2,7 @@ biome_map_config = {
     { pixel = 0, zone = "Water" },
     --{ pixel = 34, zone = "Water" },
     { pixel = 45, zone = "WaterNoFish" },
+    { pixel = 59, biome = "clay_shore", zone = "Forest" },
     { pixel = 64, zone = "ForagingNav" },
     { pixel = 102, zone = "TrailerPark" },
     { pixel = 115, biome = "townhouse", zone = "TownZone" },

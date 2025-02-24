@@ -97,6 +97,7 @@ end
 
 function ZombiePopulationWindow:onTeleport(worldX, worldY)
 	local player = getSpecificPlayer(0)
+	if not player then return end
 	player:teleportTo(worldX, worldY)
 -- 	player:setX(worldX)
 -- 	player:setY(worldY)

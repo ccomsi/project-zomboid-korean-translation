@@ -173,7 +173,7 @@ function ISHutchNestBox:onButtonGrab()
             if self.playerObj:getPrimaryHandItem() then
                 ISTimedActionQueue.add(ISUnequipAction:new(self.playerObj, self.playerObj:getPrimaryHandItem(), 50));
             end
-            if self.playerObj:getSecondaryHandItem() then
+            if self.playerObj:getSecondaryHandItem() and self.playerObj:getSecondaryHandItem() ~= self.playerObj:getPrimaryHandItem() then
                 ISTimedActionQueue.add(ISUnequipAction:new(self.playerObj, self.playerObj:getSecondaryHandItem(), 50));
             end
             ISTimedActionQueue.add(ISHutchGrabEgg:new(self.playerObj, nest, self.hutchUI.hutch))

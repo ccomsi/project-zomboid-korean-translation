@@ -369,6 +369,7 @@ function MapSpawnSelect:fillList()
 		for _,v in ipairs(regions) do
 			local info = getMapInfo(v.name)
 			if info then
+				self.mapPanel:initMapData('media/maps/'..v.name) -- FIXME: order of multiple maps matters
 				for _,dir in ipairs(info.lots) do
 					self.mapPanel:initMapData('media/maps/'..dir) -- FIXME: order of multiple maps matters
 				end

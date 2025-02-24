@@ -91,7 +91,7 @@ SpecialLootSpawns.OnCreatePhoto = function(item)
 	local list = SpecialLootSpawns.OldPhotos
 	local photo = list[ZombRand(#list)+1]
     local title = getText("IGUI_Photo_" .. photo)
-    local text =  getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_PhotoOf") .. " " .. title
+    local text = getText("IGUI_PhotoOf", getText(item:getScriptItem():getDisplayName()), title)
     item:setName(text)
     item:getModData().literatureTitle = "Photo_" .. photo .. tostring(ZombRand(1000000))
 end
@@ -100,7 +100,7 @@ SpecialLootSpawns.OnCreatePhoto_Secret = function(item)
 	local list = SpecialLootSpawns.SecretPhotos
 	local photo = list[ZombRand(#list)+1]
     local title = getText("IGUI_Photo_" .. photo)
-    local text =  getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_PhotoOf") .. " " .. title
+    local text = getText("IGUI_PhotoOf", getText(item:getScriptItem():getDisplayName()), title)
     item:setName(text)
     item:getModData().literatureTitle = "SecretPhoto_" .. photo .. tostring(ZombRand(1000000))
 end
@@ -109,7 +109,7 @@ SpecialLootSpawns.OnCreatePhoto_Racy = function(item)
 	local list = SpecialLootSpawns.RacyPhotos
 	local photo = list[ZombRand(#list)+1]
     local title = getText("IGUI_Photo_" .. photo)
-    local text =  getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_PhotoOf") .. " " .. title
+    local text = getText("IGUI_PhotoOf", getText(item:getScriptItem():getDisplayName()), title)
     item:setName(text)
     item:getModData().literatureTitle = "SecretPhoto_" .. photo .. tostring(ZombRand(1000000))
 end
@@ -122,7 +122,7 @@ SpecialLootSpawns.OnCreatePhoto_VeryOld = function(item)
 	local list = SpecialLootSpawns.VeryOldPhotos
 	local photo = list[ZombRand(#list)+1]
     local title = getText("IGUI_Photo_" .. photo)
-    local text =  getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_PhotoOf") .. " " .. title
+    local text = getText("IGUI_PhotoOf", getText(item:getScriptItem():getDisplayName()), title)
     item:setName(text)
     item:getModData().literatureTitle = "VeryOldPhoto_" .. photo .. tostring(ZombRand(1000000))
 end
@@ -130,7 +130,7 @@ end
 -- BOOKS
 SpecialLootSpawns.OnCreateSubjectBook = function(item, subject)
     if not item then return; end;
-    local hardcover = item:hasTag("Hardcover") or item:hasTag("HollowBook") or item:hasTag("FancyBook") or item:getType():contains("Book")
+    local hardcover = item:hasTag("Hardcover") or item:hasTag("HollowBook") or item:hasTag("IsHollowBook") or item:hasTag("FancyBook") or item:getType():contains("Book")
     local softcover = item:hasTag("Softcover")  or item:getType():contains("Paperback")
     local cover
 	local bookList = SpecialLootSpawns.BookTitles[subject]
@@ -1109,7 +1109,7 @@ SpecialLootSpawns.OnCreateLocket = function(item)
 -- 	local list = SpecialLootSpawns.VeryOldPhotos
 -- 	local photo = list[ZombRand(#list)+1]
 --     local title = getText("IGUI_Photo_" .. photo)
-    local text = getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_LocketText") .. " " .. title
+    local text = getText("IGUI_LocketText", getText(item:getScriptItem():getDisplayName()), title)
 	item:setName(text)
 end
 
@@ -1118,7 +1118,7 @@ SpecialLootSpawns.OnCreateDoodle = function(item)
 	local list = SpecialLootSpawns.Doodle
 	local photo = list[ZombRand(#list)+1]
     local title = getText("IGUI_Photo_" .. photo)
-    local text =  getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_PhotoOf") .. " " .. title
+    local text = getText("IGUI_PhotoOf", getText(item:getScriptItem():getDisplayName()), title)
     item:setName(text)
     item:getModData().literatureTitle = "Doodle_" .. photo .. tostring(ZombRand(1000000))
 end
@@ -1128,7 +1128,7 @@ SpecialLootSpawns.OnCreateDoodleKids = function(item)
 	local list = SpecialLootSpawns.DoodleKids
 	local photo = list[ZombRand(#list)+1]
     local title = getText("IGUI_Doodle_" .. photo)
-    local text =  getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_PhotoOf") .. " " .. title
+    local text = getText("IGUI_PhotoOf", getText(item:getScriptItem():getDisplayName()), title)
     item:setName(text)
     item:getModData().literatureTitle = "Doodle_" .. photo .. tostring(ZombRand(1000000))
 end
@@ -1335,7 +1335,7 @@ SpecialLootSpawns.OnCreatePostcard = function(item)
     if not item then return; end;
     local card = SpecialLootSpawns.Postcards[ZombRand(#SpecialLootSpawns.Postcards)+1]
     local text = getText("IGUI_Photo_" .. card)
-    text =  getText(item:getScriptItem():getDisplayName()) .. " " .. getText("IGUI_PhotoOf") .. " " .. text
+    text = getText("IGUI_PostcardFrom", getText(item:getScriptItem():getDisplayName()), text)
 	item:setName(text)
     item:getModData().literatureTitle = "IGUI_Postcard_" .. card
 end

@@ -978,6 +978,9 @@ function forageSystem.addItemDef(_itemDef)
 				if not forageSystem.itemDefs[defType] then
 					--add definition
 					forageSystem.itemDefs[defType] = def;
+					-- update the item script to know that it can be foraged
+                    local scriptItem = ScriptManager.instance:getItem(_itemDef.type)
+                    scriptItem:setCanBeForaged(true);
 					return defType, true; -- defType is added
 				else
 					log(DebugType.Foraging, "[forageSystem][addItemDef] item is already defined! ".._itemDef.type);
@@ -1018,6 +1021,9 @@ end
 function forageSystem.removeItemDef(_itemDef)
 	if _itemDef and forageSystem.isItemExist(nil, _itemDef) then
 		forageSystem.itemDefs[_itemDef.type] = nil; --wipe the definition
+        -- update the item script to know that it cannot be foraged
+        local scriptItem = ScriptManager.instance:getItem(_itemDef.type)
+        scriptItem:setCanBeForaged(false);
 	else
 		log(DebugType.Foraging, "[forageSystem][removeItemDef] no such item, ignoring "..((_itemDef and _itemDef.type) or "unknown type"));
 	end;
@@ -2254,7 +2260,7 @@ end
 function forageSystem.doDeadTrapAnimalSpawn(_character, _inventory, _itemDef, _items)
 	for item in iterList(_items) do
 		--search for trap animal definition
-		for _, trapDef in pairs(Animals) do
+		for _, trapDef in pairs(TrapAnimals) do
 			if trapDef.item == _itemDef.type then
 				-- Randomize the hunger reduction of the animal
 				local size = ZombRand(trapDef.minSize, trapDef.maxSize);

@@ -24,12 +24,12 @@ end
 function ISAddWaterFromItemAction:update()
 	self.character:faceThisObject(self.objectTo)
 	self.itemFrom:setJobDelta(self:getJobDelta())
-	local unitsSoFar = math.floor(self.addUnits * self:getJobDelta())
-	if self.itemFrom:isWaterSource() then
-		self.itemFrom:setUsedDelta(self.itemFromStartDelta - unitsSoFar * self.itemFrom:getUseDelta())
-	end
+	
+	local waterUsed = self.addUnits * self:getJobDelta();
+	local waterRemaining = self.itemFromStartAmount - waterUsed;
+	self:setItemFromWaterAmount(waterRemaining);
 
-    self.character:setMetabolicTarget(Metabolics.LightDomestic);
+	self.character:setMetabolicTarget(Metabolics.LightDomestic);
 end
 
 function ISAddWaterFromItemAction:start()
@@ -50,16 +50,12 @@ function ISAddWaterFromItemAction:stop()
 	self.itemFrom:setJobDelta(0.0)
 	-- Possibly start() wasn't called yet (because isValid() returned false)
 	if self.addUnits and self.addUnits > 0 then
-		local unitsSoFar = math.floor(self.addUnits * self:getJobDelta())
-		self.itemFrom:setUsedDelta(self.itemFromStartDelta - unitsSoFar * self.itemFrom:getUseDelta())
-		if self.itemFrom:getCurrentUsesFloat() < 0.0001 then
-			self.itemFrom:Use()
-		end
-		self.objectTo:setWaterAmount(self.objectTo:getWaterAmount() + unitsSoFar)
-		if self.itemFrom:isTaintedWater() then
-			self.objectTo:setTaintedWater(true)
-		end
-		self.objectTo:transmitModData()
+		local waterUsed = self.addUnits * self:getJobDelta();
+		local waterRemaining = self.itemFromStartAmount - waterUsed;
+		self:setItemFromWaterAmount(waterRemaining);
+
+		self.objectTo:setWaterAmount(self.objectTo:getWaterAmount() + waterUsed, self.itemFrom:isTaintedWater())
+		self.objectTo:sync()
 	end
 	ISBaseTimedAction.stop(self)
 end
@@ -75,27 +71,31 @@ end
 
 function ISAddWaterFromItemAction:serverStop()
 	self.addUnits = self.netAction:getProgress() * self.addUnits
-	self.itemFromEndingDelta = math.floor((self.itemFromStartDelta - self.addUnits * self.itemFrom:getUseDelta()) * 100.0) / 100.0
+	self.itemFromEndingAmount = self.itemFromStartAmount - self.addUnits
 	self:complete()
 end
 
 function ISAddWaterFromItemAction:complete()
-	self.itemFrom:setUsedDelta(self.itemFromEndingDelta)
-
-	if self.itemFrom:isTaintedWater() then
-		self.objectTo:setTaintedWater(true)
-	end
-	self.objectTo:setWaterAmount(self.objectTo:getWaterAmount() +self.addUnits)
+	self:setItemFromWaterAmount(self.itemFromEndingAmount);
+	
+	self.objectTo:setWaterAmount(self.objectTo:getWaterAmount() + self.addUnits, self.itemFromTainted)
 	self.objectTo:sync()
-	if not instanceof(self.objectTo, "IsoWorldInventoryObject") then
-		self.objectTo:transmitModData()
-	end
 
-	if (self.itemFrom:getCurrentUsesFloat() / self.itemFrom:getUseDelta()) < 1.0 then
-		self.itemFrom:UseAndSync()
-	end
+	--if (self.itemFrom:getCurrentUsesFloat() / self.itemFrom:getUseDelta()) < 1.0 then
+	--	self.itemFrom:UseAndSync()
+	--end
 
 	return true;
+end
+
+function ISAddWaterFromItemAction:setItemFromWaterAmount(_amount)
+	local targetUsed = _amount;
+	local actualUsed = self.itemFrom:getFluidContainer():getAmount();
+	local overFillAmount = actualUsed - targetUsed;
+	
+	if self.itemFrom:isWaterSource() then
+		self.itemFrom:getFluidContainer():removeFluid(overFillAmount)
+	end
 end
 
 function ISAddWaterFromItemAction:getDuration()
@@ -116,11 +116,11 @@ function ISAddWaterFromItemAction:new(character, itemFrom, objectTo)
 	o.itemFrom = itemFrom
 	o.objectTo = objectTo
 
-	o.itemFromStartDelta = o.itemFrom:getCurrentUsesFloat()
-	local waterAvailable = o.itemFrom:getCurrentUses()
-	local destCapacity = o.objectTo:getWaterMax() - o.objectTo:getWaterAmount()
-	o.addUnits = math.min(destCapacity, waterAvailable)
-	o.itemFromEndingDelta = math.floor((o.itemFromStartDelta - o.addUnits * o.itemFrom:getUseDelta()) * 100.0) / 100.0
+	o.itemFromTainted = not o.itemFrom:isPureWater(false)
+	o.itemFromStartAmount = o.itemFrom:getFluidContainer():getAmount()
+	local destCapacity = math.max(0, o.objectTo:getWaterMax() - o.objectTo:getWaterAmount());
+	o.addUnits = math.min(destCapacity, o.itemFromStartAmount)
+	o.itemFromEndingAmount = o.itemFromStartAmount - o.addUnits
 
 	o.maxTime = o:getDuration()
 	return o

@@ -325,7 +325,7 @@ function ISVehicleMechanics:doPartContextMenu(part, x,y)
 			self:doMenuTooltip(part, option, "takeengineparts");
 			option.notAvailable = true;
 		end
-		if part:getCondition() < 100 and self.chr:getInventory():getNumberOfItem("EngineParts", false, true) > 0 and self.chr:getPerkLevel(Perks.Mechanics) >= part:getVehicle():getScript():getEngineRepairLevel() and self.chr:getInventory():contains("Wrench") then
+		if part:getCondition() < 100 and self.chr:getInventory():getNumberOfItem("EngineParts", false, true) > 0 and self.chr:getPerkLevel(Perks.Mechanics) >= part:getVehicle():getScript():getEngineRepairLevel() and self.chr:getInventory():containsTypeRecurse("Wrench") then
 			local option = self.context:addOption(getText("IGUI_RepairEngine"), playerObj, ISVehicleMechanics.onRepairEngine, part);
 			self:doMenuTooltip(part, option, "repairengine");
 		else
@@ -419,7 +419,8 @@ function ISVehicleMechanics.onRepairEngine(playerObj, part)
 	local typeToItem = VehicleUtils.getItems(playerObj:getPlayerNum())
 	local item = typeToItem["Base.Wrench"][1]
 	ISVehiclePartMenu.toPlayerInventory(playerObj, item)
-	
+	local parts = playerObj:getInventory():getFirstTypeRecurse("EngineParts");
+	ISVehiclePartMenu.toPlayerInventory(playerObj, parts)	
 	ISTimedActionQueue.add(ISPathFindAction:pathToVehicleArea(playerObj, part:getVehicle(), part:getArea()))
 	
 	local engineCover = nil

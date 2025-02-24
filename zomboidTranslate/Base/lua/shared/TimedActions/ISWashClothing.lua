@@ -22,7 +22,12 @@ end
 function ISWashClothing:start()
 	self:setActionAnim("ScrubClothWithSoap")
 	self:setOverrideHandModels(getScriptManager():FindItem("Soap2"):getStaticModel(), getScriptManager():FindItem("DishCloth"):getStaticModel())
-	self.sound = self.character:playSound("WashClothing")
+	local bandages = { ["Base.BandageDirty"]=1, ["Base.DenimStripsDirty"]=1, ["Base.LeatherStripsDirty"]=1, ["Base.RippedSheetsDirty"]=1 }
+	if bandages[self.item:getFullType()] then
+		self.sound = self.character:playSound("FirstAidCleanRag")
+	else
+		self.sound = self.character:playSound("WashClothing")
+	end
 	self.character:reportEvent("EventWashClothing");
 end
 

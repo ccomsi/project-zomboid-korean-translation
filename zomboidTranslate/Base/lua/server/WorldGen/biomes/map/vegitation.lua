@@ -14,6 +14,13 @@ local vegitation = {
         BUSH = {
             { f = worldgen.features.BUSH.bush_dry, p = 1 },
         },
+        PLANT = {
+            { f = worldgen.features.PLANT.grass_low, p = 0.75 },
+            { f = worldgen.features.PLANT.grass_medium, p = 0.15 },
+
+            { f = worldgen.features.PLANT.fern, p = 0.03 },
+            { f = worldgen.features.PLANT.generic_plant, p = 0.07 },
+        }
     },
     params = {
         landscape = { "FOREST" },
@@ -32,12 +39,6 @@ local vegitation = {
             "!blends_natural_01_69",
             "!blends_natural_01_70",
             "!blends_natural_01_71",
-        },
-        grass = {
-            fernChance = 0.3,
-            noGrassDiv = 12,
-            noGrassStages = { 0.4 },
-            grassStages = { 0.33, 0.5 } 
         },
     }
 }

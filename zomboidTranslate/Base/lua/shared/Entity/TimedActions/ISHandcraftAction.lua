@@ -164,6 +164,18 @@ function ISHandcraftAction:perform()
 					local item = items:get(i);
 					Actions.addOrDropItem(self.character, item)
 				end
+				if items:size() == 1 then
+					local resItem = items:get(0)
+					local modData = resItem:getModData()
+					local usedItems = self.logic:getRecipeData():getAllConsumedItems()
+					for i=0, usedItems:size()-1 do
+						local item = usedItems:get(i)
+						if modData[item:getFullType()] == nil then
+							modData[item:getFullType()] = 0
+						end
+						modData[item:getFullType()] = modData[item:getFullType()] + 1
+					end
+				end
 			end
 		end
 

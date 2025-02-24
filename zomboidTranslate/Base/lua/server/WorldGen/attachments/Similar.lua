@@ -32,5 +32,9 @@ worldgen["similar"] = {
     blends_natural_02_0 = worldgen.features.GROUND.water.main,
     blends_natural_02_5 = worldgen.features.GROUND.water.main,
     blends_natural_02_6 = worldgen.features.GROUND.water.main,
-    blends_natural_02_7 = worldgen.features.GROUND.water.main
+    blends_natural_02_7 = worldgen.features.GROUND.water.main,
+    blends_natural_01_96 = worldgen.features.GROUND.clay.main,
+    blends_natural_01_101 = worldgen.features.GROUND.clay.main,
+    blends_natural_01_102 = worldgen.features.GROUND.clay.main,
+    blends_natural_01_103 = worldgen.features.GROUND.clay.main,
 }

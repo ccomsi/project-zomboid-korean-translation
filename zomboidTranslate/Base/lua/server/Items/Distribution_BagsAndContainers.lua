@@ -1039,7 +1039,7 @@ BagsAndContainers.Farming = {
 		"FarmingMag8", 2,
 		-- Tools
 		"CarpentryChisel", 2,
-	    "Fleshing_Tool", 10,
+		"Fleshing_Tool", 10,
 		"GardenSaw", 10,
 		"HandDrill", 10,
 		"HandFork", 10,
@@ -2740,6 +2740,9 @@ BagsAndContainers.SurvivorItems = {
 	"BookBlacksmith3", 8,
 	"BookBlacksmith4", 8,
 	"BookBlacksmith5", 4,
+	"BookButchering1", 8,
+	"BookButchering2", 8,
+	"BookButchering3", 8,
 	"BookButchering4", 8,
 	"BookButchering5", 4,
 	"BookCarpentry1", 8,

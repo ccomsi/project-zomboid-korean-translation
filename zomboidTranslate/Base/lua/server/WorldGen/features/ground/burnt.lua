@@ -6,19 +6,19 @@ local burnt = {
         "floors_burnt_01_15"
     },
     attach = {
-        n = {
+        s = {
             "floors_burnt_01_16",
             "floors_burnt_01_20"
         },
-        w = {
+        e = {
             "floors_burnt_01_17",
             "floors_burnt_01_21"
         },
-        e = {
+        w = {
             "floors_burnt_01_18",
             "floors_burnt_01_22"
         },
-        s = {
+        n = {
             "floors_burnt_01_19",
             "floors_burnt_01_23"
         }

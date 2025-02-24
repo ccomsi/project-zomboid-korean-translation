@@ -213,22 +213,20 @@ AnimalContextMenu.doMenu = function(player, context, animal, test)
 
     if animal:canBeSheared() and animal:getData():getWoolQuantity() > 1 then
         local shears = playerInv:getAllTagRecurse("Shear", ArrayList.new());
-        if shears:isEmpty() then
-           return;
-        end
+        if not shears:isEmpty() then
+            local shearOption = animalSubMenu:addOption(getText("ContextMenu_Shear"), nil, nil);
+            local shearSubMenu = ISContextMenu:getNew(animalSubMenu);
+            animalSubMenu:addSubMenu(shearOption, shearSubMenu);
 
-        local shearOption = animalSubMenu:addOption(getText("ContextMenu_Shear"), nil, nil);
-        local shearSubMenu = ISContextMenu:getNew(animalSubMenu);
-        animalSubMenu:addSubMenu(shearOption, shearSubMenu);
-
-        for i=0,shears:size()-1 do
-            local shear = shears:get(i);
-            local shearOptionSub = shearSubMenu:addOption(shear:getDisplayName(), animal, AnimalContextMenu.onShearAnimal, playerObj, shear);
-            if instanceof(shear, "DrainableComboItem") and shear:getCurrentUsesFloat() <= 0 then
-                shearOptionSub.notAvailable = true;
-                local tooltip = ISWorldObjectContextMenu.addToolTip();
-                tooltip:setName(getText("Tooltip_Animal_ShearNoBattery"));
-                shearOptionSub.toolTip = tooltip;
+            for i=0,shears:size()-1 do
+                local shear = shears:get(i);
+                local shearOptionSub = shearSubMenu:addOption(shear:getDisplayName(), animal, AnimalContextMenu.onShearAnimal, playerObj, shear);
+                if instanceof(shear, "DrainableComboItem") and shear:getCurrentUsesFloat() <= 0 then
+                    shearOptionSub.notAvailable = true;
+                    local tooltip = ISWorldObjectContextMenu.addToolTip();
+                    tooltip:setName(getText("Tooltip_Animal_ShearNoBattery"));
+                    shearOptionSub.toolTip = tooltip;
+                end
             end
         end
 
