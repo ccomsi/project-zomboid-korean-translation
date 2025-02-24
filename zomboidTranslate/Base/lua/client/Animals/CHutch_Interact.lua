@@ -11,6 +11,7 @@ CHutch_Interact = {};
 CHutch_Interact.onKeyPress = function(key)
     if not getCore():isKey("Interact", key) then return end
     local player = getSpecificPlayer(0)
+    if not player then return end
     local shiftPressed = isKeyDown(Keyboard.KEY_LSHIFT);
     if player:getVehicle() then return end
     if player:hasTimedActions() then return end

@@ -410,23 +410,23 @@ AdjacentFreeTileFinder.privCanStand = function(test)
 
     -- Player can stand on solidtrans squares adjacent to windows.
     if test:Is(IsoFlagType.solidtrans) then
-        local hasWindow = false
-        if test:Is(IsoFlagType.windowW) or test:Is(IsoFlagType.windowN) then
-            hasWindow = true
+        local hasWindowOrFence = false
+        if test:Is(IsoFlagType.windowW) or test:Is(IsoFlagType.windowN) or test:Is(IsoFlagType.cutW) or test:Is(IsoFlagType.cutN) then
+            hasWindowOrFence = true
         end
-        if not hasWindow then
+        if not hasWindowOrFence then
             local s = test:getAdjacentSquare(IsoDirections.S)
             if s and s:Is(IsoFlagType.windowN) then
-                hasWindow = true
+                hasWindowOrFence = true
             end
         end
-        if not hasWindow then
+        if not hasWindowOrFence then
             local e = test:getAdjacentSquare(IsoDirections.E)
             if e and e:Is(IsoFlagType.windowW) then
-                hasWindow = true
+                hasWindowOrFence = true
             end
         end
-        if not hasWindow then
+        if not hasWindowOrFence then
             return false
         end
     end

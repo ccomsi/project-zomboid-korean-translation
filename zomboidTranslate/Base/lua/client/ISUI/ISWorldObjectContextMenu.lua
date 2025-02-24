@@ -964,7 +964,8 @@ ISWorldObjectContextMenu.createMenu = function(player, worldobjects, x, y, test)
         --Handling fluid container tiles here
         if fetch.fluidcontainer and playerObj:DistToSquared(fetch.fluidcontainer:getX() + 0.5, fetch.fluidcontainer:getY() + 0.5) < 2 * 2 then
             if test == true then return true; end
-            local option = context:addOption(fetch.fluidcontainer:getFluidContainer():getContainerName(), nil, nil)
+			local containerName = getMoveableDisplayName(fetch.fluidcontainer) or fetch.fluidcontainer:getFluidContainer():getContainerName();
+            local option = context:addOption(containerName, nil, nil)
 			local mainSubMenu = ISContextMenu:getNew(context)
 			context:addSubMenu(option, mainSubMenu)
 			--[[
@@ -981,15 +982,18 @@ ISWorldObjectContextMenu.createMenu = function(player, worldobjects, x, y, test)
 			]]--
 			mainSubMenu:addOption(getText("Fluid_Show_Info"), player, ISWorldObjectContextMenu.onFluidInfo, fetch.fluidcontainer:getFluidContainer());
 			mainSubMenu:addOption(getText("Fluid_Transfer_Fluids"), player, ISWorldObjectContextMenu.onFluidTransfer, fetch.fluidcontainer:getFluidContainer());
-			ISWorldObjectContextMenu.doDrinkWaterMenu(fetch.fluidcontainer, player, mainSubMenu);
-            ISWorldObjectContextMenu.doFillWaterMenu(fetch.fluidcontainer, player, mainSubMenu);
+			if fetch.fluidcontainer:hasWater() then
+				ISWorldObjectContextMenu.doDrinkWaterMenu(fetch.fluidcontainer, player, mainSubMenu);
+   			    ISWorldObjectContextMenu.doFillWaterMenu(fetch.fluidcontainer, player, mainSubMenu);
+				ISWorldObjectContextMenu.doWashClothingMenu(fetch.fluidcontainer, player, mainSubMenu);
+			end
 			if fetch.waterdispenser then
 				mainSubMenu:addGetUpOption(getText("ContextMenu_Take_Bottle"), worldobjects, ISWorldObjectContextMenu.onWaterDispenserBottle, playerObj, fetch.waterdispenser, nil);
 			end
         -- wash clothing/yourself
 		elseif fetch.storeWater then
 			local source = getMoveableDisplayName(fetch.storeWater);
-			if source == nil and instanceof(fetch.storeWater, "IsoWorldInventoryObject") and storeWater:getItem() then
+			if source == nil and instanceof(fetch.storeWater, "IsoWorldInventoryObject") and fetch.storeWater:getItem() then
 				source = fetch.storeWater:getItem():getDisplayName()
 			end
 			if source == nil then
@@ -1970,10 +1974,13 @@ function ISWorldObjectContextMenu.addWaterFromItem(test, context, worldobjects, 
 	local fetch = ISWorldObjectContextMenu.fetchVars
 	local pourWaterInto = fetch.rainCollectorBarrel -- TODO: other IsoObjects too?
 	if pourWaterInto == nil then
-		pourWaterInto = waterDispenser
+		pourWaterInto = fetch.waterDispenser
+	end	
+	if pourWaterInto == nil then
+		pourWaterInto = fetch.fluidcontainer
 	end
-	if pourWaterInto == nil and worldItem and worldItem:getItem() and worldItem:getWaterMax()  then
-		pourWaterInto = worldItem
+	if pourWaterInto == nil and fetch.worldItem and fetch.worldItem:getItem() and fetch.worldItem:getWaterMax() > 0 then
+		pourWaterInto = fetch.worldItem
 	end
 	if pourWaterInto == nil then
 		return
@@ -3099,12 +3106,12 @@ ISWorldObjectContextMenu.canStoreWater = function(object)
 		return nil;
     end
 	if object ~= nil and instanceof(object, "IsoObject") and object:getSprite() and object:getSprite():getProperties() and
-	(((object:getSprite():getProperties():Is(IsoFlagType.waterPiped)) and (getGameTime():getWorldAgeHours() / 24 + (getSandboxOptions():getTimeSinceApo() - 1) * 30) < SandboxVars.WaterShutModifier) or object:getSprite():getProperties():Is("waterAmount")) and not instanceof(object, "IsoRaindrop") then
+	(((object:getSprite():getProperties():Is(IsoFlagType.waterPiped)) and (getGameTime():getWorldAgeHours() / 24 + (getSandboxOptions():getTimeSinceApo() - 1) * 30) < SandboxVars.WaterShutModifier) or object:hasWater()) and not instanceof(object, "IsoRaindrop") then
 		return object;
     end
 	-- we also check the square properties
 	if object ~= nil and instanceof(object, "IsoObject") and object:getSquare() and object:getSquare():getProperties() and
-	(((object:getSquare():getProperties():Is(IsoFlagType.waterPiped)) and (getGameTime():getWorldAgeHours() / 24 + (getSandboxOptions():getTimeSinceApo() - 1) * 30) < SandboxVars.WaterShutModifier) or object:getSquare():getProperties():Is("waterAmount")) and not instanceof(object, "IsoRaindrop") then
+	(((object:getSquare():getProperties():Is(IsoFlagType.waterPiped)) and (getGameTime():getWorldAgeHours() / 24 + (getSandboxOptions():getTimeSinceApo() - 1) * 30) < SandboxVars.WaterShutModifier) or object:getSquare():hasWater()) and not instanceof(object, "IsoRaindrop") then
 		return object;
     end
 end
@@ -4010,9 +4017,9 @@ end
 ISWorldObjectContextMenu.doDrinkWaterMenu = function(object, player, context)
 	local playerObj = getSpecificPlayer(player)
 	local thirst = playerObj:getStats():getThirst()
-	if thirst <= 0 then
-		return;
-	end
+	--if thirst <= 0 then
+	--	return;
+	--end
 	if object:getSquare():getBuilding() ~= playerObj:getBuilding() then return end;
 	if instanceof(object, "IsoClothingDryer") then return end
 	if instanceof(object, "IsoClothingWasher") then return end
@@ -4025,10 +4032,6 @@ ISWorldObjectContextMenu.doDrinkWaterMenu = function(object, player, context)
 	local tx = math.max(tx1, tx2)
 	local waterAmount = object:getWaterAmount();
 	local waterMax = object:getWaterMax();
-	if object:getFluidContainer() then
-		waterAmount = object:getFluidContainer():getPrimaryFluidAmount();
-		waterMax = object:getFluidContainer():getCapacity();
-	end
 	tooltip.description = tooltip.description ..formatWaterAmount(tx, waterAmount, waterMax);
 		--	tooltip.description = tooltip.description .. string.format("%s: <SETX:%d> -%d / %d <LINE> %s",
 		--getText("Tooltip_food_Thirst"), tx, math.min(units * 10, thirst * 100), thirst * 100,
@@ -4476,12 +4479,7 @@ end
 ISWorldObjectContextMenu.onTakeWater = function(worldobjects, waterObject, waterContainerList, waterContainer, player)
 	local playerObj = getSpecificPlayer(player)
 	local playerInv = playerObj:getInventory()
-	local waterAvailable;
-	if waterObject:hasComponent(ComponentType.FluidContainer) then
-		waterAvailable = waterObject:getFluidContainer():getAmount()
-	else
-		waterAvailable = waterObject:getWaterAmount()
-	end
+	local waterAvailable = waterObject:getWaterAmount()
 
 	if not waterContainerList or #waterContainerList == 0 then
 		waterContainerList = {};

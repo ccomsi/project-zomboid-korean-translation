@@ -11,6 +11,7 @@ CAnimals_Interact = {};
 CAnimals_Interact.onKeyPress = function(key)
     if not getCore():isKey("Interact", key) then return end
     local player = getSpecificPlayer(0)
+    if not player then return end
     if player:getVehicle() then return end
     if not player:isAiming() then return end
     if player:hasTimedActions() then return end

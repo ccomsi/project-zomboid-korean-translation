@@ -351,7 +351,7 @@ function SFarmingSystem:harvest(luaObject, player)
 	if numberOfVeg > 0 and props.isFlower and player then
         player:getBodyDamage():setUnhappynessLevel(player:getBodyDamage():getUnhappynessLevel() - numberOfVeg/2 )
         player:getBodyDamage():setBoredomLevel(player:getBodyDamage():getBoredomLevel() - numberOfVeg/2 )
-        player:getStats():setStress(player:getStats():getStress() - numberOfVeg/2 )
+        player:getStats():setStress(player:getStats():getBasicStress() - numberOfVeg/2 )
 	end
 
 	if props.vegetableName and player then

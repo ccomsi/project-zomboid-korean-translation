@@ -123,6 +123,7 @@ AnimalDefinitions.animals["mousepups"].distToEat = 0.4;
 AnimalDefinitions.animals["mousepups"].turnDelta = 0.95;
 AnimalDefinitions.animals["mousepups"].eatFromMother = true;
 AnimalDefinitions.animals["mousepups"].corpseSize = 0;
+AnimalDefinitions.animals["mousepups"].dung = "Dung_Mouse";
 
 
 AnimalDefinitions.animals = AnimalDefinitions.animals or {};
@@ -178,6 +179,7 @@ AnimalDefinitions.animals["mousefemale"].udder = true;
 AnimalDefinitions.animals["mousefemale"].minMilk = 1;
 AnimalDefinitions.animals["mousefemale"].maxMilk = 2;
 AnimalDefinitions.animals["mousefemale"].corpseSize = 0;
+AnimalDefinitions.animals["mousefemale"].dung = "Dung_Mouse";
 
 AnimalDefinitions.animals = AnimalDefinitions.animals or {};
 AnimalDefinitions.animals["mouse"] = {};
@@ -227,6 +229,7 @@ AnimalDefinitions.animals["mouse"].thirstHungerTrigger = 0.1;
 AnimalDefinitions.animals["mouse"].distToEat = 0.4;
 AnimalDefinitions.animals["mouse"].turnDelta = 0.95;
 AnimalDefinitions.animals["mouse"].corpseSize = 0;
+AnimalDefinitions.animals["mouse"].dung = "Dung_Mouse";
 
 local mouse_sounds = {
 	idle = { name = "AnimalVoiceMouseIdle", slot = "voice", intervalMin = 10, intervalMax = 20 },
@@ -240,9 +243,12 @@ local mouse_sounds = {
 	stressed = { name = "AnimalVoiceRatStressed", intervalMin = 5, intervalMax = 10, slot = "voice" },
 	walkloop = { name = "AnimalFootstepsMouseWalk", slot = "walkloop" },
 }
+
 AnimalDefinitions.animals["mouse"].breeds["golden"].sounds = mouse_sounds
 AnimalDefinitions.animals["mouse"].breeds["deer"].sounds = mouse_sounds
+AnimalDefinitions.animals["mouse"].breeds["white"].sounds = mouse_sounds
 
 AnimalDefinitions.animals["mousepups"].breeds["golden"].sounds = mouse_sounds
 AnimalDefinitions.animals["mousepups"].breeds["deer"].sounds = mouse_sounds
+AnimalDefinitions.animals["mousepups"].breeds["white"].sounds = mouse_sounds
 

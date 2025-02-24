@@ -320,6 +320,10 @@ function OnBreak.Sledgehammer(item, player)
     OnBreak.GroundHandler(item, player, "Base.Splinters")
 end
 
+function OnBreak.SledgehammerNoShaft(item, player)
+    OnBreak.HeadHandler(item, player, "Base.SledgehammerHead")
+end
+
 function OnBreak.WoodAxe(item, player)
     OnBreak.HeadHandler(item, player, "Base.WoodAxeHead")
     OnBreak.HandleHandler(item, player, "Base.LongHandle_Broken", false)

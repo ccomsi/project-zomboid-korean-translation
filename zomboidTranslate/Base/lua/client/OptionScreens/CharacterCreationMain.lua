@@ -41,6 +41,28 @@ function CharacterCreationMainCharacterPanel:render()
 	end
 end
 
+function CharacterCreationMainCharacterPanel:positionRelativeToScrollBar()
+	-- if false, state of scroll bar hasn't changed, don't move children
+	-- if true, state of scroll bar has changed, move children accordingly
+	if self.scrollBar ~= self:isVScrollBarVisible() then
+		self.scrollBar = self:isVScrollBarVisible()
+
+		-- determine whether scroll bar has appeared or disappeared
+		-- if appeared, multiplier is -1, moving items to the left
+		-- if disappeared, multiplier is 1, moving items to the right
+		local multiplier = 1
+		if self.scrollBar then
+			multiplier = -1
+		end
+
+		for _,child in pairs(self:getChildren()) do
+			if child ~= self.vscroll then --to prevent the scroll bar itself from moving
+				child:setX(child:getX() + (UI_BORDER_SPACING + 13)*multiplier)
+			end
+		end
+	end
+end
+
 function CharacterCreationMainCharacterPanel:onGainJoypadFocus(joypadData)
 	ISPanelJoypad.onGainJoypadFocus(self, joypadData)
 	self.joypadIndex = 1
@@ -83,9 +105,14 @@ function CharacterCreationMainCharacterPanel:onJoypadDirRight(joypadData)
 	end
 end
 
+function CharacterCreationMainCharacterPanel:onMouseWheel(del)
+	self:setYScroll(self:getYScroll() - del * 40)
+end
+
 function CharacterCreationMainCharacterPanel:new(x, y, width, height)
 	local o = ISPanelJoypad.new(self, x, y, width, height)
 	self.prevJoypadIndexY = -1
+	o.scrollBar = false;
 	return o
 end
 
@@ -178,24 +205,27 @@ function CharacterCreationMain:instantiate()
 end
 
 function CharacterCreationMain:create()
-	-- we add the header (contain forename/surname/avatar/...)
-	MainScreen.instance.charCreationHeader:setX(0);
-	MainScreen.instance.charCreationHeader:setY(UI_BORDER_SPACING*2+FONT_HGT_TITLE+1);
-	MainScreen.instance.charCreationHeader:setWidth(MainScreen.instance.charCreationHeader.forenameEntry:getRight());
-	MainScreen.instance.charCreationHeader:setAnchorRight(false);
-	MainScreen.instance.charCreationHeader:setAnchorLeft(true);
-	MainScreen.instance.charCreationHeader:setAnchorBottom(false);
-	MainScreen.instance.charCreationHeader:setAnchorTop(true);
-	
-	self:addChild(MainScreen.instance.charCreationHeader);
+	local x = UI_BORDER_SPACING + 1
+	local y = UI_BORDER_SPACING + FONT_HGT_TITLE + x
+	local w = self.width - x*2
+	local h = self.height - y - BUTTON_HGT - UI_BORDER_SPACING - x
 
-	local y = UI_BORDER_SPACING*5 + BUTTON_HGT*3 + FONT_HGT_TITLE + 1
-	self.characterPanel = CharacterCreationMainCharacterPanel:new(0, y, self.width / 2, self.height - 5 - 25 - 10)
-	self.characterPanel.background = false
-	self.characterPanel:setWidth(MainScreen.instance.charCreationHeader.forenameEntry:getRight()+UI_BORDER_SPACING+1)
+	self.avatarPanel = CharacterCreationAvatar:new(0, 0, 128, 260)
+	self.avatarPanel:noBackground()
+	self:addChild(self.avatarPanel)
+	if MainScreen.instance.avatar == nil then
+		self:createAvatar();
+    end
+	self:rescaleAvatarViewer()
+
+	self.characterPanel = CharacterCreationMainCharacterPanel:new(x, y, self.avatarPanel:getX() - x - UI_BORDER_SPACING, h)
+	self.characterPanel:noBackground()
+	self.characterPanel:setAnchorBottom(true);
+	self.characterPanel:setAnchorTop(true);
+	self.characterPanel:addScrollBars()
+	self.characterPanel:setScrollChildren(true)
 	self:addChild(self.characterPanel)
 
-	self.xOffset = MainScreen.instance.charCreationHeader.avatarPanel:getRight() + UI_BORDER_SPACING*2+3
 	self.columnWidth = math.max(
 			getTextManager():MeasureStringX(UIFont.Medium, getText("UI_characreation_forename")),
 			getTextManager():MeasureStringX(UIFont.Medium, getText("UI_characreation_surname")),
@@ -208,9 +238,13 @@ function CharacterCreationMain:create()
 			getTextManager():MeasureStringX(UIFont.Small, getText("UI_Stubble")),
 			getTextManager():MeasureStringX(UIFont.Small, getText("UI_characreation_beardtype"))
 	)
+	local scrollBarVisibleOffset = UI_BORDER_SPACING + 13 -- see positionRelativeToScrollBar()
+	self.comboWid = math.min(300, self.characterPanel.width - self.columnWidth - UI_BORDER_SPACING - scrollBarVisibleOffset)
+	self.xOffset = self.characterPanel.width - self.columnWidth - self.comboWid - UI_BORDER_SPACING
 	self.yOffset = 0;
-	self.comboWid = 200
 	self.clothingTextureComboWidth = UI_BORDER_SPACING*4 + getTextManager():MeasureStringX(UIFont.Small, getText("UI_characreation_Type").." " .. (9))
+
+    self:createNameAndGender();
 
 	-- BODY TYPE SELECTION
 	self:createBodyTypeBtn();
@@ -223,7 +257,7 @@ function CharacterCreationMain:create()
 	self:createBeardTypeBtn();
 
 	-- CLOTHING
-	self.yOffset = UI_BORDER_SPACING*2+FONT_HGT_TITLE+1;
+	self.yOffset = y
 	self:createClothingBtn();
 
 	-- BOTTOM BUTTON
@@ -310,21 +344,9 @@ function CharacterCreationMain:create()
 	self.randomButton:setAnchorBottom(true);
 --	self.backButton.setJoypadFocused = self.setJoypadFocusedYButton
 	self:addChild(self.randomButton);
-	
-	-- Hack: CharacterCreationHeader.avatarPanel overlaps this
-	local panel = CharacterCreationHeader.instance.avatarPanel
-	self.avatarPanelX = panel.x
-	self.avatarPanelY = panel.y
-	local absX,absY = panel:getAbsoluteX(),panel:getAbsoluteY()
-	panel:setX(absX - self:getAbsoluteX())
-	panel:setY(absY - self:getAbsoluteY())
-	CharacterCreationHeader.instance:removeChild(panel)
-	self:addChild(panel)
-	
+
 	-- DISABLE BUTTON
 	self:disableBtn();
-
-	self:onResolutionChange(self.width, self.height, self.width, self.height)
 end
 
 function CharacterCreationMain:deleteBuildStep1()
@@ -382,8 +404,8 @@ function CharacterCreationMain:saveBuildValidate(text)
 end
 
 function CharacterCreationMain:saveBuildStep1()
-	local firstName = MainScreen.instance.charCreationHeader.forenameEntry:getText()
-	local lastName = MainScreen.instance.charCreationHeader.surnameEntry:getText()
+	local firstName = self.forenameEntry:getText()
+	local lastName = self.surnameEntry:getText()
 	local text = firstName:trim() .. " " .. lastName:trim()
 	if text == " " then
 		text = "Preset"
@@ -415,9 +437,9 @@ function CharacterCreationMain:saveBuildStep2(button, joypadData, param2)
 	local desc = MainScreen.instance.desc;
 	
 	local builds = CharacterCreationMain.readSavedOutfitFile();
-	local savestring = "gender=" .. MainScreen.instance.charCreationHeader.genderCombo.selected .. ";";
+	local savestring = "gender=" .. self.genderCombo.selected .. ";";
 	savestring = savestring .. "skincolor=" .. self.skinColorButton.backgroundColor.r .. "," .. self.skinColorButton.backgroundColor.g .. "," .. self.skinColorButton.backgroundColor.b .. ";";
-	savestring = savestring .. "name=" .. MainScreen.instance.charCreationHeader.forenameEntry:getText() .. "|" .. MainScreen.instance.charCreationHeader.surnameEntry:getText() .. ";";
+	savestring = savestring .. "name=" .. self.forenameEntry:getText() .. "|" .. self.surnameEntry:getText() .. ";";
 	local hairStyle = self.hairTypeCombo:getOptionData(self.hairTypeCombo.selected)
 	savestring = savestring .. "hair=" .. hairStyle .. "|" .. self.hairColorButton.backgroundColor.r .. "," .. self.hairColorButton.backgroundColor.g .. "," .. self.hairColorButton.backgroundColor.b .. ";";
     savestring = savestring .. "stubble=" .. (self.hairStubbleTickBox:isSelected(1) and "1" or "2") .. ";";
@@ -484,8 +506,8 @@ function CharacterCreationMain:loadOutfit(box)
 			options = luautils.split(location[2], "|");
 		end
 		if location[1] == "gender" then
-			MainScreen.instance.charCreationHeader.genderCombo.selected = tonumber(options[1]);
-			MainScreen.instance.charCreationHeader:onGenderSelected(MainScreen.instance.charCreationHeader.genderCombo);
+			self.genderCombo.selected = tonumber(options[1]);
+			self:onGenderSelected(self.genderCombo);
 			desc:getWornItems():clear();
 		elseif location[1] == "skincolor" then
 			local color = luautils.split(options[1], ",");
@@ -497,9 +519,9 @@ function CharacterCreationMain:loadOutfit(box)
 			self:onSkinColorPicked(colorRGB, true);
 		elseif location[1] == "name" then
 			desc:setForename(options[1]);
-			MainScreen.instance.charCreationHeader.forenameEntry:setText(options[1]);
+			self.forenameEntry:setText(options[1]);
 			desc:setSurname(options[2]);
-			MainScreen.instance.charCreationHeader.surnameEntry:setText(options[2]);
+			self.surnameEntry:setText(options[2]);
 		elseif location[1] == "hair" then
 			local color = luautils.split(options[2], ",");
 			local colorRGB = {};
@@ -581,15 +603,63 @@ function CharacterCreationMain.writeSaveFile(options)
 	saved_builds:close();
 end
 
+function CharacterCreationMain:createNameAndGender()
+    local rightX = self.xOffset + self.columnWidth + UI_BORDER_SPACING
+    local labelX = self.xOffset + self.columnWidth -- right-justified
+
+	local lbl = ISLabel:new(labelX, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_forename"), 1, 1, 1, 1, UIFont.Medium, false);
+	lbl:initialise();
+	lbl:instantiate();
+	lbl:setAnchorLeft(false);
+	lbl:setAnchorRight(true);
+	self.characterPanel:addChild(lbl);
+
+	self.forenameEntry = ISTextEntryBox:new(MainScreen.instance.desc:getForename(), rightX, self.yOffset, self.comboWid, BUTTON_HGT);
+	self.forenameEntry:initialise();
+	self.forenameEntry:instantiate();
+	self.forenameEntry:setAnchorLeft(false);
+	self.forenameEntry:setAnchorRight(true);
+	self.characterPanel:addChild(self.forenameEntry);
+
+	lbl = ISLabel:new(labelX, self.forenameEntry:getBottom() + UI_BORDER_SPACING, FONT_HGT_MEDIUM, getText("UI_characreation_surname"), 1, 1, 1, 1, UIFont.Medium, false);
+	lbl:initialise();
+	lbl:instantiate();
+	lbl:setAnchorLeft(false);
+	lbl:setAnchorRight(true);
+	self.characterPanel:addChild(lbl);
+
+	self.surnameEntry = ISTextEntryBox:new(MainScreen.instance.desc:getSurname(), rightX, self.forenameEntry:getBottom() + UI_BORDER_SPACING, self.comboWid, BUTTON_HGT);
+	self.surnameEntry:initialise();
+	self.surnameEntry:instantiate();
+	self.surnameEntry:setAnchorLeft(false);
+	self.surnameEntry:setAnchorRight(true);
+	self.characterPanel:addChild(self.surnameEntry);
+
+	self.genderCombo = ISComboBox:new(rightX, self.surnameEntry:getBottom() + UI_BORDER_SPACING, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onGenderSelected);
+	self.genderCombo:initialise();
+	self.genderCombo:setAnchorLeft(false);
+	self.genderCombo:setAnchorRight(true);
+	self.genderCombo:addOption(getText("IGUI_char_Female"))
+	self.genderCombo:addOption(getText("IGUI_char_Male"))
+	self.genderCombo.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
+	self.characterPanel:addChild(self.genderCombo)
+
+	self.yOffset = self.genderCombo:getBottom() + UI_BORDER_SPACING;
+end
+
 function CharacterCreationMain:createBodyTypeBtn()
 	local lbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_body"), 1, 1, 1, 1, UIFont.Medium, true);
 	lbl:initialise();
 	lbl:instantiate();
+	lbl:setAnchorLeft(false);
+	lbl:setAnchorRight(true);
 	self.characterPanel:addChild(lbl);
 	
-	local rect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, 300, 1, 1, 0.3, 0.3, 0.3);
+	local rect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
 	rect:initialise();
 	rect:instantiate();
+	rect:setAnchorLeft(false);
+	rect:setAnchorRight(true);
 	self.characterPanel:addChild(rect);
 	
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
@@ -600,6 +670,8 @@ function CharacterCreationMain:createBodyTypeBtn()
 	self.skinColorLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_SkinColor"), 1, 1, 1, 1, UIFont.Small);
 	self.skinColorLbl:initialise();
 	self.skinColorLbl:instantiate();
+	self.skinColorLbl:setAnchorLeft(false);
+	self.skinColorLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.skinColorLbl);
 
 	self.skinColors = { {r=1,g=0.91,b=0.72},
@@ -613,6 +685,8 @@ function CharacterCreationMain:createBodyTypeBtn()
 	local skinColorBtn = ISButton:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, BUTTON_HGT, BUTTON_HGT, "", self, CharacterCreationMain.onSkinColorSelected)
 	skinColorBtn:initialise()
 	skinColorBtn:instantiate()
+	skinColorBtn:setAnchorLeft(false);
+	skinColorBtn:setAnchorRight(true);
 	local color = self.skinColors[1]
 	skinColorBtn.backgroundColor = {r = color.r, g = color.g, b = color.b, a = 1}
 	self.characterPanel:addChild(skinColorBtn)
@@ -633,10 +707,14 @@ function CharacterCreationMain:createBodyTypeBtn()
 	self.chestHairLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_ChestHair"), 1, 1, 1, 1, UIFont.Small);
 	self.chestHairLbl:initialise();
 	self.chestHairLbl:instantiate();
+	self.chestHairLbl:setAnchorLeft(false);
+	self.chestHairLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.chestHairLbl);
 
 	local tickBox = ISTickBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, "", self, CharacterCreationMain.onChestHairSelected)
 	tickBox:initialise()
+	tickBox:setAnchorLeft(false);
+	tickBox:setAnchorRight(true);
 	self.characterPanel:addChild(tickBox)
 	tickBox:addOption("")
 	self.chestHairLbl:setHeight(tickBox.height)
@@ -650,12 +728,16 @@ function CharacterCreationMain:createHairTypeBtn()
 	local lbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_hair"), 1, 1, 1, 1, UIFont.Medium, true);
 	lbl:initialise();
 	lbl:instantiate();
+	lbl:setAnchorLeft(false);
+	lbl:setAnchorRight(true);
 	self.characterPanel:addChild(lbl);
 	
-	local rect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, 300, 1, 1, 0.3, 0.3, 0.3);
+	local rect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
 	rect:setAnchorRight(false);
 	rect:initialise();
 	rect:instantiate();
+	rect:setAnchorLeft(false);
+	rect:setAnchorRight(true);
 	self.characterPanel:addChild(rect);
 	
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
@@ -663,16 +745,18 @@ function CharacterCreationMain:createHairTypeBtn()
 	self.hairTypeLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_hairtype"), 1, 1, 1, 1, UIFont.Small);
 	self.hairTypeLbl:initialise();
 	self.hairTypeLbl:instantiate();
-	
+	self.hairTypeLbl:setAnchorLeft(false);
+	self.hairTypeLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairTypeLbl);
 	
 	self.hairTypeCombo = ISComboBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onHairTypeSelected);
 	self.hairTypeCombo:initialise();
+	self.hairTypeCombo:setAnchorLeft(false);
+	self.hairTypeCombo:setAnchorRight(true);
 	self.hairTypeCombo.pointOnItem = function(_self, _index)
-		CharacterCreationHeader.instance.avatarPanel:setFacePreview(true)
 		if _self.lastIndex ~= _index then
 			MainScreen.instance.desc:getHumanVisual():setHairModel(_self:getOptionData(_index))
-			CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(MainScreen.instance.desc)
+			_self.parent.parent.avatarPanel:setSurvivorDesc(MainScreen.instance.desc)
 			_self.lastIndex = _index
 		end
 	end
@@ -685,7 +769,8 @@ function CharacterCreationMain:createHairTypeBtn()
 	self.hairColorLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_color"), 1, 1, 1, 1, UIFont.Small);
 	self.hairColorLbl:initialise();
 	self.hairColorLbl:instantiate();
-	
+	self.hairColorLbl:setAnchorLeft(false);
+	self.hairColorLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairColorLbl);
 
 
@@ -702,6 +787,8 @@ function CharacterCreationMain:createHairTypeBtn()
 	local hairColorBtn = ISButton:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, BUTTON_HGT, BUTTON_HGT, "", self, CharacterCreationMain.onHairColorMouseDown)
 	hairColorBtn:initialise()
 	hairColorBtn:instantiate()
+	hairColorBtn:setAnchorLeft(false);
+	hairColorBtn:setAnchorRight(true);
 	local color = hairColors1[1]
 	hairColorBtn.backgroundColor = {r=color.r, g=color.g, b=color.b, a=1}
 	self.characterPanel:addChild(hairColorBtn)
@@ -721,10 +808,14 @@ function CharacterCreationMain:createHairTypeBtn()
 	self.hairStubbleLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_Stubble"), 1, 1, 1, 1, UIFont.Small);
 	self.hairStubbleLbl:initialise();
 	self.hairStubbleLbl:instantiate();
+	self.hairStubbleLbl:setAnchorLeft(false);
+	self.hairStubbleLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairStubbleLbl);
 	
 	self.hairStubbleTickBox = ISTickBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, "", self, CharacterCreationMain.onShavedHairSelected);
 	self.hairStubbleTickBox:initialise();
+	self.hairStubbleTickBox:setAnchorLeft(false);
+	self.hairStubbleTickBox:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairStubbleTickBox)
 	self.hairStubbleTickBox:addOption("")
 	self.hairStubbleLbl:setHeight(self.hairStubbleTickBox.height)
@@ -736,12 +827,16 @@ function CharacterCreationMain:createVoiceTypeBtn()
 	self.voiceLbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_voice"), 1, 1, 1, 1, UIFont.Medium, true);
 	self.voiceLbl:initialise();
 	self.voiceLbl:instantiate();
+	self.voiceLbl:setAnchorLeft(false);
+	self.voiceLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceLbl);
 
-	self.voiceRect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, 300, 1, 1, 0.3, 0.3, 0.3);
+	self.voiceRect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
 	self.voiceRect:setAnchorRight(false);
 	self.voiceRect:initialise();
 	self.voiceRect:instantiate();
+	self.voiceRect:setAnchorLeft(false);
+	self.voiceRect:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceRect);
 
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
@@ -749,12 +844,14 @@ function CharacterCreationMain:createVoiceTypeBtn()
 	self.voiceTypeLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_voicetype"), 1, 1, 1, 1, UIFont.Small);
 	self.voiceTypeLbl:initialise();
 	self.voiceTypeLbl:instantiate();
-
+	self.voiceTypeLbl:setAnchorLeft(false);
+	self.voiceTypeLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceTypeLbl);
 
 	self.voiceTypeCombo = ISComboBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onVoiceTypeSelected);
 	self.voiceTypeCombo:initialise();
-
+	self.voiceTypeCombo:setAnchorLeft(false);
+	self.voiceTypeCombo:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceTypeCombo);
 
 	local voiceStyles = getAllVoiceStyles();
@@ -766,19 +863,23 @@ function CharacterCreationMain:createVoiceTypeBtn()
 		end;
 	end;
 
-	CharacterCreationHeader.instance:randomVoice();
+	self:randomVoice();
 
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 
 	self.voicePitchLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_voicepitch"), 1, 1, 1, 1, UIFont.Small);
 	self.voicePitchLbl:initialise();
 	self.voicePitchLbl:instantiate();
+	self.voicePitchLbl:setAnchorLeft(false);
+	self.voicePitchLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.voicePitchLbl);
 
 	self.voicePitchSlider = ISSliderPanel:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT);
 	self.voicePitchSlider:initialise();
 	self.voicePitchSlider:setValues(-100.0, 100.0, 1.0, 5.0);
 	self.voicePitchSlider:setCurrentValue(0.0, true);
+	self.voicePitchSlider:setAnchorLeft(false);
+	self.voicePitchSlider:setAnchorRight(true);
 	self.characterPanel:addChild(self.voicePitchSlider);
 
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
@@ -787,6 +888,8 @@ function CharacterCreationMain:createVoiceTypeBtn()
 	self.voiceDemoButton.internal = "PLAYDEMOVOICE";
 	self.voiceDemoButton:initialise();
 	self.voiceDemoButton:instantiate();
+	self.voiceDemoButton:setAnchorLeft(false);
+	self.voiceDemoButton:setAnchorRight(true);
 	self.voiceDemoButton:setEnable(true);
 	self.voiceDemoButton:setSound("activate", nil);
 	self.characterPanel:addChild(self.voiceDemoButton);
@@ -803,12 +906,16 @@ function CharacterCreationMain:createBeardTypeBtn()
 	self.beardLbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_beard"), 1, 1, 1, 1, UIFont.Medium, true);
 	self.beardLbl:initialise();
 	self.beardLbl:instantiate();
+	self.beardLbl:setAnchorLeft(false);
+	self.beardLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardLbl);
 	
-	self.beardRect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, 300, 1, 1, 0.3, 0.3, 0.3);
+	self.beardRect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
 	self.beardRect:setAnchorRight(false);
 	self.beardRect:initialise();
 	self.beardRect:instantiate();
+	self.beardRect:setAnchorLeft(false);
+	self.beardRect:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardRect);
 	
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
@@ -816,19 +923,21 @@ function CharacterCreationMain:createBeardTypeBtn()
 	self.beardTypeLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_beardtype"), 1, 1, 1, 1, UIFont.Small);
 	self.beardTypeLbl:initialise();
 	self.beardTypeLbl:instantiate();
-	
+	self.beardTypeLbl:setAnchorLeft(false);
+	self.beardTypeLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardTypeLbl);
 	
 	self.beardTypeCombo = ISComboBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onBeardTypeSelected);
 	self.beardTypeCombo:initialise();
 	self.beardTypeCombo.pointOnItem = function(_self, _index)
-		CharacterCreationHeader.instance.avatarPanel:setFacePreview(true)
 		if _self.lastIndex ~= _index then
 			MainScreen.instance.desc:getHumanVisual():setBeardModel(_self:getOptionData(_index))
-			CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(MainScreen.instance.desc)
+			_self.parent.parent.avatarPanel:setSurvivorDesc(MainScreen.instance.desc)
 			_self.lastIndex = _index
 		end
 	end
+	self.beardTypeCombo:setAnchorLeft(false);
+	self.beardTypeCombo:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardTypeCombo)
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 
@@ -838,10 +947,14 @@ function CharacterCreationMain:createBeardTypeBtn()
 	self.beardStubbleLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_Stubble"), 1, 1, 1, 1, UIFont.Small);
 	self.beardStubbleLbl:initialise();
 	self.beardStubbleLbl:instantiate();
+	self.beardStubbleLbl:setAnchorLeft(false);
+	self.beardStubbleLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardStubbleLbl);
 	
 	self.beardStubbleTickBox = ISTickBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, "", self, CharacterCreationMain.onBeardStubbleSelected);
 	self.beardStubbleTickBox:initialise();
+	self.beardStubbleTickBox:setAnchorLeft(false);
+	self.beardStubbleTickBox:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardStubbleTickBox)
 	self.beardStubbleTickBox:addOption("")
 	self.beardStubbleLbl:setHeight(self.beardStubbleTickBox.height)
@@ -870,7 +983,7 @@ function CharacterCreationMain:createClothingComboDebug(bodyLocation)
 				end
 			end
 			self:updateSelectedClothingCombo()
-			CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+			_self.parent.parent.avatarPanel:setSurvivorDesc(desc)
 			_self.lastIndex = _index
 		end
 	end
@@ -889,7 +1002,7 @@ function CharacterCreationMain:createClothingComboDebug(bodyLocation)
 	comboDecal:initialise()
 	self.clothingPanel:addChild(comboDecal)
 	
-	local comboTexture = ISComboBox:new(combo:getRight() + UI_BORDER_SPACING, self.yOffset, 200, BUTTON_HGT, self, self.onClothingTextureComboSelected, bodyLocation)
+	local comboTexture = ISComboBox:new(combo:getRight() + UI_BORDER_SPACING, self.yOffset, self.clothingTextureComboWidth, BUTTON_HGT, self, self.onClothingTextureComboSelected, bodyLocation)
 	comboTexture:initialise()
 	self.clothingPanel:addChild(comboTexture)
 	
@@ -1001,11 +1114,13 @@ end
 -- In debug you'll have access to all clothes
 -- In normal mode, you'll have access to basic clothes + some specific to your profession (RP option can be enabled in MP to have access to a full outfit)
 function CharacterCreationMain:createClothingBtn()
-	local x = self:getWidth() / 2
+	local x = self.avatarPanel:getRight() + UI_BORDER_SPACING
 
-	self.clothingPanel = ClothingPanel:new(x, self.yOffset, self.width / 2, self:getHeight() - UI_BORDER_SPACING*4 - BUTTON_HGT- FONT_HGT_TITLE - 2)
+	self.clothingPanel = ClothingPanel:new(x, self.yOffset, self.width - x - UI_BORDER_SPACING - 1, self.avatarPanel:getHeight())
 	self.clothingPanel:initialise()
-	self.clothingPanel.background = false
+	self.clothingPanel:setAnchorBottom(true);
+	self.clothingPanel:setAnchorTop(true);
+	self.clothingPanel:noBackground();
 	self:addChild(self.clothingPanel)
 
 	x = 0
@@ -1043,7 +1158,6 @@ function CharacterCreationMain:createClothingCombo(bodyLocation)
 	local combo = ISComboBox:new(x + UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, self.onClothingComboSelected, bodyLocation)
 	combo:initialise()
 	combo.pointOnItem = function(_self, _index)
-		CharacterCreationHeader.instance.avatarPanel:setFacePreview(false)
 		if _self.lastIndex ~= _index then
 			local desc = MainScreen.instance.desc
 			desc:setWornItem(bodyLocation, nil)
@@ -1055,7 +1169,7 @@ function CharacterCreationMain:createClothingCombo(bodyLocation)
 				end
 			end
 			self:updateSelectedClothingCombo()
-			CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+			_self.parent.parent.avatarPanel:setSurvivorDesc(desc)
 			_self.lastIndex = _index
 		end
 	end
@@ -1071,9 +1185,6 @@ function CharacterCreationMain:createClothingCombo(bodyLocation)
 	
 	local comboTexture = ISComboBox:new(combo:getRight() + UI_BORDER_SPACING, self.yOffset, self.clothingTextureComboWidth, BUTTON_HGT, self, self.onClothingTextureComboSelected, bodyLocation)
 	comboTexture:initialise()
-	comboTexture.pointOnItem = function(_self, _index)
-		CharacterCreationHeader.instance.avatarPanel:setFacePreview(false)
-	end
 	self.clothingPanel:addChild(comboTexture)
 	
 	self.clothingCombo = self.clothingCombo or {}
@@ -1104,12 +1215,16 @@ function CharacterCreationMain:arrangeClothingUI()
 		local labelWidth = getTextManager():MeasureStringX(UIFont.Small, label:getName())
 		maxLabelWidth = math.max(maxLabelWidth, labelWidth)
 	end
+	local scrollBarW = self.clothingPanel:isVScrollBarVisible() and (UI_BORDER_SPACING + 13) or 0
+	self.comboWid = math.min(300, self.clothingPanel.width - (maxLabelWidth + UI_BORDER_SPACING + UI_BORDER_SPACING + self.clothingTextureComboWidth + scrollBarW))
+	self.comboWid = math.max(self.comboWid, 50)
 	local totalWidth = maxLabelWidth + UI_BORDER_SPACING + self.comboWid + UI_BORDER_SPACING + self.clothingTextureComboWidth
 --	local labelRight = math.max(UI_BORDER_SPACING + maxLabelWidth, (self.clothingPanel.width - totalWidth) / 2)
-	local labelRight = UI_BORDER_SPACING + maxLabelWidth
+	local labelRight = maxLabelWidth
 
 	if self.outfitLbl then
 		self.outfitLbl:setX(labelRight - self.outfitLbl.width)
+		self.outfitCombo:setWidth(self.comboWid)
 		self.outfitCombo:setX(labelRight + UI_BORDER_SPACING)
 		self.randomizeOutfitBtn:setX(self.outfitCombo:getRight() + UI_BORDER_SPACING)
 	end
@@ -1117,6 +1232,7 @@ function CharacterCreationMain:arrangeClothingUI()
 	for bodyLocation,combo in pairs(self.clothingCombo) do
 		local label = self.clothingComboLabel[bodyLocation]
 		label:setX(labelRight - label.width)
+		combo:setWidth(self.comboWid)
 		combo:setX(labelRight + UI_BORDER_SPACING)
 		self.clothingColorBtn[bodyLocation]:setX(combo:getRight() + UI_BORDER_SPACING)
 		self.clothingTextureCombo[bodyLocation]:setX(combo:getRight() + UI_BORDER_SPACING)
@@ -1376,7 +1492,7 @@ function CharacterCreationMain:initClothingDebug()
 		return;
 	end
 
-	-- CharacterCreationHeader calls this during creation
+	-- May be called during creation
 	if not self.chestHairLbl then return end
 
 	self:removeAllClothingWidgets()
@@ -1431,17 +1547,21 @@ function CharacterCreationMain:setVisible(bVisible, joypadData)
 	ISPanelJoypad.setVisible(self, bVisible, joypadData)
 	
 	if bVisible and MainScreen.instance.desc then
-		MainScreen.instance.charCreationHeader:randomGenericOutfit();
+		self:randomGenericOutfit();
 		self:checkAllClothingOptions()
 		self:onResolutionChange(self.width, self.height, self.width, self.height)
 	end
 end
 
 function CharacterCreationMain:disableBtn()
-	-- CharacterCreationHeader calls this during creation
+	-- May be called during creation
 	if not self.chestHairLbl then return end
-	
 	local desc = MainScreen.instance.desc
+	if MainScreen.instance.desc:isFemale() then
+		self.genderCombo.selected = 1
+	else
+		self.genderCombo.selected = 2
+	end
 	local visible = not desc:isFemale()
 	self.chestHairLbl:setVisible(visible)
 	self.chestHairTickBox:setVisible(visible)
@@ -1451,6 +1571,12 @@ function CharacterCreationMain:disableBtn()
 	self.beardLbl:setVisible(visible)
 	self.beardStubbleLbl:setVisible(visible)
 	self.beardStubbleTickBox:setVisible(visible)
+	if visible then
+		self.characterPanel:setScrollHeight(self.beardStubbleTickBox:getBottom() + UI_BORDER_SPACING)
+	else
+		self.characterPanel:setScrollHeight(self.hairStubbleTickBox:getBottom() + UI_BORDER_SPACING)
+	end
+	self.characterPanel:positionRelativeToScrollBar()
 	
 	-- Changing male <-> female, update combobox choices.
 	if self.female ~= desc:isFemale() or CharacterCreationMain.forceUpdateCombo then
@@ -1644,7 +1770,7 @@ function CharacterCreationMain:onHairColorPicked(color, mouseUp)
 	desc:getHumanVisual():setBeardColor(immutableColor)
 	desc:getHumanVisual():setNaturalHairColor(immutableColor)
 	desc:getHumanVisual():setNaturalBeardColor(immutableColor)
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
 end
 
@@ -1683,10 +1809,159 @@ function CharacterCreationMain:syncUIWithTorso()
 	end
 end
 
+function CharacterCreationMain:onGenderSelected(combo)
+	if combo.selected == 1 then
+		MainScreen.instance.avatar:setFemale(true);
+		MainScreen.instance.desc:setFemale(true);
+		MainScreen.instance.desc:getHumanVisual():removeBodyVisualFromItemType("Base.M_Hair_Stubble")
+		MainScreen.instance.desc:getHumanVisual():removeBodyVisualFromItemType("Base.M_Beard_Stubble")
+	else
+		MainScreen.instance.avatar:setFemale(false);
+		MainScreen.instance.desc:setFemale(false);
+		MainScreen.instance.desc:getHumanVisual():removeBodyVisualFromItemType("Base.F_Hair_Stubble")
+	end
+	self:randomGenericOutfit()
+	self:setAvatarFromUI()
+	CharacterCreationProfession.instance:changeClothes();
+
+	-- we random the name
+	SurvivorFactory.randomName(MainScreen.instance.desc);
+
+	self.forenameEntry:setText(MainScreen.instance.desc:getForename());
+	self.surnameEntry:setText(MainScreen.instance.desc:getSurname());
+
+	self:randomVoice();
+	self:loadJoypadButtons();
+end
+
+function CharacterCreationMain:randomVoice()
+	local bodyType = 2;
+	if MainScreen.instance.desc:isFemale() then
+		bodyType = 1;
+	end;
+	local voiceStyle;
+	local choices = {};
+	local voiceTypeCombo = self.voiceTypeCombo;
+	if voiceTypeCombo then
+		for i in ipairs(voiceTypeCombo.options) do
+			voiceStyle = voiceTypeCombo:getOptionData(i);
+			if voiceStyle and (voiceStyle:getBodyTypeDefault() == bodyType) then
+				table.insert(choices, i);
+			end;
+		end;
+		voiceTypeCombo.selected = choices[ZombRand(#choices) + 1];
+	end;
+end
+
+function CharacterCreationMain:randomGenericOutfit()
+	local desc = MainScreen.instance.desc;
+--	local randomOutfit = "Generic0" .. ZombRand(5) + 1;
+--	if ZombRand(6) == 0 and MainScreen.instance.desc:isFemale() then
+--		randomOutfit = "Generic_Skirt";
+--	end
+--	desc:dressInNamedOutfit(randomOutfit)
+--	self.avatarPanel:setSurvivorDesc(desc)
+
+	local default = ClothingSelectionDefinitions.default;
+	if MainScreen.instance.desc:isFemale() then
+		self:dressWithDefinitions(default.Female, true);
+	else
+		self:dressWithDefinitions(default.Male, true);
+	end
+
+	local profession = ClothingSelectionDefinitions[desc:getProfession()];
+	if profession then
+		if MainScreen.instance.desc:isFemale() then
+			self:dressWithDefinitions(profession.Female, false);
+		else
+			if profession.Male then -- most of the time there's no diff between male/female outfit, so i didn't created them both
+				self:dressWithDefinitions(profession.Male, false);
+			else
+				self:dressWithDefinitions(profession.Female, false);
+			end
+		end
+	end
+
+	if CharacterCreationProfession.instance.listboxTraitSelected and CharacterCreationProfession.instance.listboxTraitSelected.items then
+		local traits = CharacterCreationProfession.instance.listboxTraitSelected.items
+		for i, v in pairs(traits) do
+			if v then
+				local trait = v.item:getType()
+				if TraitClothingSelectionDefinitions[trait] then
+					local definition = TraitClothingSelectionDefinitions[trait]
+					if MainScreen.instance.desc:isFemale() then
+						self:dressWithDefinitions(definition.Female, false);
+					else
+						if definition.Male then -- most of the time there's no diff between male/female outfit, so i didn't created them both
+							self:dressWithDefinitions(definition.Male, false);
+						else
+							self:dressWithDefinitions(definition.Female, false);
+						end
+					end
+				end
+			end
+		end
+	end
+
+	self.avatarPanel:setSurvivorDesc(desc)
+	if self:shouldShowAllOutfits() then
+		self:initClothingDebug()
+	else
+		self:initClothing()
+	end
+	self:disableBtn()
+end
+
+-- dress randomly according to the table definition given
+function CharacterCreationMain:dressWithDefinitions(definition, resetWornItems)
+	local desc = MainScreen.instance.desc;
+	if resetWornItems then
+		desc:getWornItems():clear();
+	end
+	for bodyLocation, profTable in pairs(definition) do
+		local chance = profTable.chance;
+		if not chance or ZombRand(100) < chance then
+			desc:setWornItem(bodyLocation, nil);
+			local items = profTable.items;
+			local itemType = items[ZombRand(0, #items)+1];
+			if itemType then
+				local item = instanceItem(itemType)
+				if item then
+					desc:setWornItem(bodyLocation, item)
+				end
+			end
+		end
+	end
+end
+
+function CharacterCreationMain:onRandomCharacter()
+	-- remove the beard
+	MainScreen.instance.desc:getExtras():clear()
+
+	local female = ZombRand(2) == 0
+	MainScreen.instance.avatar:setFemale(female)
+	MainScreen.instance.desc:setFemale(female)
+	MainScreen.instance.desc:getHumanVisual():clear()
+	self:setAvatarFromUI()
+--		CharacterCreationProfession.instance:changeClothes();
+	self:randomGenericOutfit();
+	self:randomVoice();
+
+	-- we random the name
+	SurvivorFactory.randomName(MainScreen.instance.desc);
+
+	self.forenameEntry:setText(MainScreen.instance.desc:getForename());
+	self.surnameEntry:setText(MainScreen.instance.desc:getSurname());
+
+	self:loadJoypadButtons();
+
+	self:disableBtn();
+end
+
 function CharacterCreationMain:onChestHairSelected(index, selected)
 	local desc = MainScreen.instance.desc
 	desc:getHumanVisual():setBodyHairIndex(selected and 0 or -1)
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 end
 
 function CharacterCreationMain:onShavedHairSelected(index, selected)
@@ -1696,7 +1971,7 @@ function CharacterCreationMain:onShavedHairSelected(index, selected)
 	else
 		desc:getHumanVisual():removeBodyVisualFromItemType(desc:isFemale() and "Base.F_Hair_Stubble" or "Base.M_Hair_Stubble")
 	end
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 end
 
 function CharacterCreationMain:onBeardStubbleSelected(index, selected)
@@ -1706,7 +1981,7 @@ function CharacterCreationMain:onBeardStubbleSelected(index, selected)
 	else
 		desc:getHumanVisual():removeBodyVisualFromItemType("Base.M_Beard_Stubble")
 	end
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 end
 
 function CharacterCreationMain:onSkinColorSelected(button, x, y)
@@ -1725,7 +2000,7 @@ function CharacterCreationMain:onSkinColorPicked(color, mouseUp)
 	self.skinColorButton.backgroundColor = { r=color.r, g=color.g, b=color.b, a = 1 }
 	local desc = MainScreen.instance.desc
 	desc:getHumanVisual():setSkinTextureIndex(self.colorPickerSkin.index - 1)
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
 end
 
@@ -1734,8 +2009,7 @@ function CharacterCreationMain:onHairTypeSelected(combo)
 	self.hairType = combo.selected - 1
 	local hair = combo:getOptionData(combo.selected)
 	desc:getHumanVisual():setHairModel(hair) -- may be nil
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
-	CharacterCreationHeader.instance.avatarPanel:setFacePreview(false)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
 end
 
@@ -1743,8 +2017,7 @@ function CharacterCreationMain:onBeardTypeSelected(combo)
 	local desc = MainScreen.instance.desc
 	local beard = combo:getOptionData(combo.selected)
 	desc:getHumanVisual():setBeardModel(beard) -- may be nil
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
-	CharacterCreationHeader.instance.avatarPanel:setFacePreview(false)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
 end
 
@@ -1761,7 +2034,7 @@ function CharacterCreationMain:onOutfitSelected(combo)
 	local desc = MainScreen.instance.desc
 	local outfitName = combo:getOptionData(combo.selected)
 	desc:dressInNamedOutfit(outfitName)
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
 end
 
@@ -1781,7 +2054,7 @@ function CharacterCreationMain:onClothingComboSelected(combo, bodyLocation)
 	end
 	self:updateSelectedClothingCombo();
 	
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
 end
 
@@ -1805,7 +2078,7 @@ function CharacterCreationMain:onClothingColorPicked(color, mouseUp, bodyLocatio
 	if item then
 		local color2 = ImmutableColor.new(color.r, color.g, color.b, 1)
 		item:getVisual():setTint(color2)
-		CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+		self.avatarPanel:setSurvivorDesc(desc)
 	end
 end
 
@@ -1820,7 +2093,7 @@ function CharacterCreationMain:onClothingTextureComboSelected(combo, bodyLocatio
 			item:getVisual():setBaseTexture(combo.selected - 1)
 		end
 	end
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
 end
 
@@ -1831,8 +2104,35 @@ function CharacterCreationMain:onClothingDecalComboSelected(combo, bodyLocation)
 	if decalName and item then
 		item:getVisual():setDecal(decalName)
 	end
-	CharacterCreationHeader.instance.avatarPanel:setSurvivorDesc(desc)
+	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
+end
+
+function CharacterCreationMain:createAvatar()
+	if not MainScreen.instance.desc then
+		MainScreen.instance.desc = SurvivorFactory.CreateSurvivor();
+	end
+	MainScreen.instance.avatar = IsoSurvivor.new(MainScreen.instance.desc, nil, 0, 0, 0);
+	self:setAvatarFromUI()
+end
+
+function CharacterCreationMain:setAvatarFromUI()
+	self.avatarPanel.avatarPanel:setSurvivorDesc(MainScreen.instance.desc)
+end
+
+function CharacterCreationMain:rescaleAvatarViewer()
+	local x1 = UI_BORDER_SPACING + 1
+	local y1 = UI_BORDER_SPACING + FONT_HGT_TITLE + x1
+	local w1 = self.width - x1 * 2
+	local h1 = self.height - y1 - BUTTON_HGT - UI_BORDER_SPACING - x1
+
+	local w = math.floor(h1 - UI_BORDER_SPACING - BUTTON_HGT) / 2 --floor to remove rounding errors
+	local h = h1
+	self.avatarPanel:setHeight(h);
+	self.avatarPanel:setWidth(w);
+	self.avatarPanel:rescaleAvatarViewer()
+	self.avatarPanel:setX((w1-w)/2)
+	self.avatarPanel:setY(y1)
 end
 
 function CharacterCreationMain:onOptionMouseDown(button, x, y)
@@ -1842,8 +2142,7 @@ function CharacterCreationMain:onOptionMouseDown(button, x, y)
 		MainScreen.instance.charCreationProfession:setVisible(true, joypadData);
 	end
 	if button.internal == "RANDOM" then
-		CharacterCreationHeader.instance.avatarPanel:setFacePreview(false)
-		CharacterCreationHeader.instance:onOptionMouseDown(button, x, y)
+		self:onRandomCharacter()
 	end
 	if button.internal == "NEXT" then
 		--		MainScreen.instance.charCreationMain:setVisible(false);
@@ -1902,11 +2201,11 @@ function CharacterCreationMain:onOptionMouseDown(button, x, y)
 end
 
 function CharacterCreationMain:initPlayer()
-	MainScreen.instance.desc:setForename(MainScreen.instance.charCreationHeader.forenameEntry:getText());
-	MainScreen.instance.desc:setSurname(MainScreen.instance.charCreationHeader.surnameEntry:getText());
-	MainScreen.instance.desc:setVoicePrefix(CharacterCreationMain.instance:getVoicePrefix());
-	MainScreen.instance.desc:setVoiceType(CharacterCreationMain.instance:getVoiceType());
-	MainScreen.instance.desc:setVoicePitch(CharacterCreationMain.instance:getVoicePitch());
+	MainScreen.instance.desc:setForename(self.forenameEntry:getText());
+	MainScreen.instance.desc:setSurname(self.surnameEntry:getText());
+	MainScreen.instance.desc:setVoicePrefix(self:getVoicePrefix());
+	MainScreen.instance.desc:setVoiceType(self:getVoiceType());
+	MainScreen.instance.desc:setVoicePitch(self:getVoicePitch());
 	--	if MainScreen.instance.charCreationProfession.listboxProf.selected > -1 then
 	--		MainScreen.instance.desc:setProfession(MainScreen.instance.charCreationProfession.listboxProf.items[MainScreen.instance.charCreationProfession.listboxProf.selected].item:getType());
 	--	else
@@ -1944,6 +2243,8 @@ function CharacterCreationMain:prerender()
 			avatar:getSprite():update(avatar:getSpriteDef())
 		end
 	--]]
+	local facePreview = self.hairTypeCombo.expanded or self.beardTypeCombo.expanded
+	self.avatarPanel:setFacePreview(facePreview)
 	self.deleteBuildButton:setEnable(self.savedBuilds.options[self.savedBuilds.selected] ~= nil)
 end
 
@@ -2009,7 +2310,6 @@ function CharacterCreationMain:onJoypadDirUp(joypadData)
 	updateJoypadFocus(joypadData)
 end
 
--- This is also called by CharacterCreationHeader when male/female changes.
 function CharacterCreationMain:loadJoypadButtons(joypadData)
 	self.characterPanel:loadJoypadButtons(joypadData)
 end
@@ -2027,11 +2327,11 @@ function CharacterCreationMainCharacterPanel:loadJoypadButtons(joypadData)
 		self:clearJoypadFocus(joypadData)
 	end
 	self.joypadButtonsY = {};
-	self:insertNewLineOfButtons(MainScreen.instance.charCreationHeader.forenameEntry)
-	self:insertNewLineOfButtons(MainScreen.instance.charCreationHeader.surnameEntry)
-	self:insertNewLineOfButtons(MainScreen.instance.charCreationHeader.genderCombo)
-	local buttons = {}
 	local charCreationMain = self.parent
+	self:insertNewLineOfButtons(charCreationMain.forenameEntry)
+	self:insertNewLineOfButtons(charCreationMain.surnameEntry)
+	self:insertNewLineOfButtons(charCreationMain.genderCombo)
+	local buttons = {}
 	table.insert(buttons, charCreationMain.skinColorButton)
 	table.insert(buttons, charCreationMain.clothingOutfitCombo)
 	self:insertNewListOfButtons(buttons)
@@ -2074,18 +2374,12 @@ function CharacterCreationMain:requiredSize(panel)
 end
 
 function CharacterCreationMain:onResolutionChange(oldw, oldh, neww, newh)
-	local panel = CharacterCreationHeader.instance.avatarPanel
-	panel:setX(UI_BORDER_SPACING+3)
-	panel:setY(UI_BORDER_SPACING*2 + 3 + FONT_HGT_TITLE)
-
-	MainScreen.instance.charCreationHeader:setX(panel:getX()-2);
-
-	self.characterPanel:setWidth(MainScreen.instance.charCreationHeader.forenameEntry:getRight()+UI_BORDER_SPACING+1)
-	self.characterPanel:setHeight(self:getHeight() - UI_BORDER_SPACING*5 - BUTTON_HGT*3 - FONT_HGT_TITLE + 1)
-
-	self.clothingPanel:setX(self.characterPanel:getRight()+UI_BORDER_SPACING)
-	self.clothingPanel:setWidth(self:getWidth() - self.clothingPanel.x)
-	self.clothingPanel:setHeight(self:getHeight() - UI_BORDER_SPACING*4 - BUTTON_HGT- FONT_HGT_TITLE - 2)
+	self:rescaleAvatarViewer()
+	local x = self.avatarPanel:getRight() + UI_BORDER_SPACING
+	self.characterPanel:setWidth(self.avatarPanel:getX() - UI_BORDER_SPACING*2 - 1)
+	self.characterPanel:positionRelativeToScrollBar()
+	self.clothingPanel:setX(x)
+	self.clothingPanel:setWidth(self:getWidth() - x - UI_BORDER_SPACING - 1)
 
 	self:arrangeClothingUI()
 end

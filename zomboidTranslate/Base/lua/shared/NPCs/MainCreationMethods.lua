@@ -122,6 +122,29 @@ BaseGameCharacterDetails.DoTraits = function()
 	handy:addXPBoost(Perks.Maintenance, 1)
 	handy:addXPBoost(Perks.Woodwork, 1)
     handy:addXPBoost(Perks.Carving, 1)
+    handy:getFreeRecipes():add("BarbedWireWeapon")
+    handy:getFreeRecipes():add("BoltBat")
+    handy:getFreeRecipes():add("MakeBrakeWeapon")
+    handy:getFreeRecipes():add("MakeBucketMaul")
+    handy:getFreeRecipes():add("CanReinforceLongWeapon")
+    handy:getFreeRecipes():add("CanReinforceShortWeapon")
+    handy:getFreeRecipes():add("CanReinforceWeapon")
+    handy:getFreeRecipes():add("MakeGardenForkHeadWeapon")
+    handy:getFreeRecipes():add("MakeKettleMaul")
+    handy:getFreeRecipes():add("RailspikeBaseballBat")
+    handy:getFreeRecipes():add("MakeRailspikeCudgel")
+    handy:getFreeRecipes():add("MakeRailspikeIronPipe")
+    handy:getFreeRecipes():add("MakeRailspikeLongHandle")
+    handy:getFreeRecipes():add("MakeRailspikeWeapon")
+    handy:getFreeRecipes():add("MakeRakeHeadWeapon")
+    handy:getFreeRecipes():add("MakeSawPlank")
+    handy:getFreeRecipes():add("MakeSawbladeCudgel")
+    handy:getFreeRecipes():add("MakeSawbladeLongHandle")
+    handy:getFreeRecipes():add("MakeSawbladePlank")
+    handy:getFreeRecipes():add("MakeSawbladeTableLeg")
+    handy:getFreeRecipes():add("MakeSawbladeWeapon")
+    handy:getFreeRecipes():add("SheetMetalWeapon")
+    handy:getFreeRecipes():add("MakeSpadeHeadCudgel")
 
 	local isMP = (isClient() or isServer());
 	
@@ -433,6 +456,7 @@ BaseGameCharacterDetails.DoTraits = function()
 	barfighter:addXPBoost(Perks.Axe, 1)
 	barfighter:addXPBoost(Perks.Blunt, 1)
 	barfighter:getFreeRecipes():add("BarbedWireWeapon");
+	barfighter:getFreeRecipes():add("BoltBat");
 	barfighter:getFreeRecipes():add("CanReinforceLongWeapon");
 	barfighter:getFreeRecipes():add("CanReinforceShortWeapon");
 	barfighter:getFreeRecipes():add("CanReinforceWeapon");
@@ -664,6 +688,23 @@ BaseGameCharacterDetails.DoProfessions = function()
 	carpenter:addXPBoost(Perks.SmallBlunt, 1)
 	-- added 1 level in the Carving skill, which is new in b42
 	carpenter:addXPBoost(Perks.Maintenance, 1)
+    carpenter:getFreeRecipes():add("MakeBrakeWeapon")
+    carpenter:getFreeRecipes():add("CanReinforceLongWeapon")
+    carpenter:getFreeRecipes():add("CanReinforceShortWeapon")
+    carpenter:getFreeRecipes():add("CanReinforceWeapon")
+    carpenter:getFreeRecipes():add("MakeGardenForkHeadWeapon")
+    carpenter:getFreeRecipes():add("RailspikeBaseballBat")
+    carpenter:getFreeRecipes():add("MakeRailspikeCudgel")
+    carpenter:getFreeRecipes():add("MakeRailspikeLongHandle")
+    carpenter:getFreeRecipes():add("MakeRakeHeadWeapon")
+    carpenter:getFreeRecipes():add("MakeSawPlank")
+    carpenter:getFreeRecipes():add("MakeSawbladeCudgel")
+    carpenter:getFreeRecipes():add("MakeSawbladeLongHandle")
+    carpenter:getFreeRecipes():add("MakeSawbladePlank")
+    carpenter:getFreeRecipes():add("MakeSawbladeTableLeg")
+    carpenter:getFreeRecipes():add("MakeSawbladeWeapon")
+    carpenter:getFreeRecipes():add("SheetMetalWeapon")
+    carpenter:getFreeRecipes():add("MakeSpadeHeadCudgel")
 
 	local burglar = ProfessionFactory.addProfession("burglar", getText("UI_prof_Burglar"), "profession_burglar2", -6);
 	burglar:addXPBoost(Perks.Nimble, 2)
@@ -723,11 +764,35 @@ BaseGameCharacterDetails.DoProfessions = function()
 	repairman:addXPBoost(Perks.Maintenance, 2)
 	repairman:addXPBoost(Perks.SmallBlunt, 1);
     repairman:addXPBoost(Perks.Carving, 1)
+    repairman:getFreeRecipes():add("BarbedWireWeapon")
+    repairman:getFreeRecipes():add("BoltBat")
+    repairman:getFreeRecipes():add("MakeBrakeWeapon")
+    repairman:getFreeRecipes():add("MakeBucketMaul")
+    repairman:getFreeRecipes():add("CanReinforceLongWeapon")
+    repairman:getFreeRecipes():add("CanReinforceShortWeapon")
+    repairman:getFreeRecipes():add("CanReinforceWeapon")
+    repairman:getFreeRecipes():add("MakeGardenForkHeadWeapon")
+    repairman:getFreeRecipes():add("MakeKettleMaul")
+    repairman:getFreeRecipes():add("RailspikeBaseballBat")
+    repairman:getFreeRecipes():add("MakeRailspikeCudgel")
+    repairman:getFreeRecipes():add("MakeRailspikeIronPipe")
+    repairman:getFreeRecipes():add("MakeRailspikeLongHandle")
+    repairman:getFreeRecipes():add("MakeRailspikeWeapon")
+    repairman:getFreeRecipes():add("MakeRakeHeadWeapon")
+    repairman:getFreeRecipes():add("MakeSawPlank")
+    repairman:getFreeRecipes():add("MakeSawbladeCudgel")
+    repairman:getFreeRecipes():add("MakeSawbladeLongHandle")
+    repairman:getFreeRecipes():add("MakeSawbladePlank")
+    repairman:getFreeRecipes():add("MakeSawbladeTableLeg")
+    repairman:getFreeRecipes():add("MakeSawbladeWeapon")
+    repairman:getFreeRecipes():add("SheetMetalWeapon")
+    repairman:getFreeRecipes():add("MakeSpadeHeadCudgel")
 
     local rancher = ProfessionFactory.addProfession("rancher", getText("UI_prof_rancher"), "profession_rancher", -2);
     rancher:addXPBoost(Perks.Farming, 1)
     rancher:addXPBoost(Perks.Husbandry, 3)
     rancher:addXPBoost(Perks.Butchering, 3)
+    rancher:getFreeRecipes():add("MakeBarbedWire");
 
 	local farmer = ProfessionFactory.addProfession("farmer", getText("UI_prof_Farmer"), "profession_farmer2", 2);
 	farmer:addXPBoost(Perks.Farming, 3)
@@ -875,7 +940,6 @@ BaseGameCharacterDetails.DoProfessions = function()
     engineer:getFreeRecipes():add("MakeImprovisedLantern");
     -- all things considered they should know how to
     engineer:getFreeRecipes():add("Generator");
-
 
     local metalworker = ProfessionFactory.addProfession("metalworker", getText("UI_prof_MetalWorker"), "profession_metalworker", -6);
     metalworker:addXPBoost(Perks.MetalWelding, 3);
@@ -7236,6 +7300,10 @@ doMetalWorkerRecipes = function (metalworker)
     metalworker:getFreeRecipes():add("MakeSpikedClub");
     metalworker:getFreeRecipes():add("ForgeSpearHead");
     metalworker:getFreeRecipes():add("ForgeLongSpearHead");
+    metalworker:getFreeRecipes():add("Forge_Wood_Axe_Head");
+    metalworker:getFreeRecipes():add("Forge_Old_Axe_Head");
+    metalworker:getFreeRecipes():add("Forge_Hand_Axe_Head");
+    metalworker:getFreeRecipes():add("Forge_Fleshing_Tool");
 
 
 --     metalworker:getFreeRecipes():add("Make Fork");

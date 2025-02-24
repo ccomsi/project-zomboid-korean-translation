@@ -34,6 +34,14 @@ function ISDrinkFluidAction:start()
 		self.item = self.character:getInventory():getItemById(self.item:getID())
 	end
 
+	if self.item ~= nil and self.eatSound == "DrinkingFromMug" then
+		local heat = (self.item:IsFood() or self.item:IsDrainable()) and self.item:getHeat() or 1.0
+		if not (self.item:IsFood() or self.item:IsDrainable()) then heat = self.item:getItemHeat() end
+		if heat > 1 then
+			self.eatSound = "DrinkingFromHotTeaCup"
+		end
+	end
+
 	if self.eatSound ~= '' then
         self.eatAudio = self.character:getEmitter():playSound(self.eatSound);
     end

@@ -23,7 +23,7 @@ end
 function ISEmptyRainBarrelAction:update()
 	self.character:faceThisObject(self.object)
     self.character:setMetabolicTarget(Metabolics.LightDomestic)
-    self.object:setWaterAmount(self.startAmount * (1 - self:getJobDelta()))
+    self.object:setWaterAmount(self.startAmount * (1 - self:getJobDelta()), false)
 end
 
 function ISEmptyRainBarrelAction:stop()
@@ -46,12 +46,12 @@ function ISEmptyRainBarrelAction:stopSound()
 end
 
 function ISEmptyRainBarrelAction:serverStop()
-	self.object:setWaterAmount(self.object:getWaterAmount() * (1 - self.netAction:getProgress()))
+	self.object:setWaterAmount(self.object:getWaterAmount() * (1 - self.netAction:getProgress()), false)
 	self.object:transmitModData()
 end
 
 function ISEmptyRainBarrelAction:complete()
-	self.object:setWaterAmount(0)
+	self.object:setWaterAmount(0, false)
 	self.object:transmitModData()
 
 	return true

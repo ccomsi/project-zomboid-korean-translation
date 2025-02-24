@@ -87,11 +87,11 @@ function Fish:getFishByLure()
         local sum = 0
         local fishNumber = ZombRandFloat(0.0, baitFactorSum)
         for _, fishConfig in ipairs(fishes) do
+            sum = sum + fishConfig.lure[self.lure]
             if sum >= fishNumber then
                 item = fishConfig
                 break
             end
-            sum = sum + fishConfig.lure[self.lure]
         end
 
         if item == nil then

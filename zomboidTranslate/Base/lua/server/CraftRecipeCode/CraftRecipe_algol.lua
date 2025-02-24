@@ -380,21 +380,18 @@ end
 CraftRecipeCode.GenericFixing = {}
 
 function CraftRecipeCode.GenericFixing.OnCreate(craftRecipeData, player)
-    local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
     CraftRecipeCode.GenericFixer(craftRecipeData, player, 1, craftRecipeData:getFirstInputItemWithFlag("IsDamaged"), skill, false)
 end
 
 CraftRecipeCode.GenericBetterFixing = {}
 
 function CraftRecipeCode.GenericBetterFixing.OnCreate(craftRecipeData, player)
-    local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
     CraftRecipeCode.GenericFixer(craftRecipeData, player, 2, craftRecipeData:getFirstInputItemWithFlag("IsDamaged"), skill, false)
 end
 
 CraftRecipeCode.GenericEvenBetterFixing = {}
 
 function CraftRecipeCode.GenericEvenBetterFixing.OnCreate(craftRecipeData, player)
-    local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
     CraftRecipeCode.GenericFixer(craftRecipeData, player, 3, craftRecipeData:getFirstInputItemWithFlag("IsDamaged"), skill, false)
 end
 

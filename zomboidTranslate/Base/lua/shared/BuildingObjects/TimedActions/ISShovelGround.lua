@@ -41,7 +41,8 @@ function ISShovelGround:start()
 	local jobTypes = {
 		["Base.Dirtbag"] = "ContextMenu_Take_some_dirt",
 		["Base.Gravelbag"] = "ContextMenu_Take_some_gravel",
-		["Base.Sandbag"] = "ContextMenu_Take_some_sands"
+		["Base.Sandbag"] = "ContextMenu_Take_some_sands",
+		["Base.Claybag"] = "ContextMenu_Take_some_clay"
 	}
 	self.emptyBag:setJobType(getText(jobTypes[self.newBag]))
 --    self.sound = getSoundManager():PlayWorldSound("shoveling", self.sandTile:getSquare(), 0, 5, 1, true);
@@ -98,7 +99,7 @@ function ISShovelGround:shovelGround(sq)
 		end
 
 		if self.emptyBag:hasTag("HoldDirt") and (self.newBag == "Base.Dirtbag" or
-				self.newBag == "Base.Gravelbag" or self.newBag == "Base.Sandbag") then
+				self.newBag == "Base.Gravelbag" or self.newBag == "Base.Sandbag" or self.newBag == "Base.Claybag") then
 			local isPrimary = self.character:isPrimaryHandItem(self.emptyBag)
 			local isSecondary = self.character:isSecondaryHandItem(self.emptyBag)
 			self.character:removeFromHands(self.emptyBag);
@@ -107,8 +108,10 @@ function ISShovelGround:shovelGround(sq)
 			local item = self.character:getInventory():AddItem(self.newBag);
 			sendAddItemToContainer(self.character:getInventory(), item);
 			if item ~= nil then
-				item:setUsedDelta(item:getUseDelta())
-				sendItemStats(item)
+			    if self.newBag ~= "Base.Claybag" then
+				    item:setUsedDelta(item:getUseDelta())
+				    sendItemStats(item)
+				end
 				if isPrimary then
 					self.character:setPrimaryHandItem(item)
 				end

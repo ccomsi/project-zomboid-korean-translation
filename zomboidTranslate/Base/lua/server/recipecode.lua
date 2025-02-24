@@ -8,6 +8,7 @@ Recipe.OnCanPerform = {}
 Recipe.OnCreate = {}
 Recipe.OnGiveXP = {}
 Recipe.OnTest = {}
+Recipe.WeaponParts = {}
 
 local function addExistingItemType(scriptItems, type)
 	local all = getScriptManager():getItemsByType(type)
@@ -154,39 +155,12 @@ function Recipe.OnCreate.RefillBlowTorch(craftRecipeData, character)
     end
 end
 
--- check when refilling the lighter that lighter is not full and lighter fluid not empty
-function Recipe.OnTest.RefillLighter(item)
-    if item:getType() == "Lighter" then
-        if item:getCurrentUsesFloat() == 1 then return false; end
-    elseif item:getType() == "LighterFluid" then
-        if item:getCurrentUsesFloat() == 0 then return false; end
-    end
-    return true;
-end
-
 -- Fill entirely the lighter with the remaining lighter fluid
 function Recipe.OnCreate.RefillLighter(craftRecipeData, character)
-	local items = craftRecipeData:getAllConsumedItems();
-	local result = craftRecipeData:getAllCreatedItems():get(0);
-    local oldLighter = nil;
-    local lighterFluid = nil;
-    for i=0, items:size()-1 do
-       if items:get(i):getType() == "Lighter" then
-           oldLighter = items:get(i);
-       elseif items:get(i):getType() == "LighterFluid" then
-           lighterFluid = items:get(i);
-       end
-    end
-    result:setUsedDelta(lighterFluid:getCurrentUsesFloat() + result:getUseDelta() * 30);
+	local lighter = craftRecipeData:getAllKeepInputItems():get(0);
+	local lighterFluid = craftRecipeData:getAllConsumedItems():get(0);
 
-    while result:getCurrentUsesFloat() < 1 and lighterFluid:getCurrentUsesFloat() > 0 do
-        result:setUsedDelta(result:getCurrentUsesFloat() + result:getUseDelta() * 30);
-        lighterFluid:Use();
-    end
-
-    if result:getCurrentUsesFloat() > 1 then
-        result:setUsedDelta(1);
-    end
+    lighter:setCurrentUsesFloat(lighterFluid:getCurrentUsesFloat() + 0.3);
 end
 
 -- change result quality depending on your BS skill and the tools used
@@ -234,12 +208,6 @@ function Recipe.OnCreate.TorchBatteryRemoval(craftRecipeData, character)
 			item:syncItemFields();
 		end
 	end
-end
-
--- You can't dismantle favorite item
-function Recipe.OnTest.DismantleElectronics(sourceItem, result)
--- 	if sourceItem:hasTag("Screwdriver") then return true end
-    return not sourceItem:isFavorite()
 end
 
 -- When creating item in result box of crafting panel.
@@ -305,8 +273,9 @@ end
 
 -- Sawn-off recipe callback, copies modData to the new sawn-off.
 local function tryAttachPart(weapon, part, player)
-	--if part:getMountOn():contains(weapon:getFullType()) then
-	if part:canAttach(player, weapon) then
+	-- set player to nil when calling canAttach so lua callbacks don't check inventory for tools since this part is already attached
+	-- see: Recipe.WeaponParts.hasScrewdriver
+	if part:canAttach(nil, weapon) then
 		weapon:attachWeaponPart(player, part)
 	elseif player then
 		player:getInventory():AddItem(part)
@@ -1009,8 +978,8 @@ function OnEat_Cigarettes(food, character, percent)
         if bodyDamage:getUnhappynessLevel() < 0 then
             bodyDamage:setUnhappynessLevel(0);
         end
-        stats:setStress(stats:getStress() - 10 * percent);
-        if stats:getStress() < 0 then
+        stats:setStress(stats:getBasicStress() - 10 * percent);
+        if stats:getBasicStress() < 0 then
             stats:setStress(0);
         end
         local reduceSFC = stats:getMaxStressFromCigarettes()
@@ -1051,10 +1020,10 @@ function OnEat_Cigarillo(food, character, percent)
         if bodyDamage:getUnhappynessLevel() < 0 then
             bodyDamage:setUnhappynessLevel(0);
         end
-        stats:setStress(stats:getStress() - 15 * percent);
-        if stats:getStress() < 0 then
-            stats:setStress(0);
-        end
+        stats:setStress(stats:getBasicStress() - 15 * percent);
+--         if stats:getStress() < 0 then
+--             stats:setStress(0);
+--         end
         local reduceSFC = stats:getMaxStressFromCigarettes()
         stats:setStressFromCigarettes(stats:getStressFromCigarettes() - reduceSFC * percent);
         character:setTimeSinceLastSmoke(stats:getStressFromCigarettes() / stats:getMaxStressFromCigarettes());
@@ -1093,10 +1062,10 @@ function OnEat_Cigar(food, character, percent)
         if bodyDamage:getUnhappynessLevel() < 0 then
             bodyDamage:setUnhappynessLevel(0);
         end
-        stats:setStress(stats:getStress() - 40 * percent);
-        if stats:getStress() < 0 then
-            stats:setStress(0);
-        end
+        stats:setStress(stats:getBasicStress() - 40 * percent);
+--         if stats:getStress() < 0 then
+--             stats:setStress(0);
+--         end
         local reduceSFC = stats:getMaxStressFromCigarettes()
         stats:setStressFromCigarettes(stats:getStressFromCigarettes() - reduceSFC * percent);
         character:setTimeSinceLastSmoke(stats:getStressFromCigarettes() / stats:getMaxStressFromCigarettes());
@@ -1135,10 +1104,10 @@ function OnEat_ChewingTobacco(food, character)
         if bodyDamage:getUnhappynessLevel() < 0 then
             bodyDamage:setUnhappynessLevel(0);
         end
-        stats:setStress(stats:getStress() - 10 * percent);
-        if stats:getStress() < 0 then
-            stats:setStress(0);
-        end
+        stats:setStress(stats:getBasicStress() - 10 * percent);
+--         if stats:getStress() < 0 then
+--             stats:setStress(0);
+--         end
         local reduceSFC = stats:getMaxStressFromCigarettes()
         stats:setStressFromCigarettes(stats:getStressFromCigarettes() - reduceSFC * percent);
         character:setTimeSinceLastSmoke(stats:getStressFromCigarettes() / stats:getMaxStressFromCigarettes());
@@ -1674,14 +1643,12 @@ function Recipe.OnCreate.OpenDentedCan(craftRecipeData, character)
 	local list = Recipe.MysteryCans
 	local emptyType = list[ZombRand(#list)+1]
     local result = character:getInventory():AddItem(emptyType)
-    result:setTexture(getTexture("Item_CannedUnlabeled_Open_Gross"))
---     result:setTexture(getTexture("media/textures/Item_CannedUnlabeled_Open_Gross.png"))
+    result:setTexture(getTexture("Item_CannedUnlabeled_Gross"))
     result:setWorldStaticModel("DentedCan_Open")
     result:setStaticModel("DentedCan_Open")
     if ZombRand(10) == 4 then
         result:setAge(result:getOffAgeMax())
         result:setRotten(true)
-        result:setTexture(getTexture("Item_CannedUnlabeled_Open_Gross2"))
         result:setWorldStaticModel("DentedCan_Open_Gross")
         result:setStaticModel("DentedCan_Open_Gross")
     elseif ZombRand(10) ~= 4 then
@@ -1726,39 +1693,27 @@ function Recipe.OnCanPerform.CleanMuffin(recipe, playerObj, item)
     return item and not item:isCooked();
 end
 
--- Muffins need to be cooked first
-function Recipe.OnCanPerform.GetMuffin(recipe, playerObj, item)
-    return item and (item:isCooked() or item:isBurnt());
-end
-
 function Recipe.OnCreate.GetMuffin(craftRecipeData, character)
-	local items = craftRecipeData:getAllConsumedItems();
+	local muffinTray = craftRecipeData:getAllConsumedItems():get(0);
 	local results = craftRecipeData:getAllCreatedItems();
-	local muffins = nil;
-    for i=0,items:size() - 1 do
-        if instanceof(items:get(i), "Food") then
-            muffins = items:get(i);
-            break;
-        end
-    end
-	if not muffins then return end
+
 	for i=0,results:size() - 1 do
 		local result = results:get(i)
-		result:setBaseHunger(muffins:getBaseHunger() / 6);
-		result:setHungChange(muffins:getHungChange() / 6);
-		result:setCalories(muffins:getCalories() / 6);
-		result:setProteins(muffins:getProteins() / 6);
-		result:setLipids(muffins:getLipids() / 6);
-		result:setCarbohydrates(muffins:getCarbohydrates() / 6);
+		if instanceof(result, "Food") then
+			result:setBaseHunger(muffinTray:getBaseHunger() / 6);
+			result:setHungChange(muffinTray:getHungChange() / 6);
+			result:setCalories(muffinTray:getCalories() / 6);
+			result:setProteins(muffinTray:getProteins() / 6);
+			result:setLipids(muffinTray:getLipids() / 6);
+			result:setCarbohydrates(muffinTray:getCarbohydrates() / 6);
 
-		-- This gives a bonus. See Food.getHungerChange().
-		result:setCooked(true);
+			-- This gives a bonus. See Food.getHungerChange().
+			result:setCooked(true);
 
-		result:setName(muffins:getDisplayName());
-		result:setCustomName(true);
+			result:setName(muffinTray:getDisplayName());
+			result:setCustomName(true);
+		end
 	end
-	if not character then return end
-    character:getInventory():Remove(muffins);
 end
 
 function Recipe.OnCanPerform.GetBiscuit(recipe, playerObj, item)
@@ -2843,6 +2798,13 @@ end
 function Recipe.OnCreate.SharpenBlade(craftRecipeData, player)
     local item = craftRecipeData:getFirstInputItemWithFlag("IsSharpenable")
     local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
+
+    if not item:hasSharpness() and item:hasHeadCondition() then
+        CraftRecipeCode.GenericFixer(craftRecipeData, player, 1, item, skill, true)
+    elseif not item:hasSharpness() then
+        CraftRecipeCode.GenericFixer(craftRecipeData, player, 1, item, skill)
+    end
+
     Recipe.OnCreate.GenericSharpen(player, item, skill, 1)
 end
 
@@ -2851,6 +2813,13 @@ function Recipe.OnCreate.SharpenBladePoor(craftRecipeData, player)
     local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
     skill = math.max(skill/2 - 1, 0)
     skill = math.floor(skill)
+
+    if not item:hasSharpness() and item:hasHeadCondition() then
+        CraftRecipeCode.GenericFixer(craftRecipeData, player, 0.5, item, skill, true)
+    elseif not item:hasSharpness() then
+        CraftRecipeCode.GenericFixer(craftRecipeData, player, 0.5, item, skill)
+    end
+
     Recipe.OnCreate.GenericSharpen(player, item, skill, 0.5)
 end
 
@@ -2862,6 +2831,7 @@ end
 
 function Recipe.OnCreate.RepairBladeWithGrindstone(craftRecipeData, player)
     local item = craftRecipeData:getFirstInputItemWithFlag("IsSharpenable")
+    local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
     if item:hasHeadCondition() then
         if item:getHeadCondition() < item:getHeadConditionMax() then
            CraftRecipeCode.GenericFixer(craftRecipeData, player, 1, item, nil, true)
@@ -2869,7 +2839,7 @@ function Recipe.OnCreate.RepairBladeWithGrindstone(craftRecipeData, player)
     elseif item:getCondition() < item:getConditionMax() then
         CraftRecipeCode.GenericFixer(craftRecipeData, player, 1, item)
     end
-    if item:getSharpness() < item:getMaxSharpness() then
+    if item:hasSharpness() and item:getSharpness() < item:getMaxSharpness() then
         Recipe.OnCreate.GenericSharpen(player, item, skill, 2)
     end
 end
@@ -3203,4 +3173,15 @@ function Recipe.OnCreate.KnappFlake(craftRecipeData, character)
         local flake = instanceItem("Base.SharpedStone");
         character:getInventory():AddItem(flake);
     end
+end
+
+local function predicateNotBroken(item)
+	return not item:isBroken()
+end
+
+function Recipe.WeaponParts.hasScrewdriver(character, weapon, weaponPart)
+	-- canAttach/canDetach for most firearm attachments.
+	-- this needs to return true if character is nil for sawing shotguns to properly transfer parts.
+	-- see: Recipe.OnCreate.ShotgunSawnoff and tryAttachPart
+	return character == nil or character:getInventory():containsTagEval("Screwdriver", predicateNotBroken)
 end

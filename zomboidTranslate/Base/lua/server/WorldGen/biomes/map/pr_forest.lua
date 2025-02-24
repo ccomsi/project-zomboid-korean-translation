@@ -11,6 +11,13 @@ local pr_forest = {
         BUSH = {
             { f = worldgen.features.BUSH.bush_dry, p = 1 },
         },
+        PLANT = {
+            { f = worldgen.features.PLANT.grass_low, p = 0.667 },
+            { f = worldgen.features.PLANT.grass_medium, p = 0.167 },
+
+            { f = worldgen.features.PLANT.fern, p = 0.083 },
+            { f = worldgen.features.PLANT.generic_plant, p = 0.083 },
+        }
     },
     params = {
         landscape = { "FOREST" },
@@ -29,12 +36,6 @@ local pr_forest = {
             "!blends_natural_01_69",
             "!blends_natural_01_70",
             "!blends_natural_01_71",
-        },
-        grass = {
-            fernChance = 0.3,
-            noGrassDiv = 12,
-            noGrassStages = { 0.4 },
-            grassStages = { 0.33, 0.5 } 
         },
     }
 }

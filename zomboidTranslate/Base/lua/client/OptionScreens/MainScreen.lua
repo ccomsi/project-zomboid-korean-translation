@@ -303,17 +303,6 @@ function MainScreen:instantiate()
         self.charCreationProfession.backgroundColor = {r=0, g=0, b=0, a=0.8};
         self.charCreationProfession.borderColor = {r=1, g=1, b=1, a=0.5};
 
-        self.charCreationHeader = CharacterCreationHeader:new(0, 0, 600, 260+UI_BORDER_SPACING+BUTTON_HGT);
-        self.charCreationHeader:initialise();
-        self.charCreationHeader:setVisible(true);
-        self.charCreationHeader:setAnchorRight(true);
-        self.charCreationHeader:setAnchorLeft(true);
-        self.charCreationHeader:setAnchorBottom(false);
-        self.charCreationHeader:setAnchorTop(true);
-
-        self.charCreationHeader.backgroundColor = {r=0, g=0, b=0, a=0.0};
-        self.charCreationHeader.borderColor = {r=1, g=1, b=1, a=0};
-
 		self.lastStandPlayerSelect = LastStandPlayerSelect:new(0, 0, self.width, self.height);
         self.lastStandPlayerSelect:initialise();
         self.lastStandPlayerSelect:setVisible(false);
@@ -746,7 +735,6 @@ function MainScreen:instantiate()
         triggerEvent("OnChallengeQuery");
 
 		self.desc = SurvivorFactory.CreateSurvivor();
-	    self.charCreationHeader:create();
         self.charCreationMain:create();
 	    self.charCreationProfession:create();
 		self.lastStandPlayerSelect:create();

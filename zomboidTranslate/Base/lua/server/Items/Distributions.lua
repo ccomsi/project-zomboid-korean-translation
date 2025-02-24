@@ -5395,7 +5395,7 @@ local distributionTable = {
 			procList = {
 				{name="StoreCounterCleaning", min=0, max=99, forceForTiles="location_shop_accessories_01_0;location_shop_accessories_01_1;location_shop_accessories_01_2;location_shop_accessories_01_3;location_shop_accessories_01_20;location_shop_accessories_01_21;location_shop_accessories_01_22;location_shop_accessories_01_23"},
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
-				{name="BurgerKitchenButcher", min=1, max=2, weightChance=80}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="BurgerKitchenButcher", min=1, max=2, weightChance=80},
 				{name="BurgerKitchenSauce", min=0, max=4, weightChance=40},
 				{name="BurgerKitchenCutlery", min=0, max=99, weightChance=10},
 			}
@@ -5892,7 +5892,7 @@ local distributionTable = {
 				{name="StoreCounterCleaning", min=0, max=99, forceForTiles="location_shop_accessories_01_0;location_shop_accessories_01_1;location_shop_accessories_01_2;location_shop_accessories_01_3;location_shop_accessories_01_20;location_shop_accessories_01_21;location_shop_accessories_01_22;location_shop_accessories_01_23"},
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="StoreKitchenBaking", min=0, max=1, weightChance=100},
-				{name="StoreKitchenButcher", min=1, max=1, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="StoreKitchenButcher", min=1, max=1, weightChance=100},
 				{name="StoreKitchenCutlery", min=0, max=1, weightChance=20},
 				{name="StoreKitchenDishes", min=0, max=1, weightChance=20},
 				{name="StoreKitchenGlasses", min=0, max=1, weightChance=20},
@@ -6469,7 +6469,7 @@ local distributionTable = {
 			procedural = true,
 			procList = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
-				{name="CatfishKitchenButcher", min=1, max=1, weightChance=80}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="CatfishKitchenButcher", min=1, max=1, weightChance=80},
 				{name="FishChipsKitchenSauce", min=0, max=1, weightChance=80},
 				{name="StoreKitchenCutlery", min=0, max=1, weightChance=20},
 				{name="StoreKitchenDishes", min=0, max=1, weightChance=20},
@@ -6584,7 +6584,7 @@ local distributionTable = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="ChineseKitchenCutlery", min=0, max=1, weightChance=20},
 				{name="ChineseKitchenBaking", min=0, max=1, weightChance=100},
-				{name="ChineseKitchenButcher", min=1, max=1, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="ChineseKitchenButcher", min=1, max=1, weightChance=100},
 				{name="ChineseKitchenSauce", min=0, max=1, weightChance=100},
 				{name="StoreKitchenDishes", min=0, max=1, weightChance=20},
 				{name="StoreKitchenGlasses", min=0, max=1, weightChance=20},
@@ -7495,7 +7495,7 @@ local distributionTable = {
 			procedural = true,
 			procList = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
-				{name="BurgerKitchenButcher", min=1, max=1, weightChance=80}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="BurgerKitchenButcher", min=1, max=1, weightChance=80},
 				{name="BurgerKitchenSauce", min=0, max=1, weightChance=80},
 				{name="FishChipsKitchenButcher", min=0, max=1, weightChance=80},
 				{name="FishChipsKitchenSauce", min=0, max=1, weightChance=80},
@@ -7919,7 +7919,7 @@ local distributionTable = {
 			procList = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="StoreKitchenBaking", min=0, max=1, weightChance=100},
-				{name="StoreKitchenButcher", min=1, max=1, weightChance=80}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="StoreKitchenButcher", min=1, max=1, weightChance=80},
 				{name="StoreKitchenCafe", min=0, max=1, weightChance=100},
 				{name="StoreKitchenCutlery", min=0, max=1, weightChance=20},
 				{name="StoreKitchenDishes", min=0, max=1, weightChance=20},
@@ -10058,7 +10058,6 @@ local distributionTable = {
 				{name="ButcherChicken", min=1, max=99, weightChance=100},
 				{name="ButcherSmoked", min=1, max=99, weightChance=50},
 				{name="ButcherFish", min=1, max=99, weightChance=25},
--- 				{name="ButcherTools", min=1, max=1, weightChance=100},
 			}
 		},
 		freezer = {
@@ -10152,7 +10151,7 @@ local distributionTable = {
 				{name="StoreCounterCleaning", min=0, max=99, forceForTiles="location_shop_accessories_01_0;location_shop_accessories_01_1;location_shop_accessories_01_2;location_shop_accessories_01_3;location_shop_accessories_01_20;location_shop_accessories_01_21;location_shop_accessories_01_22;location_shop_accessories_01_23"},
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="StoreKitchenBaking", min=0, max=99, weightChance=100},
-				{name="StoreKitchenButcher", min=1, max=99, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="StoreKitchenButcher", min=1, max=99, weightChance=100},
 				{name="StoreKitchenPots", min=0, max=1, weightChance=20},
 			}
 		},
@@ -10164,7 +10163,6 @@ local distributionTable = {
 				{name="ButcherChicken", min=1, max=1, weightChance=100},
 				{name="ButcherSmoked", min=1, max=4, weightChance=100},
 				{name="ButcherFish", min=0, max=1, weightChance=100},
--- 				{name="ButcherTools", min=1, max=1, weightChance=100},
 			}
 		},
 	},
@@ -11074,7 +11072,7 @@ local distributionTable = {
 			procList = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="ItalianKitchenBaking", min=0, max=1, weightChance=100},
-				{name="ItalianKitchenButcher", min=1, max=1, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="ItalianKitchenButcher", min=1, max=1, weightChance=100},
 				{name="ItalianKitchenSauce", min=0, max=1, weightChance=100},
 				{name="StoreKitchenCutlery", min=0, max=1, weightChance=20},
 				{name="StoreKitchenDishes", min=0, max=1, weightChance=20},
@@ -13062,7 +13060,7 @@ local distributionTable = {
 			procList = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="MexicanKitchenBaking", min=1, max=1, weightChance=100},
-				{name="MexicanKitchenButcher", min=1, max=1, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="MexicanKitchenButcher", min=1, max=1, weightChance=100},
 				{name="MexicanKitchenSauce", min=0, max=1, weightChance=100},
 				{name="StoreKitchenBags", min=0, max=1, weightChance=20},
 				{name="StoreKitchenCups", min=0, max=1, weightChance=20},
@@ -14341,7 +14339,7 @@ local distributionTable = {
 			procList = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="PizzaKitchenBaking", min=1, max=1, weightChance=100},
-				{name="PizzaKitchenButcher", min=1, max=1, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="PizzaKitchenButcher", min=1, max=1, weightChance=100},
 				{name="PizzaKitchenCheese", min=1, max=1, weightChance=100},
 				{name="PizzaKitchenSauce", min=1, max=1, weightChance=100},
 				{name="StoreKitchenBags", min=0, max=1, weightChance=20},
@@ -15134,7 +15132,7 @@ local distributionTable = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="StoreKitchenBaking", min=0, max=1, weightChance=100},
 				{name="StoreKitchenButcher", min=0, max=1, weightChance=100},
-				{name="StoreKitchenCafe", min=1, max=1, weightChance=80}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="StoreKitchenCafe", min=1, max=1, weightChance=80},
 				{name="StoreKitchenPotatoes", min=0, max=1, weightChance=60},
 				{name="StoreKitchenSauce", min=0, max=1, weightChance=60},
 				{name="StoreKitchenPots", min=0, max=1, weightChance=40},
@@ -15339,7 +15337,7 @@ local distributionTable = {
 				{name="StoreKitchenCleaning", min=0, max=99, forceForTiles="fixtures_sinks_01_0;fixtures_sinks_01_1;fixtures_sinks_01_2;fixtures_sinks_01_3;fixtures_sinks_01_4;fixtures_sinks_01_5;fixtures_sinks_01_6;fixtures_sinks_01_7;fixtures_sinks_01_8;fixtures_sinks_01_9;fixtures_sinks_01_10;fixtures_sinks_01_11;fixtures_sinks_01_16;fixtures_sinks_01_17;fixtures_sinks_01_18;fixtures_sinks_01_19"},
 				{name="SeafoodKitchenSauce", min=0, max=1, weightChance=100},
 				{name="JaysKitchenBaking", min=0, max=1, weightChance=100},
-				{name="SeafoodKitchenButcher", min=1, max=2, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="SeafoodKitchenButcher", min=1, max=2, weightChance=100},
 				{name="StoreKitchenBags", min=0, max=1, weightChance=20},
 				{name="StoreKitchenCups", min=0, max=1, weightChance=20},
 				{name="StoreKitchenPotatoes", min=1, max=1, weightChance=100},
@@ -16130,7 +16128,29 @@ local distributionTable = {
 
 	-- Most basements use this roomdef at the moment. This is a placeholder that uses the old 'outdoor generic crates' list.
 	storage = {
+		cardboardbox = {
+			procedural = true,
+			procList = {
+				{name="CrateToolsOld", min=0, max=99, weightChance=5},
+				{name="CratePaint", min=0, max=99, weightChance=20},
+				{name="CrateWallFinish", min=0, max=99, weightChance=20},
+				{name="CrateCarpentry", min=0, max=99, weightChance=40},
+				{name="CrateMetalwork", min=0, max=99, weightChance=40},
+				{name="CrateTools", min=0, max=99, weightChance=100},
+			}
+		},
 		crate = {
+			procedural = true,
+			procList = {
+				{name="CrateToolsOld", min=0, max=99, weightChance=5},
+				{name="CratePaint", min=0, max=99, weightChance=20},
+				{name="CrateWallFinish", min=0, max=99, weightChance=20},
+				{name="CrateCarpentry", min=0, max=99, weightChance=40},
+				{name="CrateMetalwork", min=0, max=99, weightChance=40},
+				{name="CrateTools", min=0, max=99, weightChance=100},
+			}
+		},
+		smallbox = {
 			procedural = true,
 			procList = {
 				{name="CrateToolsOld", min=0, max=99, weightChance=5},
@@ -17544,7 +17564,7 @@ local distributionTable = {
 				{name="StoreKitchenPotatoes", min=0, max=1, weightChance=100},
 				{name="StoreKitchenPots", min=0, max=99, weightChance=20},
 				{name="WesternKitchenBaking", min=0, max=1, weightChance=100},
-				{name="WesternKitchenButcher", min=1, max=1, weightChance=100}, -- needs to always spawn so that fleshing tools always have a chance to spawn
+				{name="WesternKitchenButcher", min=1, max=1, weightChance=100},
 				{name="WesternKitchenSauce", min=0, max=1, weightChance=100},
 			}
 		},

@@ -73,6 +73,7 @@ function ISShovelGroundCursor.GetEmptyItemCounts(playerObj)
 	items.dirt = playerInv:getCountTypeEvalRecurse("Dirtbag", predicateNotFull)
 	items.gravel = playerInv:getCountTypeEvalRecurse("Gravelbag", predicateNotFull)
 	items.sand = playerInv:getCountTypeEvalRecurse("Sandbag", predicateNotFull)
+	items.clay = playerInv:getCountTypeEvalRecurse("Claybag", predicateNotFull)
 	return items
 end
 
@@ -85,6 +86,8 @@ function ISShovelGroundCursor.GetEmptyItem(playerObj, groundType)
 		fullType = "Base.Gravelbag"
 	elseif groundType == "sand" then
 		fullType = "Base.Sandbag"
+	elseif groundType == "clay" then
+        fullType = "Base.Claybag"
 	end
 	local item = playerInv:getBestEvalArgRecurse(predicateTypeNotFull, comparatorMostFull, fullType)
 	if not item then
@@ -116,6 +119,12 @@ function ISShovelGroundCursor.GetDirtGravelSand(square)
 						spriteName == "floors_exterior_natural_01_24" then
 				return "sand",obj
 			end
+			if spriteName == "blends_natural_01_96" or
+						spriteName == "blends_natural_01_101" or
+            			spriteName == "blends_natural_01_102" or
+            			spriteName == "floors_exterior_natural_01_103" then
+            	return "clay",obj
+            end
 			if luautils.stringStarts(spriteName, "blends_natural_01_") or
 					luautils.stringStarts(spriteName, "floors_exterior_natural") then
 				return "dirt",obj

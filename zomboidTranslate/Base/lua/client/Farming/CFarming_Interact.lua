@@ -345,6 +345,7 @@ CFarming_Interact.FastDropItem = function(key)
     then return end
 
 	local player = getSpecificPlayer(0)
+    if not player then return end
 
     if player:getClothingItem_Back() and (not player:getClothingItem_Back():isFavorite()) and (getCore():isKey("DropWornBag", key) or getCore():isKey("DropBothHeldItemsAndWornBag", key)) then
         ISInventoryPaneContextMenu.dropItem(player:getClothingItem_Back(), player:getPlayerNum())

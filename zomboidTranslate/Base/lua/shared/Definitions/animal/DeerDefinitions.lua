@@ -119,6 +119,7 @@ AnimalDefinitions.animals["doe"].canThump = false;
 AnimalDefinitions.animals["doe"].corpseSize = 5;
 AnimalDefinitions.animals["doe"].minBlood = 800;
 AnimalDefinitions.animals["doe"].maxBlood = 2500;
+AnimalDefinitions.animals["doe"].female = true;
 
 AnimalDefinitions.animals["buck"] = {};
 AnimalDefinitions.animals["buck"].bodyModel = "DeerStag";
@@ -154,6 +155,7 @@ AnimalDefinitions.animals["buck"].canThump = false;
 AnimalDefinitions.animals["buck"].corpseSize = AnimalDefinitions.animals["doe"].corpseSize;
 AnimalDefinitions.animals["buck"].minBlood = 800;
 AnimalDefinitions.animals["buck"].maxBlood = 2500;
+AnimalDefinitions.animals["buck"].male = true;
 
 local buck_sounds = {
 	death = { name = "AnimalVoiceBuckDeath", slot = "voice", priority = 100 },

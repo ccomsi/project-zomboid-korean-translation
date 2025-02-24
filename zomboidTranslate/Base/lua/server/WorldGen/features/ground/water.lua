@@ -6,19 +6,19 @@ local water = {
         "blends_natural_02_7"
     },
     attach = {
-        n = {
+        s = {
             "blends_natural_02_8",
             "blends_natural_02_12"
         },
-        w = {
+        e = {
             "blends_natural_02_9",
             "blends_natural_02_13"
         },
-        e = {
+        w = {
             "blends_natural_02_10",
             "blends_natural_02_14"
         },
-        s = {
+        n = {
             "blends_natural_02_11",
             "blends_natural_02_15"
         }

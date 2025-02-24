@@ -10,6 +10,13 @@ local birchmix_forest = {
             { f = worldgen.features.BUSH.bush_fat, p = 0.5 },
             { f = worldgen.features.BUSH.bush_regular, p = 0.5 },
         },
+        PLANT = {
+            { f = worldgen.features.PLANT.grass_medium, p = 0.284 },
+            { f = worldgen.features.PLANT.grass_low, p = 0.55 },
+
+            { f = worldgen.features.PLANT.fern, p = 0.083 },
+            { f = worldgen.features.PLANT.generic_plant, p = 0.083 },
+        }
     },
     params = {
         landscape = { "FOREST" },
@@ -28,12 +35,6 @@ local birchmix_forest = {
             "!blends_natural_01_69",
             "!blends_natural_01_70",
             "!blends_natural_01_71",
-        },
-        grass = {
-            fernChance = 0.5,
-            noGrassDiv = 6,
-            noGrassStages = { 0.4 },
-            grassStages = { 0.33, 0.5 } 
         },
     }
 }
