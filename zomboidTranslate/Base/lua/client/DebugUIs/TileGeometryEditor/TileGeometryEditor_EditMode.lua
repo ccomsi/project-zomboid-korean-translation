@@ -1314,6 +1314,11 @@ function TileGeometryEditor_TilePicker3:createChildren()
 	self.listBox = listBox
 end
 
+function TileGeometryEditor_TilePicker3:setTileset(tilesetName)
+	self.comboTileset:select(tilesetName)
+	self.listBox:setTileset(tilesetName)
+end
+
 function TileGeometryEditor_TilePicker3:onMouseWheel(del)
 	self.listBox:onMouseWheel(del)
 	return true
@@ -1380,7 +1385,7 @@ function TileGeometryEditor_EditMode_SceneTiles:createChildren()
 	self.buttonPanel:setVisible(false)
 
 	local scrollbarWidth = 13
-	self.tilePicker3 = TileGeometryEditor_TilePicker3:new(self.width - 10 - (8 * 32 + scrollbarWidth), 40, 8 * 32 + scrollbarWidth, self.height - 10 - 40, self.editor)
+	self.tilePicker3 = TileGeometryEditor_TilePicker3:new(self.width - 10 - (8 * 32 + scrollbarWidth), UI_BORDER_SPACING*2+BUTTON_HGT, 8 * 32 + scrollbarWidth, self.height - 10 - 40, self.editor)
 	self.tilePicker3:setAnchorBottom(true)
 	self.editor:addChild(self.tilePicker3)
 	self.tilePicker3:setVisible(false)
@@ -1418,6 +1423,17 @@ function TileGeometryEditor_EditMode_SceneTiles:activate()
 	TileGeometryEditor_EditMode.activate(self)
 	self.buttonPanel:setVisible(true)
 	self.tilePicker3:setVisible(true)
+	local picker = self.editor.tilePicker.listBox
+	local picker3 = self.tilePicker3.listBox
+	if picker.tileset ~= nil then
+		self.tilePicker3:setTileset(picker.tileset)
+	end
+	local selectedTile = picker:getFirstSelectedTile()
+	if selectedTile ~= nil then
+		self.tilePicker3.comboTileset:select(picker.tileset)
+		picker3:selectionClear()
+		picker3:selectionAdd(selectedTile.col, selectedTile.row)
+	end
 	self.previousGeometryVisible = self:java0("getDrawGeometry")
 	self:java1("setDrawGeometry", false)
 	self.previousTool = self.editor.scene.currentTool
@@ -1660,7 +1676,7 @@ function TileGeometryEditor_EditMode_Curtain:createChildren()
 	self.buttonPanel:setVisible(false)
 
 	local scrollbarWidth = 13
-	self.tilePicker3 = TileGeometryEditor_TilePicker3:new(self.width - UI_BORDER_SPACING - (8 * 32 + scrollbarWidth), 40, 8 * 32 + scrollbarWidth, self.height - UI_BORDER_SPACING - 40, self.editor)
+	self.tilePicker3 = TileGeometryEditor_TilePicker3:new(self.width - UI_BORDER_SPACING - (8 * 32 + scrollbarWidth), UI_BORDER_SPACING*2+BUTTON_HGT, 8 * 32 + scrollbarWidth, self.height - UI_BORDER_SPACING - 40, self.editor)
 	self.tilePicker3:setAnchorBottom(true)
 	self.editor:addChild(self.tilePicker3)
 	self.tilePicker3:setVisible(false)
@@ -1684,10 +1700,12 @@ function TileGeometryEditor_EditMode_Curtain:activate()
 	self.propertiesPanel:setVisible(true)
 	local picker = self.editor.tilePicker.listBox
 	local picker3 = self.tilePicker3.listBox
+	if picker.tileset ~= nil then
+		self.tilePicker3:setTileset(picker.tileset)
+	end
 	local selectedTile = picker:getFirstSelectedTile()
 	if selectedTile ~= nil then
 		self.tilePicker3.comboTileset:select(picker.tileset)
-		picker3:setTileset(picker.tileset)
 		picker3:selectionClear()
 		picker3:selectionAdd(selectedTile.col, selectedTile.row)
 	end
@@ -1774,9 +1792,11 @@ end
 function TileGeometryEditor_EditMode_Curtain:setGeometryModeSelection()
 	local picker = self.editor.tilePicker.listBox
 	local picker3 = self.tilePicker3.listBox
+	if picker3.tileset ~= nil then
+		self.editor.tilePicker:setTileset(picker3.tileset)
+	end
 	local selectedTile = picker3:getFirstSelectedTile()
 	if selectedTile ~= nil then
-		picker:setTileset(picker3.tileset)
 		picker:selectionClear()
 		picker:selectionAdd(selectedTile.col, selectedTile.row)
 	end
@@ -1845,7 +1865,7 @@ function TileGeometryEditor_EditMode_Seating:createChildren()
 	self.buttonPanel:setVisible(false)
 
 	local scrollbarWidth = 13
-	self.tilePicker3 = TileGeometryEditor_TilePicker3:new(self.width - UI_BORDER_SPACING - (8 * 32 + scrollbarWidth), 40, 8 * 32 + scrollbarWidth, self.height - UI_BORDER_SPACING - 40, self.editor)
+	self.tilePicker3 = TileGeometryEditor_TilePicker3:new(self.width - UI_BORDER_SPACING - (8 * 32 + scrollbarWidth), UI_BORDER_SPACING*2+BUTTON_HGT, 8 * 32 + scrollbarWidth, self.height - UI_BORDER_SPACING - 40, self.editor)
 	self.tilePicker3:setAnchorBottom(true)
 	self.editor:addChild(self.tilePicker3)
 	self.tilePicker3:setVisible(false)
@@ -1916,9 +1936,11 @@ function TileGeometryEditor_EditMode_Seating:activate()
 	self.propertiesPanel:setVisible(true)
 	local picker = self.editor.tilePicker.listBox
 	local picker3 = self.tilePicker3.listBox
+	if picker.tileset ~= nile then
+		self.tilePicker3:setTileset(picker.tileset)
+	end
 	local selectedTile = picker:getFirstSelectedTile()
 	if selectedTile ~= nil then
-		picker3:setTileset(picker.tileset)
 		picker3:selectionClear()
 		picker3:selectionAdd(selectedTile.col, selectedTile.row)
 	end
@@ -2104,9 +2126,11 @@ end
 function TileGeometryEditor_EditMode_Seating:setGeometryModeSelection()
 	local picker = self.editor.tilePicker.listBox
 	local picker3 = self.tilePicker3.listBox
+	if picker3.tileset ~= nil then
+		self.editor.tilePicker:setTileset(picker3.tileset)
+	end
 	local selectedTile = picker3:getFirstSelectedTile()
 	if selectedTile ~= nil then
-		picker:setTileset(picker3.tileset)
 		picker:selectionClear()
 		picker:selectionAdd(selectedTile.col, selectedTile.row)
 	end

@@ -99,6 +99,8 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
     tests.haveLure = false;
     tests.animalCorpse = nil;
     tests.keyOrigin = nil;
+    tests.scriptChecks = nil;
+    tests.researchableRecipe = nil;
 
 
     local playerObj = getSpecificPlayer(player)
@@ -143,6 +145,14 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
         end
         if (isDebugEnabled() or isAdmin()) and testItem:hasOrigin() then
             tests.keyOrigin = testItem;
+        end
+        scriptItem = testItem:getScriptItem()
+        if scriptItem then
+            -- this is used to seeing if an item can be crafted, foraged, found as loot or not for debug purposes
+            tests.scriptChecks = scriptItem
+            if scriptItem:hasResearchableRecipes() then
+                tests.researchableRecipes = testItem
+            end
         end
 		if not testItem:isCanBandage() then
 			tests.isAllBandage = false;
@@ -445,6 +455,13 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
         end
     end
 
+    if c == 1 and (not getSpecificPlayer(player):tooDarkToRead()) and tests.researchableRecipes and tests.researchableRecipes:getScriptItem() and tests.researchableRecipes:getScriptItem():getResearchableRecipes(getSpecificPlayer(player), true):size() > 0 then
+        local playerObj = getSpecificPlayer(player);
+        local option = context:addOption(getText("ContextMenu_ResearchCraft"), tests.researchableRecipes, ISInventoryPaneContextMenu.onResearchRecipe, playerObj)
+        option.iconTexture = getTexture("media/ui/Properties/InventoryProperty_Research.png");
+--         option.iconTexture = getTexture("media/textures/Item_LightBulb.png");
+    end
+
     if tests.animalCorpse then
         AnimalContextMenu.doAnimalBodyMenuFromInv(context, playerObj, tests.animalCorpse);
     end
@@ -582,8 +599,8 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
     end
     -- weapon upgrades
     tests.isWeapon = tests.isHandWeapon -- to allow upgrading broken weapons
-    local hasScrewdriver = playerInv:containsTagEvalRecurse("Screwdriver", predicateNotBroken)
-    if tests.isWeapon and instanceof(tests.isWeapon, "HandWeapon") and hasScrewdriver then
+    -- local hasScrewdriver = playerInv:containsTagEvalRecurse("Screwdriver", predicateNotBroken)
+    if tests.isWeapon and instanceof(tests.isWeapon, "HandWeapon") then
         local isWeapon = tests.isWeapon
         -- add parts
         local weaponParts = getSpecificPlayer(player):getInventory():getItemsFromCategory("WeaponPart");
@@ -605,8 +622,8 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
             end
         end
         -- remove parts
-        weaponParts = isWeapon:getAllWeaponParts()
-        if hasScrewdriver and weaponParts:size() > 0 then
+        weaponParts = isWeapon:getDetachableWeaponParts(getSpecificPlayer(player)) -- checks canDetach for all parts
+        if weaponParts:size() > 0 then
             local removeUpgradeOption = context:addOption(getText("ContextMenu_Remove_Weapon_Upgrade"), items, nil);
             local subMenuRemove = context:getNew(context);
             context:addSubMenu(removeUpgradeOption, subMenuRemove);
@@ -899,6 +916,50 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
 --	local tests.carBatteryCharger = playerObj:getInventory():getItemFromType("CarBatteryCharger")
 	if tests.carBatteryCharger then
 		context:addOption(getText("ContextMenu_CarBatteryCharger_Place"), playerObj, ISInventoryPaneContextMenu.onPlaceCarBatteryCharger, tests.carBatteryCharger)
+    end
+
+--     local testScript = tests.scriptChecks
+
+    -- debug information regarding basic information on how anitem can be sourced
+    if c == 1 and tests.scriptChecks and isDebugEnabled() then
+        if tests.scriptChecks:isCraftRecipeProduct() then
+            context:addDebugOption(getText("Can be produced by a craft recipe"))
+        else
+            local option = context:addDebugOption(getText("Cannot be produced by a craft recipe"));
+            option.notAvailable = true;
+        end
+        if tests.scriptChecks:canBeForaged() then
+            context:addDebugOption(getText("Can be foraged"))
+        else
+            local option = context:addDebugOption(getText("Cannot be foraged"));
+            option.notAvailable = true;
+        end
+        if tests.scriptChecks:canSpawnAsLoot() then
+            context:addDebugOption(getText("Can spawn as loot"))
+        else
+            local option = context:addDebugOption(getText("Cannot spawn as loot"));
+            option.notAvailable = true;
+        end
+    end
+-- debug information about recipe(s), if any, that can be researched from an item
+    if c == 1 and tests.scriptChecks and tests.scriptChecks:hasResearchableRecipes() and isDebugEnabled() then
+        local recipes = tests.scriptChecks:getResearchableRecipes()
+        for i=0, recipes:size()-1 do
+            local recipe = recipes:get(i)
+            local craftRecipe = getScriptManager():getCraftRecipe(recipe)
+            if craftRecipe then
+                local known = recipe and playerObj:isRecipeActuallyKnown(craftRecipe)
+                local canLearn = (not known) and recipe and craftRecipe:canResearch(playerObj, true)
+                local text = getText("Researchable Recipe")
+                if known then text = text .. getText("(Known)") end
+                if canLearn then text = text .. getText("(Can Learn)") end
+                local postText = ""
+                if craftRecipe:getResearchSkillLevel() > 0 then
+                    postText = craftRecipe:generateDebugText()
+                end
+                context:addDebugOption(text .. ": " .. tostring(recipe) .. postText)
+            end
+        end
     end
     
     ISHotbar.doMenuFromInventory(player, testItem, context);
@@ -2014,8 +2075,16 @@ ISInventoryPaneContextMenu.OnResetRemoteControlID = function(item, player)
 end
 
 ISInventoryPaneContextMenu.onDrinkFluid = function(item, percent, playerObj)
-    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, item)
+	-- if food isn't in main inventory, put it there first.
+	ISInventoryPaneContextMenu.transferIfNeeded(playerObj, item)
+
+	-- now remove a mask
+	local mask = ISInventoryPaneContextMenu.getEatingMask(playerObj, true)
+	
+	-- drink
 	ISTimedActionQueue.add(ISDrinkFluidAction:new(playerObj, item, percent))
+	-- wear mask
+	if mask then ISTimedActionQueue.add(ISWearClothing:new(playerObj, mask, 50)) end
 end
 
 ISInventoryPaneContextMenu.doDrinkFluidMenu = function(playerObj, fluidContainer, context)
@@ -2097,18 +2166,6 @@ ISInventoryPaneContextMenu.onDrinkForThirst = function(waterContainer, playerObj
 	-- now remove a mask
 	local mask = ISInventoryPaneContextMenu.getEatingMask(playerObj, true)
     ISTimedActionQueue.add(ISDrinkFromBottle:new(playerObj, waterContainer, units))
-    if mask then ISTimedActionQueue.add(ISWearClothing:new(playerObj, mask, 50)) end
-end
-
-ISInventoryPaneContextMenu.onDrink = function(items, waterContainer, percentage, player)
-	local playerObj = getSpecificPlayer(player)
-    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, waterContainer)
-	-- now remove a mask
-	local mask = ISInventoryPaneContextMenu.getEatingMask(playerObj, true)
--- how much use we have in the bottle
-    local useLeft = waterContainer:getCurrentUses();
---     local useLeft = waterContainer:getCurrentUsesFloat() / waterContainer:getUseDelta();
-    ISTimedActionQueue.add(ISDrinkFromBottle:new(getSpecificPlayer(player), waterContainer, useLeft * percentage));
     if mask then ISTimedActionQueue.add(ISWearClothing:new(playerObj, mask, 50)) end
 end
 
@@ -3703,19 +3760,19 @@ ISInventoryPaneContextMenu.onRemoveUpgradeWeapon = function(weapon, part, player
     local screwdriver = playerObj:getInventory():getFirstTagEvalRecurse("Screwdriver", predicateNotBroken)
     if screwdriver then
         ISInventoryPaneContextMenu.equipWeapon(screwdriver, true, false, playerObj:getPlayerNum());
-        ISTimedActionQueue.add(ISRemoveWeaponUpgrade:new(playerObj, weapon, part:getPartType()));
     end
+    ISTimedActionQueue.add(ISRemoveWeaponUpgrade:new(playerObj, weapon, part:getPartType()));
 end
 
 ISInventoryPaneContextMenu.onUpgradeWeapon = function(weapon, part, player)
     ISInventoryPaneContextMenu.transferIfNeeded(player, weapon)
     ISInventoryPaneContextMenu.transferIfNeeded(player, part)
+    ISInventoryPaneContextMenu.equipWeapon(part, false, false, player:getPlayerNum());
     local screwdriver = player:getInventory():getFirstTagEvalRecurse("Screwdriver", predicateNotBroken)
     if screwdriver then
-        ISInventoryPaneContextMenu.equipWeapon(part, false, false, player:getPlayerNum());
         ISInventoryPaneContextMenu.equipWeapon(screwdriver, true, false, player:getPlayerNum());
-        ISTimedActionQueue.add(ISUpgradeWeapon:new(player, weapon, part));
     end
+    ISTimedActionQueue.add(ISUpgradeWeapon:new(player, weapon, part));
 end
 
 ISInventoryPaneContextMenu.onDropItems = function(items, player)
@@ -4412,5 +4469,10 @@ ISInventoryPaneContextMenu.onTeleportToKeyOrigin = function(item, player)
     if (item:hasOrigin()) then
         getSpecificPlayer(player):teleportTo(item:getOriginX(), item:getOriginY(), item:getOriginZ())
     end
+end
+
+ISInventoryPaneContextMenu.onResearchRecipe = function(item, playerObj)
+    local recipes = item:getScriptItem():getResearchableRecipes(playerObj, true)
+    if recipes then ISTimedActionQueue.add(ISResearchRecipe:new(playerObj, item)) end -- the player will research all researchble recipes in one-go
 end
 

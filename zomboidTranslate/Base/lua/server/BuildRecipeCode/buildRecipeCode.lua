@@ -4,6 +4,7 @@
 --***********************************************************
 
 BuildRecipeCode = BuildRecipeCode or {}
+BuildRecipeCode.canBePlastered = {}
 BuildRecipeCode.stairs = {}
 BuildRecipeCode.floor = {}
 BuildRecipeCode.butcheringHook = {}
@@ -63,6 +64,10 @@ function BuildRecipeCode.stairs.OnIsValid(params)
 	end
 
 	return true;
+end
+
+function BuildRecipeCode.canBePlastered.OnCreate(thumpable)
+    thumpable:setCanBePlastered(true);
 end
 
 function BuildRecipeCode.stairs.OnCreate(thumpable)

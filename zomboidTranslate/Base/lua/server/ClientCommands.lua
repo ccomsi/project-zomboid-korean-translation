@@ -179,7 +179,7 @@ Commands.object.shovelGround = function(player, args)
 				end
 			end
 			local emptyBag = player:getInventory():getItemWithID(args.emptyBag)
-			if emptyBag:hasTag("HoldDirt") and (args.newBag == "Base.Dirtbag" or args.newBag == "Base.Gravelbag" or args.newBag == "Base.Sandbag") then
+			if emptyBag:hasTag("HoldDirt") and (args.newBag == "Base.Dirtbag" or args.newBag == "Base.Gravelbag" or args.newBag == "Base.Sandbag" or args.newBag == "Base.Claybag") then
 				local isPrimary = player:isPrimaryHandItem(emptyBag)
 				local isSecondary = player:isSecondaryHandItem(emptyBag)
 				player:removeFromHands(emptyBag);
@@ -288,7 +288,7 @@ Commands.object.setWaterAmount = function(player, args)
 	if amount == args.amount then
 		return
 	end
-	obj:setWaterAmount(args.amount)
+	obj:setWaterAmount(args.amount, false)
 	obj:transmitModData()
 end
 

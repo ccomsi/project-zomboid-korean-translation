@@ -1188,20 +1188,25 @@ function ISVehicleMenu.onSleep(playerObj, vehicle)
 		return;
 	end
 	local playerNum = playerObj:getPlayerNum()
-	local modal = ISModalDialog:new(0,0, 250, 150, getText("IGUI_ConfirmSleep"), true, nil, ISVehicleMenu.onConfirmSleep, playerNum, playerNum, nil);
-	modal:initialise()
-	modal:addToUIManager()
+	local data = getPlayerData(playerNum)
+	if not data.vehicleSleepModal then
+		data.vehicleSleepModal = ISModalDialog:new(0,0, 250, 150, getText("IGUI_ConfirmSleep"), true, nil, ISVehicleMenu.onConfirmSleep, playerNum, playerNum, nil);
+		data.vehicleSleepModal:initialise()
+		data.vehicleSleepModal:addToUIManager()
+	end
 	if JoypadState.players[playerNum+1] then
-		setJoypadFocus(playerNum, modal)
+		setJoypadFocus(playerNum, data.vehicleSleepModal)
 	end
 end
 
 function ISVehicleMenu.onConfirmSleep(this, button, player, bed)
-	if button.internal == "YES" then
+	if button.internal == "YES" and getSpecificPlayer(player):getVehicle() then
 		getSpecificPlayer(player):setVariable("ExerciseStarted", false);
 		getSpecificPlayer(player):setVariable("ExerciseEnded", true);
 		ISWorldObjectContextMenu.onSleepWalkToComplete(player, nil)
 	end
+	local data = getPlayerData(player)
+	data.vehicleSleepModal = nil
 end
 
 function ISVehicleMenu.onOpenDoor(playerObj, part)

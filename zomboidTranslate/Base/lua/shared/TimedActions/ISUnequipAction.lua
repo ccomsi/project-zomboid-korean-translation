@@ -7,7 +7,7 @@ require "TimedActions/ISBaseTimedAction"
 ISUnequipAction = ISBaseTimedAction:derive("ISUnequipAction");
 
 function ISUnequipAction:isValid()
-	return true;
+	return self.character:getPrimaryHandItem() == self.item or self.character:getSecondaryHandItem() == self.item or self.character:getWornItems():contains(self.item)
 end
 
 function ISUnequipAction:update()

@@ -159,6 +159,12 @@ function ISBuildPanel:createRecipeCategoryColumn()
     self.rootTable:setElement(self.categoryColumn:index(), 0, self.recipeCategories);
 end
 
+function ISBuildPanel:onDoubleClick(item)
+    if self.craftRecipePanel.craftControl.buttonCraft.enable then
+        ISBuildWindow.instance:createBuildIsoEntity();
+    end
+end
+
 function ISBuildPanel:createRecipesColumn()
     self.recipeColumn = self.rootTable:addColumnFill(nil);
 
@@ -171,6 +177,7 @@ function ISBuildPanel:createRecipesColumn()
     self.recipesPanel:initialise();
     self.recipesPanel:instantiate();
     self.recipesPanel.noTooltip = true;
+    self.recipesPanel.recipeListPanel.recipeListPanel:setOnMouseDoubleClick(self, ISBuildPanel.onDoubleClick)
 
     self.rootTable:setElement(self.recipeColumn:index(), 0, self.recipesPanel);
     self.rootTable:cell(self.recipeColumn:index(), 0).padding = 0;

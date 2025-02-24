@@ -6,19 +6,19 @@ local dark_grass = {
         "blends_natural_01_23"
     },
     attach = {
-        n = {
+        s = {
             "blends_natural_01_24",
             "blends_natural_01_28"
         },
-        w = {
+        e = {
             "blends_natural_01_25",
             "blends_natural_01_29"
         },
-        e = {
+        w = {
             "blends_natural_01_26",
             "blends_natural_01_30"
         },
-        s = {
+        n = {
             "blends_natural_01_27",
             "blends_natural_01_31"
         }

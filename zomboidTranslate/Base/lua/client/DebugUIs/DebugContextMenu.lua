@@ -168,7 +168,7 @@ DebugContextMenu.doDebugMenu = function(player, context, worldobjects, test)
 	DebugContextMenu.doDebugZombieMenu(player, debugMenu, worldobjects, test)
 
 	DebugContextMenu.doDebugAnimalMenu(playerObj, debugMenu, worldobjects, test, square)
-
+	DebugContextMenu.doSurvivorSwapMenu(player, debugMenu, worldobjects, test)
 	--	if not DebugContextMenu.staggerBacking then
 	--		subMenu:addOption("Start Stagger Back", playerObj, DebugContextMenu.stagger, true);
 	--	else
@@ -1283,6 +1283,26 @@ DebugContextMenu.doRandomizedBuilding = function(building, RBdef)
 	else
 		local RBBasic = getWorld():getRBBasic();
 		RBBasic:doProfessionStory(building, RBdef);
+	end
+end
+
+DebugContextMenu.doSurvivorSwapMenu = function(player, context, worldobjects, test)
+	--if not SurvivorSwap then return end
+	if not SurvivorSwap or (table.isempty(SurvivorSwap.Survivors) and table.isempty(SurvivorSwap.Loadouts)) then return end
+	local playerObj = getSpecificPlayer(player)
+	local menu = ISContextMenu:getNew(context)
+	context:addSubMenu(context:addOption("Survivor Swap"), menu)
+
+	local submenu = ISContextMenu:getNew(menu)
+	context:addSubMenu(menu:addOption("Survivors (replaces current)"), submenu)
+	for id, data in pairs(SurvivorSwap.Survivors) do
+		submenu:addOption(id, playerObj, SurvivorSwap.applyCharacter, data)
+	end
+
+	submenu = ISContextMenu:getNew(menu)
+	context:addSubMenu(menu:addOption("Inventory (replaces current)"), submenu)
+	for id, data in pairs(SurvivorSwap.Loadouts) do
+		submenu:addOption(id, playerObj, SurvivorSwap.applyLoadout, data)
 	end
 end
 

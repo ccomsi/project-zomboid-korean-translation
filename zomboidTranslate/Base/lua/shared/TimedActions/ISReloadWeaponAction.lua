@@ -356,7 +356,13 @@ ISReloadWeaponAction.OnPressReloadButton = function(player, gun)
 end
 
 -- Called when pressing rack (if you rack while having a clip/bullets, we simply remove it and don't reload a new one)
-ISReloadWeaponAction.OnPressRackButton = function(player, gun)
+ISReloadWeaponAction.OnPressRackButton = function(player, gun, shift)
+	if shift and gun:isSelectFire() then
+		log(DebugType.Action, '[ISReloadWeaponAction.OnPressRackButton] '..tostring(player)..' cycled firemode '..tostring(gun))
+		gun:cycleFireMode()
+		return
+	end
+
 	log(DebugType.Action, '[ISReloadWeaponAction.OnPressRackButton] '..tostring(player)..' racks '..tostring(gun))
 	if ISReloadWeaponAction.disableReloading then
 		return;
@@ -372,6 +378,7 @@ ISReloadWeaponAction.OnPressRackButton = function(player, gun)
 end
 
 ISReloadWeaponAction.canShoot = function(weapon)
+	if weapon:isSelectFire() and weapon:getFireMode() == "Safe" then return false end
 	if getDebug() and getDebugOptions():getBoolean("Cheat.Player.UnlimitedAmmo") then
 		return true;
 	end

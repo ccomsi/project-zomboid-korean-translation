@@ -112,7 +112,9 @@ function ISNaturalFloor:getFloorType(item)
 		return "dirt";
 	elseif item:getFullType()=="Base.Sandbag" then
 		return "sand";
-	end
+	elseif item:getFullType()=="Base.Claybag" then
+    	return "clay";
+    end
 end
 
 function ISNaturalFloor.getFloorSpriteNames(square)

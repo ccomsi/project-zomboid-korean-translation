@@ -224,7 +224,10 @@ function ISWidgetInput:createScriptValues(_script, isSecondary)
         	table.amountStr = tostring(round(table.amount,2)).."L";
         end
         table.iconTexture = getTexture("media/textures/Item_Waterdrop_Grey.png");
-        table.inputObjects = _script:getPossibleInputFluids();
+        table.inputObjects = self.logic:getSatisfiedInputFluids(_script);
+        if table.inputObjects:size() == 0 then
+            table.inputObjects = _script:getPossibleInputFluids();
+        end
         if table.inputObjects:size()>0 then
             table.inputFullName = table.inputObjects:get(0):getFluidTypeString();
         --    local fluid = table.inputObjects:get(0);
@@ -319,6 +322,12 @@ function ISWidgetInput:updateScriptValues(_table)
     local index = 0;
     local oldIconText = _table.iconText;
     if _table.script:getResourceType()==ResourceType.Item then
+        -- update table with satisfied items if possible
+        _table.inputObjects = self.logic:getSatisfiedInputItems(_table.script);
+        if _table.inputObjects:size() == 0 then
+            _table.inputObjects = _table.script:getPossibleInputItems();
+        end
+        
         if _table.cycleIcons then
             local playerIndex = self.player:getPlayerNum();
             index = UIManager.getSyncedIconIndex(playerIndex, _table.inputObjects:size());
@@ -332,6 +341,12 @@ function ISWidgetInput:updateScriptValues(_table)
         _table.inputFullName = item:getFullName();
         _table.inputItem = item;
     elseif _table.script:getResourceType()==ResourceType.Fluid then
+        -- update table with satisfied fluids if possible
+        _table.inputObjects = self.logic:getSatisfiedInputFluids(_table.script);
+        if _table.inputObjects:size() == 0 then
+            _table.inputObjects = _table.script:getPossibleInputFluids();
+        end
+        
         if _table.cycleIcons then
             local playerIndex = self.player:getPlayerNum();
             index = UIManager.getSyncedIconIndex(playerIndex, _table.inputObjects:size());
@@ -499,7 +514,7 @@ function ISWidgetInput:updateValues()
         end
         self.borderColor = self.normalBorderColor;
     end
-
+    
     if self.logic and self.interactiveMode and self.inputScript:getResourceType()==ResourceType.Item then
         if self.logic:isManualSelectInputs() then
             self.editedLabels = true;

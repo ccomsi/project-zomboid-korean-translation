@@ -715,7 +715,7 @@ TileGeometryEditor_TilePicker = ISPanel:derive("TileGeometryEditor_TilePicker")
 local TilePicker = TileGeometryEditor_TilePicker
 
 function TilePicker:createChildren()
-	local comboHeight = BUTTON_HGT
+	local comboHeight = FONT_HGT_MEDIUM + 3 * 2
 	local combo = ISComboBox:new(0, 0, self.width, comboHeight, self, self.onSelectTileset)
 	combo.noSelectionText = "TILESET"
 	combo:setEditable(true)
@@ -747,6 +747,11 @@ function TilePicker:createChildren()
 	self.listBox = listBox
 end
 
+function TilePicker:setTileset(tilesetName)
+	self.comboTileset:select(tilesetName)
+	self.listBox:setTileset(tilesetName)
+end
+
 function TilePicker:onMouseWheel(del)
 	self.listBox:onMouseWheel(del)
 	return true
@@ -775,7 +780,7 @@ TileGeometryEditor_TilePicker2 = ISPanel:derive("TileGeometryEditor_TilePicker2"
 local TilePicker2 = TileGeometryEditor_TilePicker2
 
 function TilePicker2:createChildren()
-	local comboHeight = BUTTON_HGT
+	local comboHeight = FONT_HGT_MEDIUM + 3 * 2
 	local combo = ISComboBox:new(0, 0, self.width, comboHeight, self, self.onSelectTileset)
 	combo.noSelectionText = "TILESET"
 	combo:setEditable(true)
@@ -805,6 +810,12 @@ function TilePicker2:createChildren()
 	self:addChild(listBox)
 	listBox:addScrollBars()
 	self.listBox = listBox
+end
+
+
+function TilePicker2:setTileset(tilesetName)
+	self.comboTileset:select(tilesetName)
+	self.listBox:setTileset(tilesetName)
 end
 
 function TilePicker2:onMouseWheel(del)

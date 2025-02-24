@@ -6,19 +6,19 @@ local light_grass = {
         "blends_natural_01_55"
     },
     attach = {
-        n = {
+        s = {
             "blends_natural_01_56",
             "blends_natural_01_60"
         },
-        w = {
+        e = {
             "blends_natural_01_57",
             "blends_natural_01_61"
         },
-        e = {
+        w = {
             "blends_natural_01_58",
             "blends_natural_01_62"
         },
-        s = {
+        n = {
             "blends_natural_01_59",
             "blends_natural_01_63"
         }

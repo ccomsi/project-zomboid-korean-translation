@@ -72,6 +72,12 @@ function ISHandCraftPanel:createRecipeCategoryColumn()
     self.rootTable:setElement(column:index(), 0, self.recipeCategories);
 end
 
+function ISHandCraftPanel:onDoubleClick(item)
+    if self.recipePanel.craftControl.buttonCraft.enable then
+        self.recipePanel.craftControl:startHandcraft(false);
+    end
+end
+
 --*****************************************
 -- ISWidgetRecipesPanel
 --*****************************************
@@ -85,6 +91,8 @@ function ISHandCraftPanel:createRecipesColumn()
     self.recipesPanel:initialise();
     self.recipesPanel:instantiate();
     self.recipesPanel.noTooltip = true;
+
+    self.recipesPanel.recipeListPanel.recipeListPanel:setOnMouseDoubleClick(self, ISHandCraftPanel.onDoubleClick)
 
     local column = self.rootTable:addColumnFill(nil);
     self.rootTable:setElement(column:index(), 0, self.recipesPanel);

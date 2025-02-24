@@ -171,6 +171,7 @@ local function mergeDistributions()
 	SuburbsDistributions.garage_storage = SuburbsDistributions.garagestorage
 	SuburbsDistributions.grocers = SuburbsDistributions.grocery
 	SuburbsDistributions.hairdresser = SuburbsDistributions.aesthetic
+	SuburbsDistributions.house_kitchen = SuburbsDistributions.kitchen
 	SuburbsDistributions.icecreamstand = SuburbsDistributions.icecreamkitchen
 	SuburbsDistributions.knoxbutcher = SuburbsDistributions.butcher
 	SuburbsDistributions.laumdromat = SuburbsDistributions.laundry

@@ -286,6 +286,7 @@ function ISBuildIsoEntity:isValidPerSquare(square, tileInfo, _requiresFloor, _ex
 
 	-- AGAINST WALLS (shelves..)
 	if self.needToBeAgainstWall then
+		local originalSq = square;
 		local x = square:getX();
 		local y = square:getY();
 		local z = square:getZ();
@@ -300,9 +301,9 @@ function ISBuildIsoEntity:isValidPerSquare(square, tileInfo, _requiresFloor, _ex
 		for i=0,square:getObjects():size()-1 do
 			local obj = square:getObjects():get(i);
 			if (self.north and obj:getProperties():Is("WallN")) or (not self.north and obj:getProperties():Is("WallW")) then
-				-- check we don't try to build it on top of another thumpable
-				for j=0,square:getSpecialObjects():size() - 1 do
-					local sObj = square:getSpecialObjects():get(j);
+				for j=0,originalSq:getSpecialObjects():size() - 1 do
+					local sObj = originalSq:getSpecialObjects():get(j);
+					--print("got sobj?", sObj, obj)
 					if(sObj ~= obj and instanceof(sObj, "IsoThumpable")) then
 						return false;
 					end
@@ -447,7 +448,7 @@ function ISBuildIsoEntity:create(x, y, z, north, sprite)
 		return;
 	end
 	print("ISBuildIsoEntity -> consume success")
-	
+
 	local cell = getWorld():getCell();
 	self.sq = cell:getGridSquare(x, y, z);
 
@@ -464,7 +465,21 @@ function ISBuildIsoEntity:create(x, y, z, north, sprite)
 		-- note: this is normal for doubleDoors and garageDoors - these openFaces are determined by tile offset elsewhere - spurcival
 		openFace = nil;
 	end
-	
+
+	local items = self.buildPanelLogic:getRecipeData():getAllConsumedItems();
+	for i=0, items:size()-1 do
+		local usedItem = items:get(i)
+		local key = "need:" .. usedItem:getFullType()
+		if self.modData[key] == nil then
+			self.modData[key] = 0
+		end
+		self.modData[key] = self.modData[key] + 1
+
+		if usedItem:getFullType() == "Base.Doorknob" and usedItem:getKeyId() ~= -1 then
+			self.modData["keyId"] = usedItem:getKeyId()
+		end
+	end
+
 	for zz=0,face:getzLayers()-1 do
 		for xx=0,face:getWidth()-1 do
 			for yy=0,face:getHeight()-1 do
@@ -516,6 +531,10 @@ function ISBuildIsoEntity:setInfo(square, north, sprite, openSprite)
 			and thumpableProps and not (thumpableProps:Is("DoubleDoor") or thumpableProps:Is("GarageDoor"));
 	
 	buildUtil.setInfo(thumpable, self);
+
+	if self.isDoor and self.modData["keyId"] ~= nil then
+		thumpable:setKeyId(self.modData["keyId"])
+	end
 	
 	local bonusHealth = self.objectInfo:getScript():getBonusHealth();
 	local skillBonus = 0; -- need to get from recipe
@@ -583,6 +602,10 @@ function ISBuildIsoEntity:setInfo(square, north, sprite, openSprite)
 					end
 				end
 			end
+		end
+
+		if not torchUsed and self.character:isBuildCheat() and self.objectInfo:getScript():getDebugItem() then
+			torchUsed = instanceItem(self.objectInfo:getScript():getDebugItem());
 		end
 
 		if torchUsed then

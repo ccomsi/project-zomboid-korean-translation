@@ -9,6 +9,7 @@ CButcherHook_Interact = {};
 CButcherHook_Interact.onKeyPress = function(key)
     if not getCore():isKey("Interact", key) then return end
     local player = getSpecificPlayer(0)
+    if not player then return end
     if player:getVehicle() then return end
     if player:hasTimedActions() then return end
     local dir = player:getDir()

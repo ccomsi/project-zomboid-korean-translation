@@ -58,8 +58,7 @@ function SRainBarrelSystem:checkRain()
 				local isoObject = luaObject:getIsoObject()
 				if isoObject then -- object might have been destroyed
 					self:noise('added rain to barrel at '..luaObject.x..","..luaObject.y..","..luaObject.z..' waterAmount='..luaObject.waterAmount)
-					isoObject:setTaintedWater(true)
-					isoObject:setWaterAmount(luaObject.waterAmount)
+					isoObject:setWaterAmount(luaObject.waterAmount, true)
 					isoObject:transmitModData()
 				end
 			end

@@ -31,12 +31,11 @@ end
 
 function ISPlasterAction:complete()
 	if self.thumpable then
-		local modData = self.thumpable:getModData();
 		local north = "";
 		if self.thumpable:getNorth() then
 			north = "North";
 		end
-		local sprite = Painting[modData["wallType"]]["plasterTile" .. north];
+		local sprite = Painting[ISPaintMenu.getWallType(self.thumpable)]["plasterTile" .. north];
 
 		self.thumpable:setSprite(sprite)
 		self.thumpable:setPaintable(true)

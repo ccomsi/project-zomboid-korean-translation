@@ -123,7 +123,7 @@ function ISInventoryTransferAction:update()
     if self.character and self.character:getTraits():contains("Hemophobic") and self.item and self.item:getBloodLevel() > 0 then
         local rate =  self.item:getBloodLevelAdjustedLow() * getGameTime():getMultiplier()
         local stats = self.character:getStats()
-        stats:setStress(stats:getStress() + rate/10000);
+        stats:setStress(stats:getBasicStress() + rate/10000);
     end
 
 	-- reopen the correct container

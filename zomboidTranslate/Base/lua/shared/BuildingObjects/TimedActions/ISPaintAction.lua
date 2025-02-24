@@ -64,8 +64,8 @@ function ISPaintAction:complete()
     local sprite = nil;
     local paintingType = self.thumpable:getSprite():getProperties():Val("PaintingType");
     if self.isThump then
-        if Painting[modData["wallType"]] then
-            sprite = Painting[modData["wallType"]][self.painting .. north];
+        if Painting[ISPaintMenu.getWallType(self.thumpable)] then
+            sprite = Painting[ISPaintMenu.getWallType(self.thumpable)][self.painting .. north];
         end
     elseif Painting[paintingType] then
         sprite = Painting[paintingType][self.painting .. north];

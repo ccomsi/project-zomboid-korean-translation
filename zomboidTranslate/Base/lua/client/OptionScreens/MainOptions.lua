@@ -1256,22 +1256,6 @@ function MainOptions:addDisplayPanel()
 	end
 	self.gameOptions:add(gameOption)
 
-	----- LIGHTING QUALITY -----
-	local lighting = self:addCombo(splitpoint, y, comboWidth, 20, getText("UI_optionscreen_lighting"), {getText("UI_High"), getText("UI_Medium"), getText("UI_Low"), getText("UI_Lowest")}, 1);
-
-	gameOption = GameOption:new('lightingQuality', lighting)
-	function gameOption.toUI(self)
-		local box = self.control
-		box.selected = getPerformance():getLightingQuality() + 1
-	end
-	function gameOption.apply(self)
-		local box = self.control
-		if box.options[box.selected] then
-			getPerformance():setLightingQuality(box.selected-1)
-		end
-	end
-	self.gameOptions:add(gameOption)
-
 	----- LIGHTING FPS -----
 	local combo = self:addCombo(splitpoint, y, comboWidth, 20, getText("UI_optionscreen_lighting_fps"), {'5', '10', '15 (' .. getText("UI_optionscreen_recommended") .. ')', '20', '25', '30', '45', '60'}, 1)
 	map = {}
@@ -1646,9 +1630,23 @@ function MainOptions:addUIPanel()
 	end
 	self.gameOptions:add(gameOption)
 
-	self:addHorizontalLine(y, getText("UI_DisplayOptions_Fonts"))
+	----- CRAFTING XP -----
+	local showCraftXP = self:addYesNo(splitpoint, y, BUTTON_HGT, BUTTON_HGT, getText("UI_optionscreen_showCraftingXP"))
+
+	gameOption = GameOption:new('showCraftingXP', showCraftXP)
+	function gameOption.toUI(self)
+		local box = self.control
+		box:setSelected(1, getCore():getOptionShowCraftingXP())
+	end
+	function gameOption.apply(self)
+		local box = self.control
+		getCore():setOptionShowCraftingXP(box:isSelected(1))
+	end
+	self.gameOptions:add(gameOption)
 
 	----- FONT SIZE -----
+
+	self:addHorizontalLine(y, getText("UI_DisplayOptions_Fonts"))
 	local fontSize = self:addCombo(splitpoint, y, comboWidth, 20, getText("UI_optionscreen_FontSize"), { getText("UI_optionscreen_FontSize0"), getText("UI_optionscreen_FontSize1"), getText("UI_optionscreen_FontSize2"), getText("UI_optionscreen_FontSize3"), getText("UI_optionscreen_FontSize4"), getText("UI_optionscreen_FontSize5") }, 6)
 
 	if MainScreen.instance.inGame then
@@ -3171,6 +3169,40 @@ function MainOptions:addAccessibilityPanel()
 		end
 	end
 	self.gameOptions:add(gameOption)
+
+    if isSystemMacOS() then
+        ----- MacOS: Ignore Mouse Wheel Acceleration -----
+        local ignoreMouseWheelAcceleration = self:addYesNo(splitpoint, y, BUTTON_HGT, BUTTON_HGT, getText("UI_optionscreen_MacOSIgnoreMouseWheelAcceleration"));
+--        ignoreMouseWheelAcceleration.tooltip = getText("UI_optionscreen_MacOSIgnoreMouseWheelAcceleration_tt");
+        gameOption = GameOption:new('ignoreMouseWheelAcceleration', ignoreMouseWheelAcceleration)
+        function gameOption.toUI(self)
+            local box = self.control
+            box:setSelected(1, getCore():getOptionMacOSIgnoreMouseWheelAcceleration())
+        end
+        function gameOption.apply(self)
+            local box = self.control
+            if getCore():getOptionMacOSIgnoreMouseWheelAcceleration() ~= box:isSelected(1) then
+                getCore():setOptionMacOSIgnoreMouseWheelAcceleration(box:isSelected(1))
+            end
+        end
+        self.gameOptions:add(gameOption)
+
+        ----- MacOS: Map HorizontalMouseWheelToVertical -----
+        local mapHorizontalMouseWheelToVertical = self:addYesNo(splitpoint, y, BUTTON_HGT, BUTTON_HGT, getText("UI_optionscreen_MacOSMapHorizontalMouseWheelToVertical"));
+--        mapHorizontalMouseWheelToVertical.tooltip = getText("UI_optionscreen_MacOSMapHorizontalMouseWheelToVertical_tt");
+        gameOption = GameOption:new('mapHorizontalMouseWheelToVertical', mapHorizontalMouseWheelToVertical)
+        function gameOption.toUI(self)
+            local box = self.control
+            box:setSelected(1, getCore():getOptionMacOSMapHorizontalMouseWheelToVertical())
+        end
+        function gameOption.apply(self)
+            local box = self.control
+            if getCore():getOptionMacOSMapHorizontalMouseWheelToVertical() ~= box:isSelected(1) then
+                getCore():setOptionMacOSMapHorizontalMouseWheelToVertical(box:isSelected(1))
+            end
+        end
+        self.gameOptions:add(gameOption)
+	end
 
 	--[[
         ----- IGNORE PRONE ZOMBIE DIST -----
