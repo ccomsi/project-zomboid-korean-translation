@@ -120,6 +120,11 @@ function ISWidgetRecipesPanel:createRecipeIconPanel(_parentTable)
         self.tooltipCounter = (self.tooltipCounterTime*4);
     end
 
+    self.recipeIconPanel.render = function(_self)
+        ISTiledIconPanel.render(_self)
+        _self:renderJoypadFocus()
+    end
+
     self.recipeIconPanel:initialise();
     self.recipeIconPanel:instantiate();
 

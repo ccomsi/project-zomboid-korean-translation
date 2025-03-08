@@ -2,13 +2,10 @@
 --**              	  ROBERT JOHNSON                       **
 --***********************************************************
 
-ISDesignationZoneAnimalZoneUI = ISPanel:derive("ISDesignationZoneAnimalZoneUI");
+ISDesignationZoneAnimalZoneUI = ISPanelJoypad:derive("ISDesignationZoneAnimalZoneUI");
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.NewSmall)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.NewMedium)
-local updateTick = 0;
-local zOffsetBeforeAnimal = 0;
-local zOffsetAfterAnimal = 0;
 
 -----
 
@@ -34,11 +31,32 @@ function AnimalsPanel:prerender()
 		self:drawRect(x, y, self.width - x * 2, self.ui.itemHgt, 1.0, 0.125, 0.125, 0.125)
 		y = y + self.ui.itemHgt * 2
 	end
+
+    if (getJoypadData(self.ui.playerNum) ~= nil) and (self:size() > 0) and (self.selected < 1 or self.selected > self:size()) then
+        self.selected = 1
+    end
+    for _,button in ipairs(self.ui.animalbuttons) do
+        if button.joypadFocused then
+            button:setJoypadFocused(false, self.joyfocus)
+        end
+    end
+	if (not self.ui.listTakesFocus or self.joyfocus) and self.selected ~= -1 then
+		local y = 1 + (self.selected - 1) * self.ui.itemHgt
+		self:drawRect(x, y, self.width - x * 2, self.ui.itemHgt, 1.0, 0.25, 0.25, 0.25)
+		self.ui.animalbuttons[self.selected]:setJoypadFocused(true, self.joyfocus)
+	end
 end
 
 function AnimalsPanel:render()
 	ISPanelJoypad.render(self)
 	self:clearStencilRect()
+	if self.joyfocus then
+	    self:renderJoypadFocus()
+    elseif self.joypadFocused then
+		local x,y,w,h = 0, 0, self.width, self.height
+		self:drawRectBorderStatic(x, y, w, h, 1.0, 1.0, 1.0, 1.0)
+		self:drawRectBorderStatic(x+1, y+1, w-2, h-2, 1.0, 1.0, 1.0, 1.0)
+	end
 end
 
 function AnimalsPanel:onMouseWheel(del)
@@ -47,9 +65,43 @@ function AnimalsPanel:onMouseWheel(del)
 	return true
 end
 
+function AnimalsPanel:size()
+    return #self.ui.animalbuttons
+end
+
+function AnimalsPanel:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData)
+end
+
+function AnimalsPanel:onLoseJoypadFocus(joypadData)
+    self.joyfocus = nil -- don't call setJoypadFocused(false)
+end
+
+function AnimalsPanel:onJoypadDown(button, joypadData)
+    if button == Joypad.AButton then
+        self.ui.animalbuttons[self.selected]:forceClick()
+    end
+    if button == Joypad.BButton then
+        setJoypadFocus(self.ui.playerNum, self.ui)
+    end
+end
+
+function AnimalsPanel:onJoypadDirUp(joypadData)
+    if self.selected > 1 then
+        self.selected = self.selected - 1
+    end
+end
+
+function AnimalsPanel:onJoypadDirDown(joypadData)
+    if self.selected > 0 and self.selected < self:size() then
+        self.selected = self.selected + 1
+    end
+end
+
 function AnimalsPanel:new(x, y, width, height, ui)
 	local o = ISPanelJoypad.new(self, x, y, width, height)
 	o.ui = ui
+	o.selected = -1
 	return o
 end
 
@@ -61,7 +113,7 @@ end
 --************************************************************************--
 
 function ISDesignationZoneAnimalZoneUI:initialise()
-    ISPanel.initialise(self);
+    ISPanelJoypad.initialise(self);
     local btnWid = 100
     local btnHgt = math.max(25, FONT_HGT_SMALL + 3 * 2)
     local btnHgt2 = FONT_HGT_SMALL + 2 * 2
@@ -77,7 +129,7 @@ function ISDesignationZoneAnimalZoneUI:initialise()
 	self.animalPanel:setScrollChildren(true)
 	self.animalPanel:addScrollBars()
 
-    self.ok = ISButton:new(self:getWidth() - btnWid - 10, self:getHeight() - padBottom - btnHgt, btnWid, btnHgt, getText("UI_Ok"), self, ISDesignationZoneAnimalZoneUI.onClick);
+    self.ok = ISButton:new(self:getWidth() - btnWid - 10, self:getHeight() - padBottom - btnHgt, btnWid, btnHgt, getText("UI_Close"), self, ISDesignationZoneAnimalZoneUI.onClick);
     self.ok.internal = "OK";
     self.ok.anchorTop = false
     self.ok.anchorBottom = true
@@ -95,7 +147,16 @@ function ISDesignationZoneAnimalZoneUI:initialise()
     self.reloadBtn.borderColor = {r=1, g=1, b=1, a=0.1};
     self:addChild(self.reloadBtn);
 
-    self.infoBtn = ISButton:new(10, self:getHeight() - padBottom - btnHgt, btnWid, btnHgt, getText("ContextMenu_Info"), self, ISDesignationZoneAnimalZoneUI.onClick);
+    self.animalInfoBtn = ISButton:new(self.reloadBtn:getX() - 10 - btnWid, self:getHeight() - padBottom - btnHgt, btnWid, btnHgt, getText("ContextMenu_Info"), self, ISDesignationZoneAnimalZoneUI.onClick);
+    self.animalInfoBtn.internal = "INFO";
+    self.animalInfoBtn.anchorTop = false
+    self.animalInfoBtn.anchorBottom = true
+    self.animalInfoBtn:initialise();
+    self.animalInfoBtn:instantiate();
+    self.animalInfoBtn.borderColor = {r=1, g=1, b=1, a=0.1};
+    self:addChild(self.animalInfoBtn);
+
+    self.infoBtn = ISButton:new(10, self:getHeight() - padBottom - btnHgt, btnWid, btnHgt, getText("UI_btn_help"), self, ISDesignationZoneAnimalZoneUI.onClick);
     self.infoBtn.internal = "READINFO";
     self.infoBtn.anchorTop = false
     self.infoBtn.anchorBottom = true
@@ -116,8 +177,7 @@ end
 
 function ISDesignationZoneAnimalZoneUI:prerender()
     if not self:checkExist() then
-        self:setVisible(false);
-        self:removeFromUIManager();
+        self:close();
         return;
     end
 
@@ -132,23 +192,21 @@ function ISDesignationZoneAnimalZoneUI:prerender()
 
     self:drawText(getText("IGUI_DesignationZone_Animals") .. self.zone:getAnimalsConnected():size(), 10, z, 1,1,1,1,UIFont.NewSmall);
     z = z + FONT_HGT_SMALL + 5;
-    if self.nbOfAnimals == -1 then
-        self.nbOfAnimals = self.zone:getAnimalsConnected():size()
-    end
+
     if self.nbOfAnimals ~= self.zone:getAnimalsConnected():size() then
-        zOffsetAfterAnimal = self:updateAnimals();
+        self.zOffsetAfterAnimal = self:updateAnimals();
         self.nbOfAnimals = self.zone:getAnimalsConnected():size()
     end
 
-    zOffsetBeforeAnimal = z;
-    updateTick = updateTick - getGameTime():getMultiplier();
-    if updateTick <= 0 then
-        updateTick = 1000;
-        zOffsetAfterAnimal = self:updateAnimals();
+    self.zOffsetBeforeAnimal = z;
+    self.updateTick = self.updateTick - UIManager.getMillisSinceLastRender();
+    if self.updateTick <= 0 then
+        self.updateTick = 1000;
+        self.zOffsetAfterAnimal = self:updateAnimals();
         self:reload();
     end
 
-    z = zOffsetAfterAnimal + FONT_HGT_SMALL + 3;
+    z = self.zOffsetAfterAnimal + FONT_HGT_SMALL + 3;
 
     self:drawText(getText("IGUI_FeedingTroughUI_Enclosure") .. self.zone:getFullZoneSize(), 10, z, 1,1,1,1, UIFont.NewSmall);
     z = z + FONT_HGT_SMALL + 5;
@@ -167,10 +225,22 @@ function ISDesignationZoneAnimalZoneUI:prerender()
     self:drawText(getText("IGUI_DesignationZone_Water") .. water .. " mL", 10, z, 1,1,1,1,UIFont.NewSmall);
     z = z + FONT_HGT_SMALL + 5;
 
+    local nearRiver = self:calcNearRiver();
+    self:drawText(getText("IGUI_DesignationZone_NearRiver") .. nearRiver, 10, z, 1,1,1,1,UIFont.NewSmall);
+    z = z + FONT_HGT_SMALL + 5;
+
     self:drawText(getText("IGUI_DesignationZone_RoofArea") .. self.zone:getRoofAreasConnected():size(), 10, z, 1,1,1,1,UIFont.NewSmall);
     z = z + FONT_HGT_SMALL + 5;
 
     self:setHeight(z + 50);
+
+    self.animalInfoBtn:setEnable(#self.animalbuttons > 0)
+    self.animalInfoBtn:setVisible(getJoypadData(self.playerNum) ~= nil)
+end
+
+function ISDesignationZoneAnimalZoneUI:render()
+    ISPanelJoypad.render(self)
+    self:renderJoypadFocus()
 end
 
 function ISDesignationZoneAnimalZoneUI:updateAnimals()
@@ -207,7 +277,7 @@ function ISDesignationZoneAnimalZoneUI:updateAnimals()
         btn:initialise();
         btn:instantiate();
         btn.borderColor = {r=1, g=1, b=1, a=0.1};
-        btn:setVisible(true);
+        btn:setVisible(getJoypadData(self.playerNum) == nil);
         self.animalPanel:addChild(btn);
         table.insert(self.animalbuttons, btn);
 
@@ -235,7 +305,23 @@ function ISDesignationZoneAnimalZoneUI:updateAnimals()
 
     self.animalPanel:setScrollHeight(z)
 
+    local joypadData = getJoypadData(self.playerNum)
+    if self.listTakesFocus and joypadData then
+        self:clearJoypadFocus(joypadData)
+        self.joypadIndexY = 1
+        self.joypadIndex = 1
+        self.joypadButtonsY = {}
+        self.joypadButtons = {}
+        self:insertNewLineOfButtons(self.animalPanel)
+        self:insertNewLineOfButtons(self.infoBtn, self. reloadBtn, self.ok)
+        self:restoreJoypadFocus(joypadData)
+    end
+
     return self.animalPanel:getBottom();
+end
+
+function ISDesignationZoneAnimalZoneUI:calcNearRiver()
+    return self.zone:getNearWaterSquaresConnected():size();
 end
 
 function ISDesignationZoneAnimalZoneUI:calcWater()
@@ -275,34 +361,112 @@ end
 
 function ISDesignationZoneAnimalZoneUI:onClick(button)
     if button.internal == "OK" then
-        self:setVisible(false);
-        self:removeFromUIManager();
-        self.player:setSeeDesignationZone(false);
+        self:close();
     end
     if button.internal == "RELOAD" then
         self.zone:check();
         self:reload();
-        zOffsetAfterAnimal = self:updateAnimals();
+        self.zOffsetAfterAnimal = self:updateAnimals();
     end
     if button.internal == "INFO" then
         if AnimalContextMenu.cheat then
-            local ui = ISAnimalUI:new(100, 100, 680, 500, button.animal, self.player)
+            local ui = ISAnimalUI:new(getPlayerScreenLeft(self.playerNum)+100, getPlayerScreenTop(self.playerNum)+100, 680, 500, button.animal, self.player)
             ui:initialise();
             ui:addToUIManager();
+            if getJoypadData(self.playerNum) then
+                ui.prevFocus = getJoypadFocus(self.playerNum)
+                setJoypadFocus(self.playerNum, ui)
+            end
             return;
         end
         if luautils.walkAdj(self.player, button.animal:getSquare()) then
-            ISTimedActionQueue.add(ISOpenAnimalInfo:new(self.player, button.animal))
+            ISTimedActionQueue.add(ISOpenAnimalInfo:new(self.player, button.animal, self))
         end
     end
     if button.internal == "READINFO" then
-        ISAnimalZoneFirstInfo.showUI(true);
+        ISAnimalZoneFirstInfo.showUI(self.playerNum, true);
     end
 end
 
 function ISDesignationZoneAnimalZoneUI:reload()
     self:calcFood();
     self:calcWater();
+    self:calcNearRiver();
+end
+
+function ISDesignationZoneAnimalZoneUI:close()
+    self:setVisible(false)
+    self:removeFromUIManager()
+    self.player:setSeeDesignationZone(false);
+    if getJoypadData(self.playerNum) then
+        setJoypadFocus(self.playerNum, nil)
+    end
+end
+
+function ISDesignationZoneAnimalZoneUI:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData)
+    if self.listTakesFocus then
+        if joypadData.switchingFocusFrom == self.animalPanel then
+            self:restoreJoypadFocus(joypadData)
+            self:setISButtonForY(self.infoBtn)
+            self:setISButtonForA(self.animalInfoBtn)
+            self:setISButtonForX(self.reloadBtn)
+            self:setISButtonForB(self.ok)
+        else
+            joypadData.focus = self.animalPanel
+            updateJoypadFocus(joypadData)
+        end
+    else
+        self:setISButtonForY(self.infoBtn)
+        self:setISButtonForA(self.animalInfoBtn)
+        self:setISButtonForX(self.reloadBtn)
+        self:setISButtonForB(self.ok)
+    end
+end
+
+function ISDesignationZoneAnimalZoneUI:onLoseJoypadFocus(joypadData)
+    ISPanelJoypad.onLoseJoypadFocus(self, joypadData)
+    self:clearJoypadFocus(joypadData)
+    self:clearISButtons()
+end
+
+function ISDesignationZoneAnimalZoneUI:onJoypadDown(button, joypadData)
+    if self.listTakesFocus then
+        if button == Joypad.AButton and self.animalPanel.joypadFocused then
+            joypadData.focus = self.animalPanel
+            return
+        end
+    else
+        if button == Joypad.AButton then
+            local selected = self.animalPanel.selected
+            if self.animalbuttons[selected] then
+                self.animalInfoBtn.animal = self.animalbuttons[selected].animal
+                self.animalInfoBtn:forceClick()
+            end
+            return
+        end
+    end
+    if button == Joypad.BButton then
+        self:close()
+        return
+    end
+    ISPanelJoypad.onJoypadDown(self, button, joypadData)
+end
+
+function ISDesignationZoneAnimalZoneUI:onJoypadDown_Descendant(descendant, button, joypadData)
+    ISPanelJoypad.onJoypadDown_Descendant(self, descendant, button, joypadData)
+end
+
+function ISDesignationZoneAnimalZoneUI:onJoypadDirUp(joypadData)
+    if not self.listTakesFocus then
+        self.animalPanel:onJoypadDirUp(joypadData)
+    end
+end
+
+function ISDesignationZoneAnimalZoneUI:onJoypadDirDown(joypadData)
+    if not self.listTakesFocus then
+        self.animalPanel:onJoypadDirDown(joypadData)
+    end
 end
 
 --************************************************************************--
@@ -311,9 +475,7 @@ end
 --************************************************************************--
 function ISDesignationZoneAnimalZoneUI:new(x, y, width, height, player, zone)
     local o = {}
-    o = ISPanel:new(x, y, width, height);
-    setmetatable(o, self)
-    self.__index = self
+    o = ISPanelJoypad.new(self, x, y, width, height);
     if y == 0 then
         o.y = o:getMouseY() - (height / 2)
         o:setY(o.y)
@@ -328,13 +490,22 @@ function ISDesignationZoneAnimalZoneUI:new(x, y, width, height, player, zone)
     o.width = width;
     o.height = height;
     o.player = player;
+    o.playerNum = player:getPlayerNum()
     o.animalbuttons = {};
     o.animalLabels = {};
     zone:check();
     o.moveWithMouse = true;
     o.buttonBorderColor = {r=0.7, g=0.7, b=0.7, a=0.5};
     player:setSeeDesignationZone(true);
-    updateTick = 0;
+    player:resetSelectedZonesForHighlight()
+    local connectedZones = DesignationZoneAnimal.getAllDZones(nil, zone, nil);
+    for i=1,connectedZones:size() do
+        player:addSelectedZoneForHighlight(connectedZones:get(i-1):getId())
+    end
     o.nbOfAnimals = -1; -- this is used so i can auto refresh when animals nb change
+    o.listTakesFocus = false
+    o.updateTick = 0
+    o.zOffsetBeforeAnimal = 0
+    o.zOffsetAfterAnimal = 0
     return o;
 end

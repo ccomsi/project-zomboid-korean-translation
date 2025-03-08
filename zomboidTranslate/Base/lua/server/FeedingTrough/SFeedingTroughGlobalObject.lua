@@ -63,7 +63,7 @@ function SFeedingTroughGlobalObject:stateToIsoObject(isoObject)
 	isoObject:setLinkedX(self.linkedX or 0)
 	isoObject:setLinkedY(self.linkedY or 0)
 	self.water = self.water or 0
-	isoObject:setWater(self.water or 0)
+	--isoObject:setWater(self.water or 0)
 	if self.maxFeed ~= isoObject:getMaxFeed() or self.maxWater ~= isoObject:getMaxWater() then
 		self.maxFeed = isoObject:getMaxFeed()
 		self.maxWater = isoObject:getMaxWater()

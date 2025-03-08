@@ -54,6 +54,11 @@ ISCarMechanicsOverlay.CarList["Base.StepVan_Heralds"] = {imgPrefix = "van_", x=1
 ISCarMechanicsOverlay.CarList["Base.StepVanAirportCatering"] = {imgPrefix = "van_", x=10,y=0};
 ISCarMechanicsOverlay.CarList["Base.Van_LectroMax"] = {imgPrefix = "van_", x=10,y=0};
 ISCarMechanicsOverlay.CarList["Base.Van_KnoxDisti"] = {imgPrefix = "van_", x=10,y=0};
+
+-- trailers
+-- ISCarMechanicsOverlay.CarList["Base.Trailer_Livestock"] = {imgPrefix = "livestocktrailer_", x=10,y=0};
+-- ISCarMechanicsOverlay.CarList["Base.Trailer_Horsebox"] = {imgPrefix = "horsetrailer_", x=10,y=0};
+
 -- new b42 cars
 ISCarMechanicsOverlay.CarList["Base.PickUpTruckJPLandscaping"] = {imgPrefix = "truck_", x=10,y=0};
 ISCarMechanicsOverlay.CarList["Base.PickUpVanBuilder"] = {imgPrefix = "truck_", x=10,y=0};

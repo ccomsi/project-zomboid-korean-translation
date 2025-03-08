@@ -392,8 +392,8 @@ local distributionTable = {
 			junk = {
 				rolls = 4,
 				items = {
-					"Log", 4,
-					"Newspaper", 8,
+					"Firewood", 8,
+					"Newspaper", 4,
 					"TreeBranch2", 6,
 					"Twigs", 10,
 				}
@@ -591,6 +591,8 @@ local distributionTable = {
 				"Branch_Broken", 10,
 				"LargeBranch", 8,
 				"TreeBranch2", 10,
+				-- Firewood
+				"Firewood", 10,
 				-- Detritus
 				"Sapling", 4,
 				"Splinters", 20,
@@ -600,6 +602,7 @@ local distributionTable = {
 				"Log", 20,
 				"Log", 20,
 				"Log", 10,
+
 			},
 			junk = {
 				rolls = 1,
@@ -1270,8 +1273,8 @@ local distributionTable = {
 			junk = {
 				rolls = 4,
 				items = {
-					"Log", 4,
-					"Newspaper", 8,
+					"Firewood", 8,
+					"Newspaper", 4,
 					"TreeBranch2", 6,
 					"Twigs", 10,
 				}
@@ -1489,7 +1492,7 @@ local distributionTable = {
 				"TobaccoLoose", 1,
 				"Whetstone", 1,
 			},
-			bags = BagsAndContainers.SurvivorBag,
+			bags = BagsAndContainers.BanditBag_Late,
 			junk = {
 				rolls = 1,
 				items = {
@@ -5008,7 +5011,7 @@ local distributionTable = {
 		locker = {
 			procedural = true,
 			procList = {
-				{name="CampingLockers", min=0, max=99, forceForTiles="furniture_storage_02_12;furniture_storage_02_13;furniture_storage_02_14;furniture_storage_02_15"},
+				{name="CultistClothing", min=0, max=99, forceForZones="Cultists"},
 			}
 		},
 		plankstash = {
@@ -18628,6 +18631,7 @@ local distributionTable = {
 			"BoltCutters", 20,
 			"ClubHammer", 20,
 			"Crowbar", 100,
+			"HandAxe", 10,
 			"Hammer", 20,
 			"KnifeButterfly", 10,
 			"Pliers", 20,
@@ -18701,6 +18705,7 @@ local distributionTable = {
 			"CarpentryChisel", 10,
 			"ClubHammer", 20,
 			"Crowbar", 20,
+			"HandAxe", 10,
 			"Hammer", 50,
 			"HandDrill", 20,
 			"KnifePocket", 0.1,
@@ -19282,6 +19287,7 @@ local distributionTable = {
 			"Axe", 6,
 			"Crowbar", 10,
 			"FireplacePoker", 1,
+			"HandAxe", 10,
 			"GardenFork", 6,
 			"GardenFork_Forged", 0.1,
 			"GardenHoe", 6,
@@ -19350,6 +19356,7 @@ local distributionTable = {
 			-- Tools
 			"Crowbar", 20,
 			"Hammer", 50,
+			"HandAxe", 1,
 			"HandTorch", 50,
 			"KnifePocket", 0.1,
 			"PipeWrench", 100,
@@ -20156,6 +20163,7 @@ local distributionTable = {
 			"Needle", 20,
 			"P38", 50,
 			"PenLight", 20,
+			"SurvivalSchematic", 10,
 			"Thread", 50,
 			"Thread", 20,
 			"WaterPurificationTablets", 10,

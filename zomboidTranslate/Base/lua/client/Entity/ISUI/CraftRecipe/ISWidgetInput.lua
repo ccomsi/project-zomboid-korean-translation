@@ -177,6 +177,7 @@ end
 
 function ISWidgetInput:render()
     ISPanel.render(self);
+    self:renderJoypadFocus(-4, -4, self.width + 8, self.height + 8)
 end
 
 function ISWidgetInput:update()
@@ -205,23 +206,28 @@ function ISWidgetInput:createScriptValues(_script, isSecondary)
         if table.inputObjects:size() == 0 then
             table.inputObjects = _script:getPossibleInputItems();
         end
-        
+
         if table.inputObjects:size()>0 then
             table.iconTexture = table.inputObjects:get(0):getNormalTexture();
-			table.iconColor = { r=table.inputObjects:get(0):getR(),g=table.inputObjects:get(0):getG(),b=table.inputObjects:get(0):getB(),a=1 };
+            table.iconColor = { r=table.inputObjects:get(0):getR(),g=table.inputObjects:get(0):getG(),b=table.inputObjects:get(0):getB(),a=1 };
             --table.cycleIcons = table.inputObjects:size() > 1;
             table.inputFullName = table.inputObjects:get(0):getFullName();
             table.inputItem = table.inputObjects:get(0);
         end
     elseif _script:getResourceType()==ResourceType.Fluid then
         table.amount = _script:getAmount();
+        table.satisfiedAmount = self.logic:getInputUses(_script);
         if self.displayAsOutput then
             table.amount = self.logic:getResidualFluidFromInput(_script);
         end
         if table.amount < 0 then
             table.amountStr = "?";
         else
-        	table.amountStr = tostring(round(table.amount,2)).."L";
+            if self.displayAsOutput then
+                table.amountStr = tostring(round(table.amount,2)).."L";
+            else
+                table.amountStr = tostring(round(table.satisfiedAmount,2)).."/"..tostring(round(table.amount,2)).."L";
+            end
         end
         table.iconTexture = getTexture("media/textures/Item_Waterdrop_Grey.png");
         table.inputObjects = self.logic:getSatisfiedInputFluids(_script);
@@ -327,14 +333,14 @@ function ISWidgetInput:updateScriptValues(_table)
         if _table.inputObjects:size() == 0 then
             _table.inputObjects = _table.script:getPossibleInputItems();
         end
-        
+
         if _table.cycleIcons then
             local playerIndex = self.player:getPlayerNum();
             index = UIManager.getSyncedIconIndex(playerIndex, _table.inputObjects:size());
         end
         local item = _table.inputObjects:get(index);
         _table.iconTexture = item:getNormalTexture();
-		_table.iconColor.r = item:getR();
+        _table.iconColor.r = item:getR();
         _table.iconColor.g = item:getG();
         _table.iconColor.b = item:getB();
         _table.iconText = item:getDisplayName();
@@ -346,21 +352,27 @@ function ISWidgetInput:updateScriptValues(_table)
         if _table.inputObjects:size() == 0 then
             _table.inputObjects = _table.script:getPossibleInputFluids();
         end
-        
+
         if _table.cycleIcons then
             local playerIndex = self.player:getPlayerNum();
             index = UIManager.getSyncedIconIndex(playerIndex, _table.inputObjects:size());
         end
         local fluid = _table.inputObjects:get(index);
+        _table.amount = _table.script:getAmount();
+        _table.satisfiedAmount = self.logic:getInputUses(_table.script);
         if self.displayAsOutput then
             _table.amount = self.logic:getResidualFluidFromInput(_table.script);
-            if _table.amount < 0 then
-                _table.amountStr = "?";
-            else
-                _table.amountStr = tostring(round(_table.amount,2)).."L";
-            end
-            _table.label:setName(_table.amountStr);
         end
+        if _table.amount < 0 then
+            _table.amountStr = "?";
+        else
+            if self.displayAsOutput then
+                _table.amountStr = tostring(round(_table.amount,2)).."L";
+            else
+                _table.amountStr = tostring(round(_table.satisfiedAmount,2)).."/"..tostring(round(_table.amount,2)).."L";
+            end
+        end
+        _table.label:setName(_table.amountStr);
         local c = fluid:getColor();
         _table.iconColor.r = c:getRedFloat();
         _table.iconColor.g = c:getGreenFloat();

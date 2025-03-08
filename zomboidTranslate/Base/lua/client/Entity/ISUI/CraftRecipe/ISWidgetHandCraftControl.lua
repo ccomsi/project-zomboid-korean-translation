@@ -3,9 +3,9 @@
 --**				  Author: turbotutone				   **
 --***********************************************************
 
-require "ISUI/ISPanel"
+require "ISUI/ISPanelJoypad"
 
-ISWidgetHandCraftControl = ISPanel:derive("ISWidgetHandCraftControl");
+ISWidgetHandCraftControl = ISPanelJoypad:derive("ISWidgetHandCraftControl");
 
 local debugSpam = true
 -- local debugSpam = false
@@ -21,11 +21,11 @@ local BUTTON_ICON_SIZE = 16 * ICON_SCALE;
 --************************************************************************--
 
 function ISWidgetHandCraftControl:initialise()
-	ISPanel.initialise(self);
+	ISPanelJoypad.initialise(self);
 end
 
 function ISWidgetHandCraftControl:createChildren()
-    ISPanel.createChildren(self);
+    ISPanelJoypad.createChildren(self);
 
     self.colProgress = safeColorToTable(self.xuiSkin:color("C_ValidGreen"));
 
@@ -301,6 +301,18 @@ function ISWidgetHandCraftControl:calculateLayout(_preferredWidth, _preferredHei
 
     self:setWidth(width);
     self:setHeight(height);
+
+    self.joypadButtonsY = {}
+    self.joypadButtons = {}
+    self.joypadIndexY = 1
+    self.joypadIndex = 1
+    if self.buttonLess:isVisible() then
+        self:insertNewLineOfButtons(self.buttonLess, self.buttonMore, self.buttonMax)
+    end
+    self:insertNewLineOfButtons(self.buttonCraft)
+    if self.buttonForceCraft then
+        self:insertNewLineOfButtons(self.buttonForceCraft)
+    end
 end
 
 function ISWidgetHandCraftControl:onResize()
@@ -308,7 +320,7 @@ function ISWidgetHandCraftControl:onResize()
 end
 
 function ISWidgetHandCraftControl:prerender()
-    --ISPanel.prerender(self);
+    --ISPanelJoypad.prerender(self);
 
 	if self.background then
 		self:drawRectStatic(0, 0, self.width, self.boxHeight, self.backgroundColor.a, self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b);
@@ -320,8 +332,14 @@ function ISWidgetHandCraftControl:prerender()
 
     if self.durationLabel then
         if self.logic and self.logic:getRecipe() then
-            local seconds = self.logic:getRecipe():getTime();
-            local mm = round(seconds / 60, 0);
+            local seconds = self.logic:getRecipe():getTime(self.player);
+--             local seconds = self.logic:getRecipe():getTime();
+            -- changed because weird artifacts were happening for sub 1 minute recipes
+            local mm
+            if seconds < 60 then mm = 0
+            else mm = round(seconds / 60, 0) end;
+
+--             local mm = round(seconds / 60, 0);
             local ss = math.fmod(seconds, 60);
             local text = string.format("Time Required: %02dm %02ds", mm, ss);
             self.durationLabel:setName(text)
@@ -386,11 +404,12 @@ function ISWidgetHandCraftControl:prerender()
 end
 
 function ISWidgetHandCraftControl:render()
-    ISPanel.render(self);
+    ISPanelJoypad.render(self);
+    self:renderJoypadFocus()
 end
 
 function ISWidgetHandCraftControl:update()
-    ISPanel.update(self);
+    ISPanelJoypad.update(self);
 end
 
 function ISWidgetHandCraftControl:onAutoToggled(_newState)
@@ -574,15 +593,22 @@ function ISWidgetHandCraftControl:sanitizeCraftQuantity()
     --end 
 end
 
+function ISWidgetHandCraftControl:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData)
+    self:restoreJoypadFocus()
+end
+
+function ISWidgetHandCraftControl:onLoseJoypadFocus(joypadData)
+    ISPanelJoypad.onLoseJoypadFocus(self, joypadData)
+    self:clearJoypadFocus()
+end
 
 --************************************************************************--
 --** ISWidgetHandCraftControl:new
 --**
 --************************************************************************--
 function ISWidgetHandCraftControl:new(x, y, width, height, player, logic)
-    local o = ISPanel:new(x, y, width, height);
-    setmetatable(o, self)
-    self.__index = self
+    local o = ISPanelJoypad.new(self, x, y, width, height);
 
     o.background = true;
     o.backgroundColor = {r=0.2, g=0.2, b=0.2, a=0.5};

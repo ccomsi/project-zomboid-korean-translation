@@ -43,6 +43,8 @@ ISPaintMenu.doPaintMenu = function(player, context, worldobjects, test)
 	local playerObj = getSpecificPlayer(player)
 	local playerInv = playerObj:getInventory()
 
+	if playerObj:getVehicle() then return false end
+
     local square = nil;
     local thump = nil;
     local paintableWall = nil;

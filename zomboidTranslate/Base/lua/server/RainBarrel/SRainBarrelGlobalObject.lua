@@ -23,7 +23,7 @@ end
 function SRainBarrelGlobalObject:stateFromIsoObject(isoObject)
 	self.exterior = isoObject:getSquare():isOutside()
 	self.taintedWater = isoObject:isTaintedWater()
-	self.waterAmount = isoObject:getWaterAmount()
+	self.waterAmount = isoObject:getFluidAmount()
 	self.waterMax = isoObject:getModData().waterMax
 
 	-- Sanity check
@@ -75,7 +75,8 @@ function SRainBarrelGlobalObject:stateToIsoObject(isoObject)
 		self.taintedWater = self.waterAmount > 0 and self.exterior
 	end
 
-	isoObject:setWaterAmount(self.waterAmount, self.taintedWater) -- FIXME? OnWaterAmountChanged happens here
+	isoObject:emptyFluid();
+	isoObject:addFluid(self.taintedWater and FluidType.TaintedWater or FluidType.Water, self.waterAmount);
 	isoObject:getModData().waterMax = self.waterMax
 	self:changeSprite()
 	isoObject:transmitModData()

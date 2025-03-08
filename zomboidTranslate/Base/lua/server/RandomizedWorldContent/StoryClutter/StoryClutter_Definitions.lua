@@ -429,6 +429,8 @@ StoryClutter.FarmStorageClutter = {
     "Base.HandAxe_Old",
     "Base.Axe_Old",
     "Base.Fleshing_Tool",
+    "Base.Sledgehammer",
+    "Base.Sledgehammer2",
 }
 
 -- used for the football night story clutter
@@ -568,6 +570,8 @@ StoryClutter.GarageStorageClutter = {
     "Base.MasonsChisel",
     "Base.MasonsTrowel",
     "Base.HandAxe",
+    "Base.Sledgehammer",
+    "Base.Sledgehammer2",
 }
 
 StoryClutter.GigamartClutter = {
@@ -942,6 +946,7 @@ StoryClutter.KitchenCounterClutter = {
     "Base.SpeedingTicket",
     "Base.Postcard",
     "Base.Whetstone",
+    "Base.Coffee2",
 }
 
 -- residential kitchen sinks, used for Randomized Residential Buildings
@@ -1435,6 +1440,7 @@ StoryClutter.SurvivalistCampsiteClutter = {
     "Base.Whetstone",
     "Base.Fleshing_Tool",
     "Base.HandAxe",
+    "Base.FirewoodBundle",
 }
 
 StoryClutter.TwiggyClutter = {

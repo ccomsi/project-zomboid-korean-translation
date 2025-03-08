@@ -69,7 +69,7 @@ Tutorial1.createInventoryContextMenu = function(player, isInPlayerInventory, ite
         end
     end
     if testItem then
-        if Tutorial1.contextMenuEat and testItem:getType() == "DeadMouse" then
+        if Tutorial1.contextMenuEat and testItem:getType() == "DeadRat" then
             local eatOption = context:addOption(getText("ContextMenu_Eat"), {testItem});
             local subMenuEat = context:getNew(context)
             context:addSubMenu(eatOption, subMenuEat)
@@ -427,11 +427,11 @@ Tutorial1.FillContainers = function()
                     c:emptyIt();
                     if type == "lootingStuff" then
                         Tutorial1.DeadMouseContainer = o;
-                        local apple = c:AddItem("Base.DeadMouse");
+                        local apple = c:AddItem("Base.DeadRat");
                         apple:setAge(17);
                         Tutorial1.DeadMouse = apple
                         c:AddItem("Base.EmptyJar");
-                        c:AddItem("Base.Dung_Mouse");
+                        c:AddItem("Base.Dung_Rat");
                     end
                     c:setExplored(true);
                 end

@@ -43,6 +43,7 @@ function Fishing.States.Idle:start()
     local primaryHandItem = self.manager.player:getPrimaryHandItem()
     if not (primaryHandItem ~= nil and primaryHandItem:hasTag("FishingRod")) then
         self.manager:changeState("None")
+        return
     end
     if self.manager.fishingRod == nil then
         self.manager.fishingRod = Fishing.FishingRod:new(self.manager.player)

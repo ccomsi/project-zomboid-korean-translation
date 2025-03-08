@@ -54,12 +54,16 @@ end
 function ISScrollingListBox:onJoypadDirRight(joypadData)
     if self.joypadParent then
         self.joypadParent:onJoypadDirRight(joypadData);
+    else
+        ISPanelJoypad.onJoypadDirRight(self, joypadData);
     end
 end
 
 function ISScrollingListBox:onJoypadDirLeft(joypadData)
     if self.joypadParent then
         self.joypadParent:onJoypadDirLeft(joypadData);
+    else
+        ISPanelJoypad.onJoypadDirLeft(self, joypadData);
     end
 end
 
@@ -562,10 +566,7 @@ function ISScrollingListBox:ensureVisible(index)
 end
 
 function ISScrollingListBox:render()
-    if self.joypadFocused then
-        self:drawRectBorder(0, -self:getYScroll(), self:getWidth(), self:getHeight(), 0.4, 0.2, 1.0, 1.0);
-        self:drawRectBorder(1, 1-self:getYScroll(), self:getWidth()-2, self:getHeight()-2, 0.4, 0.2, 1.0, 1.0);
-    end
+    self:renderJoypadFocus()
 end
 
 function ISScrollingListBox:onJoypadDown(button, joypadData)

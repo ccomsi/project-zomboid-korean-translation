@@ -4,7 +4,7 @@
 --- DateTime: 11/18/2024 10:46 AM
 ---
 
-ISAnimalZoneFirstInfo = ISPanel:derive("ISAnimalZoneFirstInfo");
+ISAnimalZoneFirstInfo = ISPanelJoypad:derive("ISAnimalZoneFirstInfo");
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.NewSmall)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.NewMedium)
@@ -12,7 +12,7 @@ local UI_BORDER_SPACING = 10
 local BUTTON_HGT = FONT_HGT_SMALL + 6
 
 function ISAnimalZoneFirstInfo:initialise()
-    ISPanel.initialise(self);
+    ISPanelJoypad.initialise(self);
     local btnWid = 150
     local x = UI_BORDER_SPACING+1
 
@@ -67,24 +67,34 @@ function ISAnimalZoneFirstInfo:onClickOk()
 
     self:setVisible(false);
     self:removeFromUIManager();
-end
-
-ISAnimalZoneFirstInfo.showUI = function(force)
-    if force or getCore():getOptionShowFirstAnimalZoneInfo() then
-        local ui = ISAnimalZoneFirstInfo:new(0,0);
-        ui:initialise();
-        ui:addToUIManager();
+    if isJoypadFocusOnElementOrDescendant(self.playerNum, self) then
+        setJoypadFocus(self.playerNum, self.prevFocus)
     end
 end
 
-function ISAnimalZoneFirstInfo:new(x, y)
+function ISAnimalZoneFirstInfo:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData);
+    self:setISButtonForA(self.okBtn)
+end
+
+ISAnimalZoneFirstInfo.showUI = function(playerNum, force)
+    if force or getCore():getOptionShowFirstAnimalZoneInfo() then
+        local ui = ISAnimalZoneFirstInfo:new(0, 0, playerNum);
+        ui:initialise();
+        ui:addToUIManager();
+        local joypadData = getJoypadData(playerNum)
+        if joypadData then
+            ui.prevFocus = joypadData.focus
+            setJoypadFocus(playerNum, ui)
+        end
+    end
+end
+
+function ISAnimalZoneFirstInfo:new(x, y, playerNum)
     local width = 700;
     local height = 500;
 
-    local o = {}
-    o = ISPanel:new(x, y, width, height);
-    setmetatable(o, self)
-    self.__index = self
+    local o = ISPanelJoypad.new(self, x, y, width, height);
     if y == 0 then
         o.y = getCore():getScreenHeight() / 2 - (height / 2)
         o:setY(o.y)
@@ -95,6 +105,6 @@ function ISAnimalZoneFirstInfo:new(x, y)
     end
     o.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
     o.backgroundColor = {r=0, g=0, b=0, a=0.8};
-
+    o.playerNum = playerNum
     return o;
 end

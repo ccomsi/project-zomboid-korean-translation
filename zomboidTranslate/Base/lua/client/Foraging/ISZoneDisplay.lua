@@ -10,6 +10,8 @@
 local zdImage = ISPanel:derive("zdImage");
 ISZoneDisplay = ISPanel:derive("ISZoneDisplay");
 local UI_BORDER_SPACING = 10
+local GHC = getCore():getGoodHighlitedColor()
+local BHC = getCore():getBadHighlitedColor()
 -------------------------------------------------
 -------------------------------------------------
 local zdTex = {
@@ -20,7 +22,7 @@ local zdTex = {
 	nextBtn				= getTexture("media/ui/inventoryPanes/Button_GuideN.png"),
 	--
 	celestial = {
-		stars			= getTexture("media/ui/foraging/Stars.png"),
+		stars			= getTexture("media/ui/foraging/stars.png"),
 	},
 	solar = {
 		sun				= getTexture("media/ui/foraging/Sun.png"),
@@ -37,18 +39,27 @@ local zdTex = {
 		moon7			= getTexture("media/ui/foraging/Moon7.png"),
 	},
 	sky = {
-		clouds			= getTexture("media/ui/foraging/Clouds.png"),
+		clouds			= getTexture("media/ui/foraging/clouds.png"),
 	},
 	zones = {
+		Nav             = getTexture("media/ui/foraging/zoneNav.png"),
 		Forest          = getTexture("media/ui/foraging/ZoneForest.png"),
 		DeepForest      = getTexture("media/ui/foraging/ZoneDeepForest.png"),
 		Farm            = getTexture("media/ui/foraging/ZoneFarm.png"),
 		FarmLand        = getTexture("media/ui/foraging/ZoneFarmLand.png"),
-		Nav             = getTexture("media/ui/foraging/ZoneNav.png"),
+		ForagingNav		= getTexture("media/ui/foraging/zoneNav.png"),
 		TownZone        = getTexture("media/ui/foraging/ZoneTown.png"),
 		TrailerPark     = getTexture("media/ui/foraging/ZoneTrailerPark.png"),
 		Unknown         = getTexture("media/ui/foraging/ZoneUnknown.png"),
 		Vegitation      = getTexture("media/ui/foraging/ZoneVegetation.png"),
+		PHForest      	= getTexture("media/ui/foraging/ZoneForest.png"),
+		PRForest      	= getTexture("media/ui/foraging/ZoneForest.png"),
+		PHMixForest     = getTexture("media/ui/foraging/ZoneDeepForest.png"),
+		FarmForest     	= getTexture("media/ui/foraging/ZoneForest.png"),
+		FarmMixForest   = getTexture("media/ui/foraging/ZoneForest.png"),
+		BirchForest   	= getTexture("media/ui/foraging/ZoneForest.png"),
+		BirchMixForest  = getTexture("media/ui/foraging/ZoneDeepForest.png"),
+		OrganicForest  	= getTexture("media/ui/foraging/ZoneDeepForest.png"),
 	},
 	fog = {
 		fog1			= getTexture("media/ui/foraging/Fog1.png"),
@@ -161,6 +172,16 @@ ISZoneDisplay.tips = {
 		text            = getText("IGUI_SearchMode_Tip_WildPlants_Text"),
 		shown           = false,
 	},
+};
+
+ISZoneDisplay.fuzzyChanceTable = {
+	[1] = {text = getText"Sandbox_Rarity_option1", chance = 0},
+	[2] = {text = getText"Sandbox_Rarity_option2", chance = 1},
+	[3] = {text = getText"Sandbox_Rarity_option3", chance = 5},
+	[4] = {text = getText"Sandbox_Rarity_option4", chance = 10},
+	[5] = {text = getText"Sandbox_Rarity_option5", chance = 25},
+	[6] = {text = getText"Sandbox_Rarity_option6", chance = 50},
+	[7] = {text = getText"Sandbox_Rarity_option7", chance = 1000},
 };
 -------------------------------------------------
 -------------------------------------------------
@@ -287,6 +308,7 @@ end
 -------------------------------------------------
 local function getZoneType(_x, _y)
 	local zones = getWorld():getMetaGrid():getZonesAt(_x, _y, 0);
+
 	if zones then
 		for i = zones:size(),1,-1 do
 			local zone = zones:get(i-1);
@@ -298,17 +320,6 @@ local function getZoneType(_x, _y)
 		end;
 	end;
 	return "Unknown";
-end
--------------------------------------------------
--------------------------------------------------
-function ISZoneDisplay:doFadeStep()
-	for target, element in pairs(self.fadeElements) do
-		if self.fadeTarget == target then
-			element:setAlphaTarget(1);
-		else
-			element:setAlphaTarget(0);
-		end;
-	end;
 end
 -------------------------------------------------
 -------------------------------------------------
@@ -408,11 +419,38 @@ function ISZoneDisplay:updateLocation()
 		self.fog2:setAlphaTarget(0);
 		self.fog3:setAlphaTarget(0);
 	end;
+
 	local zoneType = getZoneType(self.character:getX(), self.character:getY());
 	self.currentZone = zoneType;
-	if self.fadeTarget ~= zoneType then
-		self.fadeTarget = zoneType;
+
+	--support multiple zones in the categories we can find display
+	self.currentZones = {};
+
+	--reset alpha targets
+	for _, element in pairs(self.fadeElements) do element:setAlphaTarget(0); end;
+
+	--set new alpha targets
+	local zones = getWorld():getMetaGrid():getZonesAt(self.character:getX(), self.character:getY(), 0);
+	local foundZone = false;
+	if zones then
+		for i = zones:size(),1,-1 do
+			local zone = zones:get(i-1);
+			if zone then
+				if forageSystem.zoneDefs[zone:getType()] then
+					if self.fadeElements[zone:getType()] then
+						--set fade target
+						if not foundZone then self.fadeElements[zone:getType()]:setAlphaTarget(1); end;
+						--keep track of all zones
+						self.currentZones[(getTextOrNull("IGUI_SearchMode_Zone_Names_"..zone:getType()) or zone:getType())] = zone:getType();
+						foundZone = true;
+					end;
+				end;
+			end;
+		end;
 	end;
+
+	--if we cannot find a valid zone here, show the dreaded questionmarks
+	if not foundZone then self.fadeElements["Unknown"]:setAlphaTarget(1); end;
 end
 -------------------------------------------------
 -------------------------------------------------
@@ -421,8 +459,8 @@ local function formatPercent(_float)
 end
 
 local function getRGBForTooltip(_isGreen)
-	if _isGreen then return " <RGB:0,1,0> "; end;
-	return " <RGB:1,0.5,0> ";
+	if _isGreen then return (" <RGB:"..GHC:getR()..","..GHC:getG()..","..GHC:getB().."> "); end;
+	return (" <RGB:"..BHC:getR()..","..BHC:getG()..","..BHC:getB().."> ");
 end
 
 local function getToolTipText(_text, _value, _isBonus)
@@ -465,15 +503,7 @@ end
 -------------------------------------------------
 -------------------------------------------------
 function ISZoneDisplay:getZoneTooltipText()
-	local fuzzyChanceTable = {
-		[1] = {text = getText"Sandbox_Rarity_option1", chance = 0},
-		[2] = {text = getText"Sandbox_Rarity_option2", chance = 1},
-		[3] = {text = getText"Sandbox_Rarity_option3", chance = 5},
-		[4] = {text = getText"Sandbox_Rarity_option4", chance = 10},
-		[5] = {text = getText"Sandbox_Rarity_option5", chance = 25},
-		[6] = {text = getText"Sandbox_Rarity_option6", chance = 50},
-		[7] = {text = getText"Sandbox_Rarity_option7", chance = 1000},
-	};
+	local fuzzyChanceTable = ISZoneDisplay.fuzzyChanceTable;
 	local text = "";
 	if self.currentZone == "Unknown" then
 		text = text .. " <LINE> " .. getText("IGUI_SearchMode_Window_Tooltip_Nothing_In_Area");
@@ -485,50 +515,67 @@ function ISZoneDisplay:getZoneTooltipText()
 		local categoryName;
 		local exactCategory;
 		local perkLevel;
-		for catName, catDef in pairs(catDefs) do
-			perkLevel = self.character:getPerkLevel(Perks.FromString(catDef.identifyCategoryPerk));
-			--some categories are deliberately hidden (ammunition, forest rarities)
-			if not catDef.categoryHidden then
-				exactCategory = getTextOrNull("IGUI_SearchMode_Categories_"..catDef.name);
-			else
-				exactCategory = nil;
-			end;
-			zoneChance = catDef.zoneChance[self.currentZone] * forageSystem.getWeatherBonus(catDef);
-			if zoneChance and zoneChance > 0 then
-				zoneChance = zoneChance * forageSystem.getTimeOfDayBonus(catDef);
-				--show exact categories in forage debug mode
-				if ISSearchWindow.showDebug then
-					categoryName = catName;
-				elseif exactCategory and (perkLevel >= catDef.identifyCategoryLevel) then
-					categoryName = exactCategory;
+		local getWeatherBonus = forageSystem.getWeatherBonus;
+		local getTimeOfDayBonus = forageSystem.getTimeOfDayBonus;
+
+		text = text .. " <LINE> " .. getText("IGUI_SearchMode_Window_Tooltip_Categories_In_Area") .. " <LINE> ";
+
+		for _, zoneType in pairs(self.currentZones) do
+			for catName, catDef in pairs(catDefs) do
+				perkLevel = self.character:getPerkLevel(Perks.FromString(catDef.identifyCategoryPerk));
+				--some categories are deliberately hidden (ammunition, forest rarities)
+				if not catDef.categoryHidden then
+					exactCategory = getTextOrNull("IGUI_SearchMode_Categories_"..catDef.name);
 				else
-					categoryName = getText("IGUI_SearchMode_Categories_"..catDef.typeCategory);
+					exactCategory = nil;
 				end;
-				if not chanceTable[categoryName] then
-					chanceTable[categoryName] = 0;
+
+				if catDef.zoneChance[zoneType] then --some zones may not have a catDef zonechance set
+					zoneChance = catDef.zoneChance[zoneType] * getWeatherBonus(catDef);
+					if zoneChance and zoneChance > 0 then
+						zoneChance = zoneChance * getTimeOfDayBonus(catDef);
+						--show exact categories in forage debug mode
+						if ISSearchWindow.showDebug then
+							categoryName = catName;
+						elseif exactCategory and (perkLevel >= catDef.identifyCategoryLevel) then
+							categoryName = exactCategory;
+						else
+							categoryName = getText("IGUI_SearchMode_Categories_"..catDef.typeCategory);
+						end;
+						if not chanceTable[categoryName] then
+							chanceTable[categoryName] = 0;
+						end;
+						totalChance = totalChance + zoneChance;
+						chanceTable[categoryName] = chanceTable[categoryName] + zoneChance;
+					end;
 				end;
-				totalChance = totalChance + zoneChance;
-				chanceTable[categoryName] = chanceTable[categoryName] + zoneChance;
 			end;
 		end;
-		--
-		text = text .. " <LINE> " .. getText("IGUI_SearchMode_Window_Tooltip_Categories_In_Area") .. " <LINE> ";
-		--
+
 		local fuzzyChance = "Unknown";
 		local chanceTableSorted = {};
+		local exactChance, chanceColor;
+		local r, g, b;
 		for k, v in pairs(chanceTable) do
 			table.insert(chanceTableSorted, {name = k, chance = v});
 		end;
-		table.sort(chanceTableSorted, function (a, b)return a.chance > b.chance; end);
+		table.sort(chanceTableSorted, function (i, j) return i.chance > j.chance; end);
 		for _, chanceCategory in ipairs(chanceTableSorted) do
-			local exactChance = (chanceCategory.chance / totalChance);
+			exactChance = (chanceCategory.chance / totalChance);
 			for _, fuzzyTable in ipairs(fuzzyChanceTable) do
 				if (exactChance * 100) <= fuzzyTable.chance then
 					fuzzyChance = fuzzyTable.text;
 					break;
 				end;
 			end;
-			text = text .. " <LINE> <RGB:1,1,1> <TEXT> ".. chanceCategory.name ..": <SPACE> <RGB:"..0.5-exactChance..","..0.5+exactChance..",0> ";
+
+			--offsets the chance value to help color coding cover a wider range
+			chanceColor = math.min(1, exactChance + (1 * exactChance));
+			r = BHC:getR() * (1-chanceColor) + GHC:getR() * chanceColor;
+			g = BHC:getG() * (1-chanceColor) + GHC:getG() * chanceColor;
+			b = BHC:getB() * (1-chanceColor) + GHC:getB() * chanceColor;
+
+			text = text .. " <LINE> <RGB:1,1,1> <TEXT> ".. chanceCategory.name ..": <SPACE> <RGB:"..r..","..g..","..b.."> ";
 			if ISSearchWindow.showDebug then
 				text = text .. string.format("%.2f", exactChance * 100) .. "%";
 			else
@@ -588,7 +635,18 @@ function ISZoneDisplay:updateTooltip()
 					self.tooltip:setName(self.tipPanel.tip.title);
 					self.tooltip.description = self.tipPanel.tip.text;
 				else
-					self.tooltip:setName(getText("IGUI_SearchMode_Zone_Names_"..self.currentZone));
+					--add support for multiple zones
+					local zoneTitleString = "";
+					local multiple = false;
+					for zoneName, _ in pairs(self.currentZones) do
+						--if getTextOrNull("IGUI_SearchMode_Zone_Names_"..zoneName) then
+							if multiple then zoneTitleString = zoneTitleString .. " / "; end;
+							zoneTitleString = zoneTitleString .. zoneName;  --key is translated to handle stacked identical zones, such as Nav/ForagingNav or Farm/FarmLand
+							multiple = true;
+						--end;
+					end;
+					self.zoneTitleString = zoneTitleString;
+					self.tooltip:setName(zoneTitleString);
 					self.tooltip.description = self:getZoneTooltipText();
 				end;
 			end
@@ -620,7 +678,6 @@ function ISZoneDisplay:update()
 		self.stars:setAlphaTarget(0);
 		self:updateSunPosition(self.dawn, self.dusk, self.timeOfDay);
 	end;
-	self:doFadeStep();
 	self:updateLocation();
 	self:updateTooltip();
 	self:updateTips();
@@ -655,6 +712,7 @@ function ISZoneDisplay:updateData()
 	self.moonBright = climateManager:getNightStrength();
 	local globalLight = climateManager:getGlobalLight();
 	local extLight = globalLight:getExterior();
+
 	self.backgroundColor = {
 		r = extLight:getRedFloat(),
 		g = extLight:getGreenFloat(),
@@ -685,9 +743,13 @@ function ISZoneDisplay:initialise()
 	ISPanel.initialise(self);
 	self:initialiseImages(zdTex.celestial, self.width, self.height, true)
 	self:initialiseImages(zdTex.solar, 35, 35, false)
-	self:initialiseImages(zdTex.sky, self.width, self.height, true)
+	self:initialiseImages(zdTex.sky, self.width, self.height, false)
 	self:initialiseImages(zdTex.zones, self.width, self.height, true)
+	--
 	self:initialiseImages(zdTex.fog, self.width, self.height, false)
+	self.fog1.alphaStep = 0.01;
+	self.fog2.alphaStep = 0.01;
+	self.fog3.alphaStep = 0.01;
 	--
 	self.tipPanel = ISRichTextPanel:new(0, 0, self.width, self.height);
 	self.tipPanel:initialise();
@@ -767,6 +829,7 @@ function ISZoneDisplay:new(_parent)
 
 	o.zdImages			= {};
 	o.fadeTarget		= "Unknown";
+	o.fadeTargets		= { "Unknown" };
 	o.fadeElements		= {};
 
 	o.timeOfDay			= 0;
@@ -795,6 +858,8 @@ function ISZoneDisplay:new(_parent)
 	o.climateMoon		= getClimateMoon();
 
 	o.currentZone		= "Unknown";
+	o.currentZones		= {};
+	o.zoneTitleString	= "Unknown";
 
 	o.currentTip		= 1;
 	o.flashTipButton	= false;
@@ -816,6 +881,7 @@ function zdImage:setAlpha(_a)         self.backgroundColor.a = _a;      end;
 function zdImage:setAlphaTarget(_a)   self.alphaTarget = _a;            end;
 -------------------------------------------------
 -------------------------------------------------
+
 function zdImage:setGreyscale(_rgb)
 	self.backgroundColor.r = _rgb;
 	self.backgroundColor.g = _rgb;
@@ -830,14 +896,16 @@ end
 -------------------------------------------------
 -------------------------------------------------
 function zdImage:update()
-	if self:getAlpha() <= self.alphaTarget then self:setAlpha(math.min(self:getAlpha() + self.alphaStep, 1)); end;
-	if self:getAlpha() >= self.alphaTarget then self:setAlpha(math.max(self:getAlpha() - self.alphaStep, 0)); end;
+	self:setAlpha(luautils.lerp(self:getAlpha(), self:getAlphaTarget(), self.alphaStep, 0.001));
 end
 
 function zdImage:prerender() end;
 function zdImage:render()
 	local bgc = self.backgroundColor;
+
 	self:drawTextureScaled(self.texture, 0, 0, self.width, self.height, bgc.a, bgc.r, bgc.g, bgc.b);
+
+	self:clearStencilRect();
 end
 -------------------------------------------------
 -------------------------------------------------
@@ -856,7 +924,7 @@ function zdImage:new(zoneDisplay, x, y, width, height, texture)
 	o.width = width;
 	o.height = height;
 	o.alphaTarget = 1;
-	o.alphaStep = 0.05;
+	o.alphaStep = 0.1;
 	return o;
 end
 -------------------------------------------------

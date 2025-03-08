@@ -40,9 +40,16 @@ function ISOpenAnimalInfo:perform()
 end
 
 function ISOpenAnimalInfo:complete()
-	local ui = ISAnimalUI:new(100, 100, 650, 500, self.animal, self.player)
+	local ui = ISAnimalUI:new(getPlayerScreenLeft(self.playerNum)+100, getPlayerScreenTop(self.playerNum)+100, 650, 500, self.animal, self.player)
 	ui:initialise();
 	ui:addToUIManager();
+	ui.prevFocus = self.prevFocus
+	if getJoypadData(self.playerNum) then
+		if self.prevFocus ~= nil and self.prevFocus.Type == "ISVehicleAnimalUI" then
+			self.prevFocus:setVisible(false)
+		end
+		setJoypadFocus(self.playerNum, ui)
+	end
 	return true
 end
 
@@ -59,11 +66,13 @@ end
 function ISOpenAnimalInfo:animEvent(event, parameter)
 end
 
-function ISOpenAnimalInfo:new(character, animal)
+function ISOpenAnimalInfo:new(character, animal, prevFocus)
 	local o = ISBaseTimedAction.new(self, character)
 	o.animal = animal;
 	o.player = character;
+	o.playerNum = character:getPlayerNum();
 	o.maxTime = o:getDuration()
 	o.useProgressBar = false;
+	o.prevFocus = prevFocus;
 	return o;
 end

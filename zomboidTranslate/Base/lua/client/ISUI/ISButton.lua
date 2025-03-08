@@ -286,7 +286,7 @@ function ISButton:update()
 			self.repeatWhilePressedFunc(self.target, self)
 		else
 			local ms = getTimestampMs()
-			if ms - self.pressedTime > 500 then
+			if ms - self.pressedTime > self.repeatWhilePressedTimer then
 				self.pressedTime = ms
 				self.repeatWhilePressedFunc(self.target, self)
 			end
@@ -297,7 +297,7 @@ function ISButton:update()
 end
 
 function ISButton:updateTooltip()
-	if self:isMouseOver() and self.tooltip then
+	if (self:isMouseOver() or self.joypadFocused) and self.tooltip then
 		local text = self.tooltip
 		if not self.tooltipUI then
 			self.tooltipUI = ISToolTip:new()
@@ -315,7 +315,11 @@ function ISButton:updateTooltip()
 			self.tooltipUI:setVisible(true)
 		end
 		self.tooltipUI.description = text
-		self.tooltipUI:setDesiredPosition(getMouseX(), self:getAbsoluteY() + self:getHeight() + 8)
+		if self:isMouseOver() then
+		    self.tooltipUI:setDesiredPosition(getMouseX(), self:getAbsoluteY() + self:getHeight() + 8)
+		else
+		    self.tooltipUI:setDesiredPosition(self:getAbsoluteX(), self:getAbsoluteY() + self:getHeight() + 8)
+        end
 	else
 		if self.tooltipUI and self.tooltipUI:getIsVisible() then
 			self.tooltipUI:setVisible(false)
@@ -485,6 +489,7 @@ function ISButton:new (x, y, width, height, title, clicktarget, onclick, onmouse
     o.yoffset = 0;
     o.fade = UITransition.new()
     o.joypadTextureWH = 32
+	o.repeatWhilePressedTimer = 500;
     o.sounds = {}
     o.sounds.activate = "UIActivateButton"
 	o.originalWidth = width;

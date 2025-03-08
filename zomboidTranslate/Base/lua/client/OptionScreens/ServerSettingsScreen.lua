@@ -4613,6 +4613,7 @@ SettingsTable = {
 					}
 					},
 					{ name = "DaysUntilMaximumDiminishedLoot" },
+					{ name = "MaximumLootedBuildingRooms" },
 					-- Loot rarity
 					{ name = "FoodLootNew", title = "LootRarity",
                     advancedCombo = {

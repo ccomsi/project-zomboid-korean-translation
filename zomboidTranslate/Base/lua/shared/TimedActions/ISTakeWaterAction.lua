@@ -8,7 +8,7 @@ ISTakeWaterAction = ISBaseTimedAction:derive("ISTakeWaterAction");
 
 function ISTakeWaterAction:isValid()
 	if self.item and not self.item:getContainer() then return false end
-	return self.waterObject:hasWater()
+	return self.waterObject:hasFluid()
 end
 
 function ISTakeWaterAction:waitToStart()
@@ -25,8 +25,6 @@ function ISTakeWaterAction:update()
     if self.waterObject then
         self.character:faceThisObject(self.waterObject);
     end
-    
-    -- spurcival: TODO: live update fluid qtys here?
 end
 
 function ISTakeWaterAction:start()
@@ -59,7 +57,9 @@ function ISTakeWaterAction:start()
             self:setOverrideHandModels(self.item:getStaticModel(), nil)
         end
     else
-        if self.waterObject:getProperties() and (self.waterObject:getProperties():Val("CustomName") == "Toilet") then
+        if (props ~= nil) and (props:Val("CustomName") == "Dispenser") then
+            self.sound = self.character:playSound("GetWaterFromDispenser");
+        elseif (props ~= nil) and (props:Val("CustomName") == "Toilet") then
             self.sound = self.character:playSound("DrinkingFromToilet");
         elseif isLakeOrRiver or isPuddle then
             self.sound = self.character:playSound("DrinkingFromRiver");
@@ -85,7 +85,9 @@ end
 function ISTakeWaterAction:stop()
 	self:stopSound();
 
-    -- spurcival: TODO: set partial use here?
+    if not isClient() and not isServer() then
+        self:serverStop();
+    end
     
     if self.item ~= nil then
 		self.item:setBeingFilled(false)
@@ -109,49 +111,28 @@ function ISTakeWaterAction:perform()
 end
 
 function ISTakeWaterAction:complete()
-    local usedWaterTainted = self.waterObject:isTaintedWater();
-    local usedWaterAmount = self.waterObject:useWater(self.waterUnit);
-    self.waterObject:sync();
-    
-    local newPoisonLevel;
-	if self.item then
-		local fluid = Fluid.Water;
-	    if usedWaterTainted then
-            fluid = Fluid.TaintedWater;
-        end
-        self.item:getFluidContainer():addFluid(fluid, usedWaterAmount);
-        self.item:syncItemFields();
-        sendItemStats(self.item)
-    else
-        local thirst = self.character:getStats():getThirst() - usedWaterAmount
-        self.character:getStats():setThirst(math.max(thirst, 0.0));
-        --Stat_Thirst
-        syncPlayerStats(self.character, 0x00004000);
-
-        -- Trust client in case water is tainted, since we can't compute puddles on the server side
-        local isTainted = (isServer() and self.waterTaintedCL) or usedWaterTainted
-        if isTainted then
-            --tainted water shouldn't kill the player but make them sick - dangerous when sick
-            local bodyDamage	= self.character:getBodyDamage();
-            local stats			= self.character:getStats();
-            if bodyDamage:getPoisonLevel() < 20 and stats:getSickness() < 0.3 then
-                newPoisonLevel = math.min(bodyDamage:getPoisonLevel() + 10 + math.floor(self.waterUnit * 10), 20);
-                bodyDamage:setPoisonLevel(newPoisonLevel);
-                sendDamage(self.character)
-                --print("Player " .. tostring(self.character:getDisplayName()) .. " just drank tainted water with poison power " .. tostring(newPoisonLevel))
-            end
-        end
-    end
-
+    self:transferFluid(self.waterUnit)
     return true;
 end
 
-function ISTakeWaterAction:serverStop()
-	if self.item ~= nil and self.item:getFluidContainer() then
-		self.item:getFluidContainer():addFluid(Fluid.Water, self.netAction:getProgress()*(self.waterUnit));
+function ISTakeWaterAction:transferFluid(_amount)
+    if self.item then
+        self.waterObject:transferFluidTo(self.item:getFluidContainer(), _amount);
         self.item:syncItemFields();
         sendItemStats(self.item)
-	end
+    else
+        local fluidContainer = self.waterObject:moveFluidToTemporaryContainer(_amount);
+        self.character:DrinkFluid(fluidContainer, 1);
+        FluidContainer.DisposeContainer(fluidContainer);
+    end
+end
+
+function ISTakeWaterAction:serverStop()
+    if self.waterUnit and self.waterUnit > 0 then
+        local progress = self.netAction and self.netAction:getProgress() or self:getJobDelta();
+        local waterUsed = self.waterUnit * progress;
+        self:transferFluid(waterUsed);
+    end
 end
 
 function ISTakeWaterAction:getDuration()
@@ -172,7 +153,7 @@ function ISTakeWaterAction:new (character, item, waterObject, waterTaintedCL)
     o.waterObject = waterObject;
     o.waterTaintedCL = waterTaintedCL;
 
-    local waterAvailable = o.waterObject:getWaterAmount();
+    local waterAvailable = o.waterObject:getFluidAmount();
     if o.item ~= nil then
 		if o.item:getFluidContainer() then
 			o.startUsedAmount = o.item:getFluidContainer():getAmount();

@@ -877,7 +877,7 @@ function ISMoveableSpriteProps:getInfoPanelFlagsPerTile( _square, _object, _play
         --print("pickup test", self:getTopTable(_square), _object)
         InfoPanelFlags.tooHeavy = InfoPanelFlags.tooHeavy or (not _player:getInventory():hasRoomFor(_player, self.weight));
         InfoPanelFlags.itemsOnSurface = InfoPanelFlags.itemsOnSurface or ((self.isTable and _square:Is("IsTableTop")) or (self.isTable and _object and _object ~= self:getTopTable(_square)));
-        InfoPanelFlags.hasWater = InfoPanelFlags.hasWater or (self.isWaterCollector and _object and _object:hasWater());
+        InfoPanelFlags.hasWater = InfoPanelFlags.hasWater or (self.isWaterCollector and _object and _object:hasFluid());
         
         if self.type == "Window" then
             InfoPanelFlags.windowOpen = InfoPanelFlags.windowOpen or (_object and instanceof(_object,"IsoWindow") and _object:IsOpen());
@@ -905,7 +905,7 @@ function ISMoveableSpriteProps:getInfoPanelFlagsPerTile( _square, _object, _play
     end
     if _mode == "scrap" or _mode == "repair" then
         InfoPanelFlags.itemsOnSurface = InfoPanelFlags.itemsOnSurface or ((self.isTable and _square:Is("IsTableTop")) or (self.isTable and _object and _object ~= self:getTopTable(_square)));
-        InfoPanelFlags.hasWater = InfoPanelFlags.hasWater or (self.isWaterCollector and _object and _object:hasWater());
+        InfoPanelFlags.hasWater = InfoPanelFlags.hasWater or (self.isWaterCollector and _object and _object:hasFluid());
         InfoPanelFlags.doorBarricaded = InfoPanelFlags.doorBarricaded or (_object and instanceof(_object,"IsoDoor") and _object:isBarricaded());
         InfoPanelFlags.doorBarricaded = InfoPanelFlags.doorBarricaded or (_object and instanceof(_object,"IsoThumpable") and _object:isDoor() and _object:isBarricaded());
         InfoPanelFlags.doorInFrame = InfoPanelFlags.doorInFrame or (_object and instanceof(_object,"IsoThumpable") and _object:isDoorFrame() and _square:getDoor(_object:getNorth()));
@@ -1124,7 +1124,7 @@ function ISMoveableSpriteProps:canPickUpMoveableInternal( _character, _square, _
         self.yOffsetCursor = _object and _object:getRenderYOffset() or 0;
 
         if canPickUp and self.isWaterCollector then
-            if _object and _object:hasWater() then
+            if _object and _object:hasFluid() then
                 canPickUp = false
             end
         end
@@ -3470,7 +3470,7 @@ function ISMoveableSpriteProps:canScrapObjectInternal(_result, _object)
         canScrap = false
     end
     if canScrap and self.isWaterCollector then
-        if _object and _object:hasWater() then
+        if _object and _object:hasFluid() then
             canScrap = false
         end
     end
@@ -3697,7 +3697,7 @@ function ISMoveableSpriteProps:canRepairObjectInternal(_result, _object)
         canRepair = false
     end
     if canRepair and self.isWaterCollector then
-        if _object and _object:hasWater() then
+        if _object and _object:hasFluid() then
             canRepair = false
         end
     end

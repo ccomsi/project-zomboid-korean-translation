@@ -215,13 +215,13 @@ function ISReadABook:perform()
     end
 
     self.isLiteratureRead = nil
-    if self.item:getModData().literatureTitle then
+    if self.item:hasModData() and self.item:getModData().literatureTitle then
         --         self.character:Say(self.item:getModData().literatureTitle)
         self.isLiteratureRead = self.character:isLiteratureRead(self.item:getModData().literatureTitle)
         self.character:addReadLiterature(self.item:getModData().literatureTitle)
     end
 
-    if self.item:getModData().printMedia then
+    if self.item:hasModData() and self.item:getModData().printMedia then
         --local val = "TheKentuckyHerald_July9"
         local val = self.item:getModData().printMedia
         local win = PZAPI.UI.PrintMedia{
@@ -236,6 +236,34 @@ function ISReadABook:perform()
 
         win:instantiate()
         win.javaObj:setAlwaysOnTop(false)
+
+        if getJoypadData(self.playerNum) then
+            ISAtomUIJoypad.Apply(win)
+            win.close = function(self)
+                UIManager.RemoveElement(self.javaObj)
+                if getJoypadData(self.playerNum) then
+                    setJoypadFocus(self.playerNum, self.prevFocus)
+                end
+            end
+            win.children.bar.children.closeButton.onLeftClick = function(_self)
+                getSoundManager():playUISound(_self.sounds.activate)
+                _self.parent.parent:close()
+            end
+            win.playerNum = self.playerNum
+            win.prevFocus = getJoypadData(self.playerNum).focus
+            win.onJoypadDown = function(self, button, joypadData)
+                if button == Joypad.BButton then
+                    self.children.bar.children.closeButton:onLeftClick()
+                end
+                if button == Joypad.XButton then
+                    self:onClickNewspaperButton()
+                end
+                if button == Joypad.YButton then
+                    self:onClickMapButton()
+                end
+            end
+            setJoypadFocus(self.playerNum, win)
+        end
 
         --[[
         local index = self.item:getModData().printMedia
@@ -294,14 +322,18 @@ function ISReadABook:complete()
         self.item:setAlreadyReadPages(0);
     end
 
-    if self.item:getModData().teachedRecipe ~= nil then
+    if self.item:hasModData() and self.item:getModData().teachedRecipe ~= nil then
         self.character:learnRecipe(self.item:getModData().teachedRecipe)
 --         self.character:getKnownRecipes():add(self.item:getModData().teachedRecipe)
     end
 
-    if self.item:getModData().literatureTitle then
-        --         self.character:Say(self.item:getModData().literatureTitle)
+    if self.item:hasModData() and self.item:getModData().literatureTitle then
+--        self.character:Say(self.item:getModData().literatureTitle)
         self.character:addReadLiterature(self.item:getModData().literatureTitle)
+    end
+
+    if self.item:hasModData() and self.item:getModData().printMedia then
+        self.character:addReadPrintMedia(self.item:getModData().printMedia)
     end
 
     ISReadABook.checkMultiplier(self);
@@ -403,6 +435,7 @@ end
 function ISReadABook:new(character, item)
     local o = ISBaseTimedAction.new(self, character);
     o.character = character;
+    o.playerNum = character:getPlayerNum()
     o.item = item;
 
     o.minutesPerPage = getSandboxOptions():getOptionByName("MinutesPerPage"):getValue() or 2.0

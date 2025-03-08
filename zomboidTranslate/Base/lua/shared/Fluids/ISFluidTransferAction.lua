@@ -55,6 +55,12 @@ function ISFluidTransferAction:stop()
 	if self.sound and self.character:getEmitter():isPlaying(self.sound) then
 		self.character:stopOrTriggerSound(self.sound);
 	end
+
+	if not isClient() and not isServer() then
+		self.amount = self.amount * self:getJobDelta();
+		self:complete();
+	end
+	
 	ISBaseTimedAction.stop(self)
 end
 

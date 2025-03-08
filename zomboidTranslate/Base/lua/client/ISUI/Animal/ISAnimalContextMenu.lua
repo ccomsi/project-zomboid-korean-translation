@@ -565,13 +565,14 @@ AnimalContextMenu.onLure = function(animal, playerObj, item)
     ISTimedActionQueue.add(ISLureAnimal:new(playerObj, animal, item))
 end
 
-AnimalContextMenu.onDebugSetStress = function(animal, chr)
-    local modal = ISTextBox:new(0, 0, 280, 180, "Set Stress", animal:getStress() .. "", nil, AnimalContextMenu.onSetStressClick, chr, animal, getSpecificPlayer(chr));
+AnimalContextMenu.onDebugSetStress = function(animal, playerNum)
+    local modal = ISTextBox:new(0, 0, 280, 180, "Set Stress", animal:getStress() .. "", nil, AnimalContextMenu.onSetStressClick, playerNum, animal, getSpecificPlayer(playerNum));
     modal:initialise();
     modal:addToUIManager();
     modal:setOnlyNumbers(true);
-    if JoypadState.players[chr+1] then
-        setJoypadFocus(player, modal)
+    if getJoypadData(playerNum) then
+        modal.prevFocus = getJoypadFocus(playerNum)
+        setJoypadFocus(playerNum, modal)
     end
 end
 
@@ -772,13 +773,14 @@ AnimalContextMenu.onShearAnimal = function(animal, chr, shear)
     ISTimedActionQueue.add(ISShearAnimal:new(chr, animal, shear))
 end
 
-AnimalContextMenu.onSetWoolQty = function(animal, chr)
-    local modal = ISTextBox:new(0, 0, 280, 180, getText("ContextMenu_SetWoolQty"), animal:getData():getWoolQuantity() .. "", nil, AnimalContextMenu.onSetWoolQtyClick, chr, animal, getSpecificPlayer(chr));
+AnimalContextMenu.onSetWoolQty = function(animal, playerNum)
+    local modal = ISTextBox:new(0, 0, 280, 180, getText("ContextMenu_SetWoolQty"), animal:getData():getWoolQuantity() .. "", nil, AnimalContextMenu.onSetWoolQtyClick, playerNum, animal, getSpecificPlayer(playerNum));
     modal:initialise();
     modal:addToUIManager();
     modal:setOnlyNumbers(true);
-    if JoypadState.players[chr+1] then
-        setJoypadFocus(player, modal)
+    if getJoypadData(playerNum) then
+        modal.prevFocus = getJoypadFocus(playerNum)
+        setJoypadFocus(playerNum, modal)
     end
 end
 
@@ -796,13 +798,14 @@ function AnimalContextMenu:onSetWoolQtyClick(button, animal, playerObj)
     end
 end
 
-AnimalContextMenu.onSetMilkQty = function(animal, chr)
-    local modal = ISTextBox:new(0, 0, 280, 180, getText("ContextMenu_SetMilkQty"), animal:getData():getMilkQuantity() .. "", nil, AnimalContextMenu.onSetMilkQtyClick, chr, animal, getSpecificPlayer(chr));
+AnimalContextMenu.onSetMilkQty = function(animal, playerNum)
+    local modal = ISTextBox:new(0, 0, 280, 180, getText("ContextMenu_SetMilkQty"), animal:getData():getMilkQuantity() .. "", nil, AnimalContextMenu.onSetMilkQtyClick, playerNum, animal, getSpecificPlayer(playerNum));
     modal:initialise();
     modal:addToUIManager();
     modal:setOnlyNumbers(true);
-    if JoypadState.players[chr+1] then
-        setJoypadFocus(player, modal)
+    if getJoypadData(playerNum) then
+        modal.prevFocus = getJoypadFocus(playerNum)
+        setJoypadFocus(playerNum, modal)
     end
 end
 
@@ -875,7 +878,8 @@ AnimalContextMenu.SetFertilizedTime = function(animal, player)
     modal:initialise();
     modal:addToUIManager();
     modal:setOnlyNumbers(true);
-    if JoypadState.players[player+1] then
+    if getJoypadData(player) then
+        modal.prevFocus = getJoypadFocus(player)
         setJoypadFocus(player, modal)
     end
 end
@@ -908,7 +912,8 @@ AnimalContextMenu.SetPregnancyPeriod = function(animal, player)
     modal:initialise();
     modal:addToUIManager();
     modal:setOnlyNumbers(true);
-    if JoypadState.players[player+1] then
+    if getJoypadData(player) then
+        modal.prevFocus = getJoypadFocus(player)
         setJoypadFocus(player, modal)
     end
 end
@@ -932,7 +937,9 @@ AnimalContextMenu.onSetAnimalAge = function(animal, player)
     modal:initialise();
     modal:addToUIManager();
     modal:setOnlyNumbers(true);
-    if JoypadState.players[player+1] then
+    if getJoypadData(player) then
+        modal:centerOnScreen(player)
+        modal.prevFocus = getJoypadFocus(player)
         setJoypadFocus(player, modal)
     end
 end
@@ -961,9 +968,14 @@ AnimalContextMenu.onRemoveAnimal = function(animal, playerObj)
 end
 
 AnimalContextMenu.onAnimalInfo = function(animal, chr)
-    local ui = ISAnimalUI:new(100, 100, 680, 500, animal, chr)
+    local playerNum = chr:getPlayerNum()
+    local ui = ISAnimalUI:new(getPlayerScreenLeft(playerNum)+100, getPlayerScreenTop(playerNum)+100, 680, 500, animal, chr)
     ui:initialise();
     ui:addToUIManager();
+    if getJoypadData(playerNum) then
+        ui.prevFocus = getJoypadFocus(playerNum)
+        setJoypadFocus(playerNum, ui)
+    end
 end
 
 AnimalContextMenu.onDetachAnimalTree = function(animal, chr)
@@ -1039,10 +1051,14 @@ AnimalContextMenu.doDesignationZoneMenu = function(context, zone, playerObj)
 end
 
 AnimalContextMenu.onCheckZone = function(zone, playerObj)
-    local ui = ISDesignationZoneAnimalZoneUI:new(50,50, 600, 600, playerObj, zone);
+    local playerNum = playerObj:getPlayerNum()
+    local ui = ISDesignationZoneAnimalZoneUI:new(getPlayerScreenLeft(playerNum)+50, getPlayerScreenTop(playerNum)+50, 600, 600, playerObj, zone);
     ui:initialise()
     ui:addToUIManager()
-    ISAnimalZoneFirstInfo.showUI();
+    if getJoypadData(playerNum) then
+        setJoypadFocus(playerNum, ui)
+    end
+    ISAnimalZoneFirstInfo.showUI(playerNum, false);
 end
 
 AnimalContextMenu.onKillAnimal = function(animal, playerObj)
@@ -1126,7 +1142,7 @@ function AnimalContextMenu.showRadialMenu(playerObj)
     if animal:getData():getMilkQuantity() > 0.1 and animal:canBeMilked() then
         local bucketList = playerObj:getInventory():getAvailableFluidContainer(animal:getData():getBreed():getMilkType())
         local bucket = nil;
-        if bucketList then
+        if bucketList and not bucketList:isEmpty() then
             bucket = bucketList:get(0);
         end
 
@@ -1158,6 +1174,12 @@ function AnimalContextMenu.showRadialMenu(playerObj)
     menu:setX(getPlayerScreenLeft(playerIndex) + getPlayerScreenWidth(playerIndex) / 2 - menu:getWidth() / 2)
     menu:setY(getPlayerScreenTop(playerIndex) + getPlayerScreenHeight(playerIndex) / 2 - menu:getHeight() / 2)
     menu:addToUIManager()
+
+    if getJoypadData(playerIndex) then
+        menu:setHideWhenButtonReleased(Joypad.DPadUp)
+        setJoypadFocus(playerIndex, menu)
+        playerObj:setJoypadIgnoreAimUntilCentered(true)
+    end
 end
 
 Events.OnClickedAnimalForContext.Add(AnimalContextMenu.clickedAnimals);

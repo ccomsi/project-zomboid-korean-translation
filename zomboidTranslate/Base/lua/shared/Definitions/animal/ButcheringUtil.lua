@@ -53,6 +53,7 @@ function setAnimalBodyData(died, modData)
         modData["woolQty"] = died:getData():getWoolQuantity();
         modData["shouldBeBodyFleece"] = died:getData():getWoolQuantity() > (died:getData():getMaxWool() / 2);
     end
+    modData["roadKill"] = died:isRoadKill();
 end
 
 -- Give every items to the player defined in ButcheringUtil.animals[]
@@ -141,12 +142,34 @@ function ButcheringUtil.butcherAnimalFromGround(carcass, player, keepCorpse)
     if not keepCorpse and not partDef.noSkeleton then
         carcass:getModData()["skeleton"] = "true";
         carcass:getModData()["parts"] =  null;
+        carcass:getModData()["head"] = nil;
+        carcass:getModData()["headless"] = true;
+        carcass:changeRotStage(2); -- switch to a bloody skeleton
         carcass:invalidateCorpse();
     end
 
     if partDef.noSkeleton and carcass:getSquare() then
         carcass:getSquare():removeCorpse(carcass, false);
         carcass:invalidateCorpse();
+    end
+
+    -- add possible blood on character
+    local bloodNb = ZombRand(22 - (player:getPerkLevel(Perks.Butchering) * 2));
+
+    -- if animal still had blood in it, add lots more
+    local bloodGround = 0;
+    if carcass:getModData()["BloodQty"] > 0 then
+        bloodNb = bloodNb + carcass:getModData()["BloodQty"] * 2
+        bloodGround = carcass:getModData()["BloodQty"] * 2;
+    end
+
+    -- add some blood on ground and on player
+    for i=0,bloodNb do
+        player:addBlood(nil, true, false, false);
+    end
+
+    for i=0,bloodGround do
+        addBloodSplat(carcass:getSquare(), 2, ZombRandFloat(-0.3, 0.3), ZombRandFloat(-0.3, 0.3))
     end
 
     return text;
@@ -175,6 +198,7 @@ end
 -- Add an animal part in the player's inventory
 -- If the part is a food we gonna modify it
 function ButcheringUtil.addAnimalPart(part, player, carcass, fromGround)
+    local skill = player:getPerkLevel(Perks.Butchering);
     local text = "";
     -- if you're doing it from ground but animal can't go on a hook, it's all ok
     if fromGround then
@@ -211,9 +235,18 @@ function ButcheringUtil.addAnimalPart(part, player, carcass, fromGround)
     local nb = part.nb;
     -- lower parts gathered if from the ground
     if fromGround then
-        minNb = minNb * 0.8;
-        maxNb = maxNb * 0.8;
+        minNb = minNb * 0.6;
+        maxNb = maxNb * 0.6;
+    else
+        minNb = minNb * 1.2;
+        maxNb = maxNb * 1.2;
     end
+
+    -- every 2 pts in butchering gives * 1.1 max meat ratio
+    local skillIndex = (math.floor(skill/2) / 10) + 1;
+    maxNb = maxNb * skillIndex;
+
+
     local meatRatio = carcass:getModData()["meatRatio"];
     if meatRatio <= 0 then
         meatRatio = 1;
@@ -228,6 +261,25 @@ function ButcheringUtil.addAnimalPart(part, player, carcass, fromGround)
 
     --print("meat ratio", meatRatio, minNb, maxNb, nb, carcass:getAnimalSize())
 
+    if carcass:getModData()["roadKill"] then
+        minNb = minNb / 2;
+        maxNb = maxNb / 2;
+        meatRatio = ZombRand(0.1, 0.2);
+    end
+
+    local rotten = false;
+    -- depending on the time passed since death we lower the food nb/ratio
+    local deathAge = carcass:getModData()["deathAge"] or 0;
+    if deathAge > 12 then -- give 12h before starting to lower it
+        local delta = deathAge/30;
+        minNb = minNb / delta;
+        maxNb = maxNb / delta;
+        meatRatio = meatRatio / delta;
+        if carcass:getModData()["animalRotStage"] > 0 then -- corpse has rotten
+            rotten = true;
+        end
+    end
+
     if nb == -1 then
         nb = ZombRand(minNb, maxNb);
     end
@@ -238,7 +290,7 @@ function ButcheringUtil.addAnimalPart(part, player, carcass, fromGround)
 
     -- meat can be modified to give prime cut/medium cut etc.
     if AnimalPartsDefinitions.meat[part.item] then
-        text = text .. ButcheringUtil.giveMeatModified(AnimalPartsDefinitions.meat[part.item], nb, player, meatRatio, carcass, fromGround);
+        text = text .. ButcheringUtil.giveMeatModified(AnimalPartsDefinitions.meat[part.item], nb, player, meatRatio, carcass, fromGround, rotten, deathAge);
         return text;
     end
 
@@ -248,7 +300,7 @@ function ButcheringUtil.addAnimalPart(part, player, carcass, fromGround)
 
         -- If the item is a food we alter its hunger depending on the size of animal
         if instanceof(item, "Food") then
-            text = text .. ButcheringUtil.modifyMeat(item, carcass:getAnimalSize(), meatRatio);
+            text = text .. ButcheringUtil.modifyMeat(item, carcass:getAnimalSize(), meatRatio, 1, rotten, deathAge);
         else
             text = text .. item:getDisplayName();
         end
@@ -278,7 +330,7 @@ function roundButcher(x)
 end
 
 -- gives various type of meat depending on the definition
-function ButcheringUtil.giveMeatModified(meatDef, nb, player, meatRatio, carcass, fromGround)
+function ButcheringUtil.giveMeatModified(meatDef, nb, player, meatRatio, carcass, fromGround, rotten, deathAge)
     local text = "";
 
     local percRest = 100;
@@ -307,9 +359,9 @@ function ButcheringUtil.giveMeatModified(meatDef, nb, player, meatRatio, carcass
 
             local hungerBoost = partDef.hungerBoost;
             if fromGround then
-                hungerBoost = hungerBoost * 0.7;
+                hungerBoost = hungerBoost * 0.6;
             end
-            ButcheringUtil.modifyMeat(item, carcass:getAnimalSize(), meatRatio, partDef.hungerBoost);
+            ButcheringUtil.modifyMeat(item, carcass:getAnimalSize(), meatRatio, partDef.hungerBoost, rotten, deathAge);
             item:setName(getText("IGUI_AnimalMeat", getText(partDef.baseName), getText(partDef.extraName)))
             item:setCustomName(true);
 
@@ -342,7 +394,7 @@ end
 
 -- Modify the meat/food item given by the butchering by the meatRatio & size of animal
 -- Adding a *0.9-1.1 for extra flavor
-function ButcheringUtil.modifyMeat(item, size, meatRatio, hungerBoost)
+function ButcheringUtil.modifyMeat(item, size, meatRatio, hungerBoost, rotten, deathAge)
     local text = "";
 
     local ratio = size * meatRatio;
@@ -360,6 +412,12 @@ function ButcheringUtil.modifyMeat(item, size, meatRatio, hungerBoost)
     item:setLipids(item:getLipids() * ratio * ZombRandFloat(0.9, 1.1));
     item:setProteins(item:getProteins() * ratio * ZombRandFloat(0.9, 1.1));
     item:setCarbohydrates(item:getCarbohydrates() * ratio * ZombRandFloat(0.9, 1.1));
+
+    if rotten then
+        item:setAge(ZombRand(item:getOffAgeMax() + 3, item:getOffAgeMax() * 1.5));
+    else
+        item:setAge(ZombRand(0, deathAge/10));
+    end
 
     hungChangePositive = round(math.abs(item:getHungChange() * 100), 2);
 

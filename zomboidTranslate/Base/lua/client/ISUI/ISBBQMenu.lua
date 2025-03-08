@@ -45,8 +45,10 @@ function ISBBQMenu.OnFillWorldObjectContextMenu(player, context, worldobjects, t
 	for _,object in ipairs(worldobjects) do
 		local square = object:getSquare()
 		if square then
-			for i=1,square:getObjects():size() do
-				local object2 = square:getObjects():get(i-1)
+			local index = square:getNextNonItemObjectIndex(0)
+			while index >= 0 and index < square:getObjects():size() do
+				local object2 = square:getObjects():get(index)
+				index = square:getNextNonItemObjectIndex(index + 1)
 				if instanceof(object2, "IsoBarbecue") then
 					bbq = object2
 				end

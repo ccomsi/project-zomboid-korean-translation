@@ -12,7 +12,7 @@ function ISAddWaterFromItemAction:isValid()
     else
         return self.itemFrom:isWaterSource() and self.character:getInventory():contains(self.itemFrom) and
             self.objectTo:getObjectIndex() ~= -1 and
-            self.objectTo:getWaterAmount() < self.objectTo:getWaterMax()
+            self.objectTo:getFluidAmount() < self.objectTo:getFluidCapacity()
     end
 end
 
@@ -24,11 +24,6 @@ end
 function ISAddWaterFromItemAction:update()
 	self.character:faceThisObject(self.objectTo)
 	self.itemFrom:setJobDelta(self:getJobDelta())
-	
-	local waterUsed = self.addUnits * self:getJobDelta();
-	local waterRemaining = self.itemFromStartAmount - waterUsed;
-	self:setItemFromWaterAmount(waterRemaining);
-
 	self.character:setMetabolicTarget(Metabolics.LightDomestic);
 end
 
@@ -48,15 +43,11 @@ end
 function ISAddWaterFromItemAction:stop()
 	self:stopSound()
 	self.itemFrom:setJobDelta(0.0)
-	-- Possibly start() wasn't called yet (because isValid() returned false)
-	if self.addUnits and self.addUnits > 0 then
-		local waterUsed = self.addUnits * self:getJobDelta();
-		local waterRemaining = self.itemFromStartAmount - waterUsed;
-		self:setItemFromWaterAmount(waterRemaining);
 
-		self.objectTo:setWaterAmount(self.objectTo:getWaterAmount() + waterUsed, self.itemFrom:isTaintedWater())
-		self.objectTo:sync()
+	if not isClient() and not isServer() then
+		self:serverStop()
 	end
+
 	ISBaseTimedAction.stop(self)
 end
 
@@ -70,32 +61,19 @@ function ISAddWaterFromItemAction:perform()
 end
 
 function ISAddWaterFromItemAction:serverStop()
-	self.addUnits = self.netAction:getProgress() * self.addUnits
+	local progress = self.netAction and self.netAction:getProgress() or self:getJobDelta();
+	self.addUnits = progress * self.addUnits
 	self.itemFromEndingAmount = self.itemFromStartAmount - self.addUnits
 	self:complete()
 end
 
 function ISAddWaterFromItemAction:complete()
-	self:setItemFromWaterAmount(self.itemFromEndingAmount);
-	
-	self.objectTo:setWaterAmount(self.objectTo:getWaterAmount() + self.addUnits, self.itemFromTainted)
-	self.objectTo:sync()
-
-	--if (self.itemFrom:getCurrentUsesFloat() / self.itemFrom:getUseDelta()) < 1.0 then
-	--	self.itemFrom:UseAndSync()
-	--end
+	if self.addUnits and self.addUnits > 0 then
+		self.objectTo:transferFluidFrom(self.itemFrom:getFluidContainer(), self.addUnits);
+		self.itemFrom:syncItemFields();
+	end
 
 	return true;
-end
-
-function ISAddWaterFromItemAction:setItemFromWaterAmount(_amount)
-	local targetUsed = _amount;
-	local actualUsed = self.itemFrom:getFluidContainer():getAmount();
-	local overFillAmount = actualUsed - targetUsed;
-	
-	if self.itemFrom:isWaterSource() then
-		self.itemFrom:getFluidContainer():removeFluid(overFillAmount)
-	end
 end
 
 function ISAddWaterFromItemAction:getDuration()
@@ -116,9 +94,8 @@ function ISAddWaterFromItemAction:new(character, itemFrom, objectTo)
 	o.itemFrom = itemFrom
 	o.objectTo = objectTo
 
-	o.itemFromTainted = not o.itemFrom:isPureWater(false)
 	o.itemFromStartAmount = o.itemFrom:getFluidContainer():getAmount()
-	local destCapacity = math.max(0, o.objectTo:getWaterMax() - o.objectTo:getWaterAmount());
+	local destCapacity = math.max(0, o.objectTo:getFluidCapacity() - o.objectTo:getFluidAmount());
 	o.addUnits = math.min(destCapacity, o.itemFromStartAmount)
 	o.itemFromEndingAmount = o.itemFromStartAmount - o.addUnits
 

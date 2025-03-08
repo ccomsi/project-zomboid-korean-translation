@@ -415,7 +415,8 @@ function MainScreen:instantiate()
         getTextManager():MeasureStringX(UIFont.Small, getText("UI_Details")),
         getTextManager():MeasureStringX(UIFont.Small, getText("UI_NewGame_Mods")),
         getTextManager():MeasureStringX(UIFont.Small, getText("UI_TermsOfService_MainMenu")),
-        getTextManager():MeasureStringX(UIFont.Small, getText("UI_ResetLua"))
+        getTextManager():MeasureStringX(UIFont.Small, getText("UI_ResetLua")),
+        getTextManager():MeasureStringX(UIFont.Small, getText("UI_ReportBug"))
     )
 
     if not self.inGame then
@@ -665,7 +666,7 @@ function MainScreen:instantiate()
     reportY = reportY - UI_BORDER_SPACING - BUTTON_HGT
     self.reportBug = ISButton:new(self.versionDetail.x, reportY, btnWidth, BUTTON_HGT, getText("UI_ReportBug"), self, MainScreen.onClickReportBug);
     self.reportBug:initialise();
-    self.reportBug.borderColor = {r=1, g=.1, b=.1, a=1};
+    self.reportBug.borderColor = {r=1, g=0, b=0, a=1};
     self.reportBug.textColor =  {r=1, g=1, b=1, a=1};
     self.reportBug:setAnchorLeft(false)
     self.reportBug:setAnchorTop(false)

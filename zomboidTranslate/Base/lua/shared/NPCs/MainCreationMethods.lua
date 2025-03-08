@@ -145,6 +145,7 @@ BaseGameCharacterDetails.DoTraits = function()
     handy:getFreeRecipes():add("MakeSawbladeWeapon")
     handy:getFreeRecipes():add("SheetMetalWeapon")
     handy:getFreeRecipes():add("MakeSpadeHeadCudgel")
+    handy:getFreeRecipes():add("MakeScrewdriver");
 
 	local isMP = (isClient() or isServer());
 	
@@ -384,16 +385,7 @@ BaseGameCharacterDetails.DoTraits = function()
     cook:getFreeRecipes():add("MakeFriedOnionRings");
     cook:getFreeRecipes():add("MakeFriedShrimp");
     cook:getFreeRecipes():add("MakeCabbageRolls");
-
-    cook:getFreeRecipes():add("MakeJarofTomatoes");
-    cook:getFreeRecipes():add("MakeJarofCarrots");
-    cook:getFreeRecipes():add("MakeJarofPotatoes");
-    cook:getFreeRecipes():add("MakeJarofEggplant");
-    cook:getFreeRecipes():add("MakeJarofLeeks");
-    cook:getFreeRecipes():add("MakeJarofRedRadishes");
-    cook:getFreeRecipes():add("MakeJarofBellPeppers");
-    cook:getFreeRecipes():add("MakeJarofCabbage");
-    cook:getFreeRecipes():add("MakeJarofBroccoli");
+    cook:getFreeRecipes():add("MakeJar");
 
 
     TraitFactory.addTrait("Cook2", getText("UI_trait_Cook"), 0, getText("UI_trait_Cook2Desc"), true);
@@ -428,11 +420,11 @@ BaseGameCharacterDetails.DoTraits = function()
     wilderness:getFreeRecipes():add("MakeComfreyPoultice");
     wilderness:getFreeRecipes():add("MakeWildGarlicPoultice");
 
-    wilderness:getFreeRecipes():add("Black Sage Growing Season");
-    wilderness:getFreeRecipes():add("Broadleaf Plantain Growing Season");
-    wilderness:getFreeRecipes():add("Comfrey Growing Season");
-    wilderness:getFreeRecipes():add("Common Mallow Growing Season");
-    wilderness:getFreeRecipes():add("Wild Garlic Growing Season");
+--     wilderness:getFreeRecipes():add("Black Sage Growing Season");
+--     wilderness:getFreeRecipes():add("Broadleaf Plantain Growing Season");
+--     wilderness:getFreeRecipes():add("Comfrey Growing Season");
+--     wilderness:getFreeRecipes():add("Common Mallow Growing Season");
+--     wilderness:getFreeRecipes():add("Wild Garlic Growing Season");
 
     wilderness:getFreeRecipes():add("BindSpear");
     wilderness:getFreeRecipes():add("WireSpear");
@@ -451,6 +443,9 @@ BaseGameCharacterDetails.DoTraits = function()
     wilderness:getFreeRecipes():add("MakeJawboneAxe");
     wilderness:getFreeRecipes():add("MakeFishingRod");
     wilderness:getFreeRecipes():add("MakeSnareTrap");
+    wilderness:getFreeRecipes():add("MakeStoneBladeSaw");
+    wilderness:getFreeRecipes():add("CarveBucket");
+    wilderness:getFreeRecipes():add("CarveFleshingTool");
 
 	local barfighter = TraitFactory.addTrait("Brawler", getText("UI_trait_BarFighter"), 6, getText("UI_trait_BarFighterDesc"), false);
 	barfighter:addXPBoost(Perks.Axe, 1)
@@ -472,6 +467,7 @@ BaseGameCharacterDetails.DoTraits = function()
 
 	local baseball = TraitFactory.addTrait("BaseballPlayer", getText("UI_trait_PlaysBaseball"), 4, getText("UI_trait_PlaysBaseballDesc"), false);
 	baseball:addXPBoost(Perks.Blunt, 1)
+	baseball:getFreeRecipes():add("CarveBat")
 
 	local backpacker = TraitFactory.addTrait("Hiker", getText("UI_trait_Hiker"), 6, getText("UI_trait_HikerDesc"), false);
 	backpacker:addXPBoost(Perks.PlantScavenging, 1)
@@ -503,14 +499,46 @@ BaseGameCharacterDetails.DoTraits = function()
 
 	local whittler = TraitFactory.addTrait("Whittler", getText("UI_trait_Whittler"), 2, getText("UI_trait_WhittlerDesc"), false);
 	whittler:addXPBoost(Perks.Carving, 2)
+    whittler:getFreeRecipes():add("SharpenBone");
     whittler:getFreeRecipes():add("SharpenLongBone");
+    whittler:getFreeRecipes():add("SharpenJawbone");
     whittler:getFreeRecipes():add("MakeBoneFishingHook");
     whittler:getFreeRecipes():add("MakeBoneSewingNeedle");
+    whittler:getFreeRecipes():add("CarveKnittingNeedles");
+    whittler:getFreeRecipes():add("CarveBat");
+    whittler:getFreeRecipes():add("MakeBoneHatchetHead");
+    whittler:getFreeRecipes():add("MakeBoneAwl");
+    whittler:getFreeRecipes():add("MakeLargeBoneBead");
+    whittler:getFreeRecipes():add("MakeLargeBoneBeads");
+    whittler:getFreeRecipes():add("CarveWoodenFork");
+    whittler:getFreeRecipes():add("MakeBoneFork");
+    whittler:getFreeRecipes():add("CarveWoodenSpade");
+    whittler:getFreeRecipes():add("CarveGoblets");
+    whittler:getFreeRecipes():add("CarveBucket");
+    whittler:getFreeRecipes():add("CarveFleshingTool");
+    whittler:getFreeRecipes():add("CarveShortBat");
+
+
+
+	local mason = TraitFactory.addTrait("Mason", getText("UI_trait_Mason"), 2, getText("UI_trait_MasonDesc"), false);
+	mason:addXPBoost(Perks.Masonry, 2)
+    mason:getFreeRecipes():add("Construct_Advanced_Forge");
+    mason:getFreeRecipes():add("Construct_Blast_Furnace");
+    mason:getFreeRecipes():add("Construct_Dome_Kiln");
+    mason:getFreeRecipes():add("Construct_Forge");
+    mason:getFreeRecipes():add("Construct_Smelting_Furnace");
+    mason:getFreeRecipes():add("Construct_Primitive_Forge");
+
+	local artisan = TraitFactory.addTrait("Artisan", getText("UI_trait_Artisan"), 2, getText("UI_trait_ArtisanDesc"), false);
+	artisan:addXPBoost(Perks.Glassmaking, 1)
+	artisan:addXPBoost(Perks.Pottery, 1)
+
+	local inventive = TraitFactory.addTrait("Inventive", getText("UI_trait_Inventive"), 2, getText("UI_trait_InventiveDesc"), false);
 
 	--TraitFactory.addTrait("Dismantler", getText("UI_trait_Dismantler"), 2, getText("UI_trait_DismantlerDesc"), false);
 	
 	
-	   TraitFactory.setMutualExclusive("Blacksmith", "Blacksmith2");
+	TraitFactory.setMutualExclusive("Blacksmith", "Blacksmith2");
 --    TraitFactory.setMutualExclusive("Metalworker", "Metalworker2");
 	TraitFactory.setMutualExclusive("SpeedDemon", "SundayDriver");
 	TraitFactory.setMutualExclusive("Dextrous", "AllThumbs");
@@ -583,7 +611,8 @@ BaseGameCharacterDetails.DoTraits = function()
     TraitFactory.setMutualExclusive("Desensitized", "AdrenalineJunkie");
     TraitFactory.setMutualExclusive("IronGut", "WeakStomach");
 
-    TraitFactory.setMutualExclusive("Herbalist", "WildernessKnowledge");
+    -- disabled as now wilderness knowledge doesn't teach growing seasons
+--     TraitFactory.setMutualExclusive("Herbalist", "WildernessKnowledge");
 
     TraitFactory.sortList();
 
@@ -670,7 +699,7 @@ BaseGameCharacterDetails.DoProfessions = function()
     local constructionworker = ProfessionFactory.addProfession("constructionworker", getText("UI_prof_constructionworker"), "profession_constructionworker2", -2);
 --    constructionworker:addFreeTrait("ThickSkinned");
 	constructionworker:addXPBoost(Perks.SmallBlunt, 3)
-	constructionworker:addXPBoost(Perks.Masonry, 3)
+	constructionworker:addXPBoost(Perks.Masonry, 2)
 	constructionworker:addXPBoost(Perks.Woodwork, 1)
 	constructionworker:addXPBoost(Perks.Maintenance, 1)
 --    constructionworker:addFreeTrait("Handy");
@@ -724,6 +753,7 @@ BaseGameCharacterDetails.DoProfessions = function()
     burglar:getFreeRecipes():add("MakeShinBulletproofVestArmor");
     burglar:getFreeRecipes():add("MakeThighBulletproofVestArmor");
     burglar:getFreeRecipes():add("Hemp Growing Season");
+    burglar:getFreeRecipes():add("MakeScrewdriver");
 
 	local chef = ProfessionFactory.addProfession("chef", getText("UI_prof_Chef"), "profession_chef2", -4);
 	chef:addXPBoost(Perks.Cooking, 3)
@@ -787,6 +817,7 @@ BaseGameCharacterDetails.DoProfessions = function()
     repairman:getFreeRecipes():add("MakeSawbladeWeapon")
     repairman:getFreeRecipes():add("SheetMetalWeapon")
     repairman:getFreeRecipes():add("MakeSpadeHeadCudgel")
+    repairman:getFreeRecipes():add("MakeScrewdriver");
 
     local rancher = ProfessionFactory.addProfession("rancher", getText("UI_prof_rancher"), "profession_rancher", -2);
     rancher:addXPBoost(Perks.Farming, 1)
@@ -7218,18 +7249,16 @@ end
 
 doMetalWorkerRecipes = function (metalworker)
 
-    metalworker:getFreeRecipes():add("Construct Advanced Forge");
-    metalworker:getFreeRecipes():add("Construct Blast Furnace");
-    metalworker:getFreeRecipes():add("Construct Charcoal Burner");
-    metalworker:getFreeRecipes():add("Construct Charcoal Pit");
-    metalworker:getFreeRecipes():add("Construct Dome Kiln");
-    metalworker:getFreeRecipes():add("Construct Forge");
-    metalworker:getFreeRecipes():add("Construct Makeshift Electric Blower Forge");
-    metalworker:getFreeRecipes():add("Construct Smelting Furnace");
-    metalworker:getFreeRecipes():add("Construct Primitive Forge");
-    metalworker:getFreeRecipes():add("Construct Primitive Furnace");
-    metalworker:getFreeRecipes():add("Extract Workable Iron From Bloom");
-    metalworker:getFreeRecipes():add("Extract Workable Iron from Ingot");
+    metalworker:getFreeRecipes():add("Construct_Advanced_Forge");
+    metalworker:getFreeRecipes():add("Construct_Blast_Furnace");
+    metalworker:getFreeRecipes():add("Construct_Charcoal_Burner");
+    metalworker:getFreeRecipes():add("Construct_Charcoal_Pit");
+    metalworker:getFreeRecipes():add("Construct_Dome_Kiln");
+    metalworker:getFreeRecipes():add("Construct_Forge");
+    metalworker:getFreeRecipes():add("Construct_Makeshift_Electric_Blower_Forge");
+    metalworker:getFreeRecipes():add("Construct_Smelting_Furnace");
+    metalworker:getFreeRecipes():add("Construct_Primitive_Forge");
+    metalworker:getFreeRecipes():add("Construct_Primitive_Furnace");
 
     metalworker:getFreeRecipes():add("Forge_Baking_Pan");
     metalworker:getFreeRecipes():add("Forge_Baking_Tray");
@@ -7276,7 +7305,7 @@ doMetalWorkerRecipes = function (metalworker)
     metalworker:getFreeRecipes():add("Forge_Saw");
     metalworker:getFreeRecipes():add("Forge_Scissors");
     metalworker:getFreeRecipes():add("Forge_Scythe_Head");
-    metalworker:getFreeRecipes():add("Forge_Shovel");
+    metalworker:getFreeRecipes():add("Forge_Spade_Head");
     metalworker:getFreeRecipes():add("Forge_Sheep_Shears");
     metalworker:getFreeRecipes():add("Forge_Sledgehammer_Head");
     metalworker:getFreeRecipes():add("Forge_Small_Armor_Plate");
@@ -7304,6 +7333,9 @@ doMetalWorkerRecipes = function (metalworker)
     metalworker:getFreeRecipes():add("Forge_Old_Axe_Head");
     metalworker:getFreeRecipes():add("Forge_Hand_Axe_Head");
     metalworker:getFreeRecipes():add("Forge_Fleshing_Tool");
+    metalworker:getFreeRecipes():add("Forge_Goblets");
+    metalworker:getFreeRecipes():add("Forge_Cup");
+    metalworker:getFreeRecipes():add("Forge_Buckle");
 
 
 --     metalworker:getFreeRecipes():add("Make Fork");

@@ -23,15 +23,19 @@ function ISGetHutchInfo:stop()
 end
 
 function ISGetHutchInfo:perform()
-	local ui = ISHutchUI:new(100, 100, 600, 500, self.hutch, self.character)
+	local ui = ISHutchUI:new(getPlayerScreenLeft(self.playerNum)+100, getPlayerScreenTop(self.playerNum)+100, 200, 200, self.hutch, self.character)
 	ui:initialise();
 	ui:addToUIManager();
-    -- needed to remove from queue / start next.
+	if getJoypadData(self.playerNum) then
+		setJoypadFocus(self.playerNum, ui)
+	end
+	-- needed to remove from queue / start next.
 	ISBaseTimedAction.perform(self);
 end
 
 function ISGetHutchInfo:new(character, hutch)
 	local o = ISBaseTimedAction.new(self, character)
+	o.playerNum = character:getPlayerNum()
 	o.hutch = hutch;
 	o.maxTime = 1
 	o.stopOnAim = false;

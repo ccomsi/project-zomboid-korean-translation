@@ -83,8 +83,11 @@ function ISRepairEngine:complete()
 	return true
 end
 
-function ISRepairEngine:getDuration()
-	return self.maxTime;
+function ISRepairEngine:getDuration(maxTime)
+	if self.character:isTimedActionInstant() then
+		return 1;
+	end
+	return maxTime;
 end
 
 function ISRepairEngine:new(character, part, item, maxTime)
@@ -92,7 +95,7 @@ function ISRepairEngine:new(character, part, item, maxTime)
 	o.vehicle = part:getVehicle()
 	o.part = part
 	o.item = item
-	o.maxTime = maxTime
+	o.maxTime = o:getDuration(maxTime)
 	o.jobType = getText("IGUI_RepairEngine")
 	return o
 end

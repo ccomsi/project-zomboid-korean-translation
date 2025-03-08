@@ -189,15 +189,18 @@ function ISCraftRecipePanel:updateContainers(containers)
     end
 end
 
+function ISCraftRecipePanel:onGainJoypadFocus(joypadData)
+    ISPanel.onGainJoypadFocus(self, joypadData)
+    joypadData.focus = self.inputs
+    updateJoypadFocus(joypadData)
+end
 
 --************************************************************************--
 --** ISCraftRecipePanel:new
 --**
 --************************************************************************--
 function ISCraftRecipePanel:new(x, y, width, height, player, logic, recipeData, craftBench, isoObject)
-    local o = ISPanel:new(x, y, width, height);
-    setmetatable(o, self)
-    self.__index = self
+    local o = ISPanel.new(self, x, y, width, height);
 
     o.background = false;
     --o.margin = 5;

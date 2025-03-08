@@ -15,6 +15,9 @@ function ISDrinkFluidAction:waitToStart()
 end
 
 function ISDrinkFluidAction:isValid()
+	if self.item:getWorldItem() ~= nil and self.item:getWorldItem():getFluidContainer() == self.fluidContainer then
+		return true;
+	end
     if isClient() and self.item and ISFluidUtil.validateContainer(self.item) then
         return self.character:getInventory():containsID(self.item:getID());
     else
@@ -66,6 +69,11 @@ end
 
 function ISDrinkFluidAction:stop()
     ISBaseTimedAction.stop(self);
+
+	if not isClient() and not isServer() then
+		self:serverStop();
+	end	
+	
 	if self.eatAudio ~= 0 and self.character:getEmitter():isPlaying(self.eatAudio) then
 		self.character:stopOrTriggerSound(self.eatAudio);
 	end
@@ -73,12 +81,7 @@ function ISDrinkFluidAction:stop()
 end
 
 function ISDrinkFluidAction:serverStop()
-	local applyEat = true;
-	local hungerChange = math.abs(self.item:getFluidContainer():getProperties():getHungerChange() * 100)
-	if (hungerChange or self.item:getBaseHunger()) and hungerChange <= 1 then
-		applyEat = false; -- dont consume 1 hunger food items when action cancelled.
-	end
-	if applyEat and self.character:getInventory():contains(self.item) then
+	if self.character:getInventory():contains(self.item) then
 		self:eat(self.item, self:getJobDelta());
 	end
 end
@@ -95,8 +98,8 @@ end
 
 function ISDrinkFluidAction:complete()
 --     self.character:Say("Percentage - " .. tostring(self.percentage))
-    local capacity =self.item:getFluidContainer():getCapacity()
-    local amount = self.item:getFluidContainer():getAmount()
+    local capacity = self.fluidContainer:getCapacity()
+    local amount = self.fluidContainer:getAmount()
     local ratio = capacity/amount
 	self.character:DrinkFluid(self.item, self.percentage * ratio, self.useUtensil);
 	self.item:syncItemFields();
@@ -124,7 +127,8 @@ function ISDrinkFluidAction:new (character, item, percentage)
 --     character:Say("Percentage - " .. tostring(percentage))
 	local o = ISBaseTimedAction.new(self, character);
 	o.character = character;
-	o.item = item;
+	o.item = instanceof(item, "IsoWorldInventoryObject") and item:getItem() or item;
+	o.fluidContainer = item:getFluidContainer();
 	o.stopOnWalk = false;
 	o.stopOnRun = true;
     o.percentage = percentage;
@@ -133,13 +137,13 @@ function ISDrinkFluidAction:new (character, item, percentage)
         o.percentage = 1;
     end
 
-	o.maxTime = math.abs(item:getFluidContainer():getProperties():getHungerChange() * 150 * o.percentage) * 8;
+	o.maxTime = math.abs(o.fluidContainer:getProperties():getHungerChange() * 150 * o.percentage) * 8;
 
-    if o.maxTime > math.abs(item:getFluidContainer():getProperties():getHungerChange() * 150 * 8) then
-        o.maxTime = math.abs(item:getFluidContainer():getProperties():getHungerChange() * 150 * 8);
+    if o.maxTime > math.abs(o.fluidContainer:getProperties():getHungerChange() * 150 * 8) then
+        o.maxTime = math.abs(o.fluidContainer:getProperties():getHungerChange() * 150 * 8);
     end
 
-	local hungerConsumed = math.abs(item:getFluidContainer():getProperties():getHungerChange() * o.percentage * 100);
+	local hungerConsumed = math.abs(o.fluidContainer:getProperties():getHungerChange() * o.percentage * 100);
 	local eatingLoop = 1;
 	if hungerConsumed >= 30 then
 		eatingLoop = 2;
@@ -156,11 +160,11 @@ function ISDrinkFluidAction:new (character, item, percentage)
 	
 	-- Cigarettes don't reduce hunger
 	if hungerConsumed == 0 then o.maxTime = 460 end
-	if item:getEatType() == "popcan" then
+	if o.item:getEatType() == "popcan" then
 		o.maxTime = 160;
 	end
 
-    o.eatSound = item:getFluidContainer():getCustomDrinkSound();
+    o.eatSound = o.fluidContainer:getCustomDrinkSound();
     o.eatAudio = 0
 
     o.ignoreHandsWounds = true;

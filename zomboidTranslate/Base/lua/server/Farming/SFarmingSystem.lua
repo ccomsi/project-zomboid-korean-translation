@@ -311,7 +311,8 @@ function SFarmingSystem:checkPlantSquare(luaObject)
     -- if the plant has enough of a pest flies infestation we apply flies to the square
     if luaObject:hasVisibleFlies() then square:setHasFlies(true) end
     -- we may destroy our plant if someone walk onto it, or if it's already dead
-    self:destroyOnWalk(luaObject, square)
+    -- this is now handled java-side
+--     self:destroyOnWalk(luaObject, square)
 end
 
 function SFarmingSystem:checkWater(luaObject)
@@ -478,10 +479,10 @@ function SFarmingSystem:destroyOnWalk(luaObject, square)
 -- 	local square = luaObject:getSquare()
 -- 	if not square then return end
 -- 	if luaObject.state == "plow" or luaObject.state == "destroyed" or luaObject.state == "harvested" then return end
-	if square:isVehicleIntersectingCrops() then
-        luaObject:destroyThis()
-        return
-	end
+-- 	if square:isVehicleIntersectingCrops() then
+--         luaObject:destroyThis()
+--         return
+-- 	end
 	-- the other stuff is handled java-side now
 
 	-- if zombie walk on our plant !
