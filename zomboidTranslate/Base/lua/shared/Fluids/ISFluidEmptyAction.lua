@@ -50,6 +50,15 @@ function ISFluidEmptyAction:stop()
 	if self.sound and self.character:getEmitter():isPlaying(self.sound) then
 		self.character:stopOrTriggerSound(self.sound);
 	end
+	
+	-- do partial empty
+	if self.container:getFluidContainer() then
+		local oldAmount = self.container:getFluidContainer():getAmount();
+		local newAmount = oldAmount * self:getJobDelta();
+		self.container:getFluidContainer():adjustAmount(newAmount);
+		self.container:sync();
+	end
+	
 	ISBaseTimedAction.stop(self)
 end
 

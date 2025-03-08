@@ -370,7 +370,7 @@ function WalkToAdjacent:finish()
 end
 
 InventoryLootingStep = TutorialStep:derive("InventoryLootingStep");
-InventoryLootingStep.itemToEat = "DeadMouse";
+InventoryLootingStep.itemToEat = "DeadRat";
 function InventoryLootingStep:new () local o = {} setmetatable(o, self)    self.__index = self    return o end
 
 function InventoryLootingStep:begin()
@@ -392,13 +392,13 @@ function InventoryLootingStep:begin()
             local o = objs:get(i);
             local c = o:getContainer();
             if c ~= nil then
-                local mouse = c:AddItem("Base.DeadMouse");
+                local mouse = c:AddItem("Base.DeadRat");
                 mouse:setAge(17);
                 Tutorial1.DeadMouse = mouse;
                 c:AddItem("Base.EmptyJar");
-                c:AddItem("Base.Dung_Mouse");
+                c:AddItem("Base.Dung_Rat");
                 InventoryLootingStep.container = o
-                getPlayerLoot(0).inventoryPane.highlightItem = "DeadMouse";
+                getPlayerLoot(0).inventoryPane.highlightItem = "DeadRat";
                 break;
             end
         end
@@ -516,7 +516,7 @@ function InventoryUseStep:begin()
     if getCore():getDebug() and not InventoryLootingStep.finished then
         getPlayer():setAuthorizeMeleeAction(false);
         getPlayer():setIgnoreInputsForDirection(false);
-        Tutorial1.DeadMouse = getPlayer():getInventory():AddItem("Base.DeadMouse");
+        Tutorial1.DeadMouse = getPlayer():getInventory():AddItem("Base.DeadRat");
         getPlayer():getInventory():AddItem("Base.EmptyJar");
         if not JoypadState.players[1] then
             getPlayerInventory(0):setVisible(true);

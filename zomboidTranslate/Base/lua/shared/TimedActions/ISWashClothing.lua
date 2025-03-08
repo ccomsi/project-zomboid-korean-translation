@@ -7,7 +7,7 @@ require "TimedActions/ISBaseTimedAction"
 ISWashClothing = ISBaseTimedAction:derive("ISWashClothing");
 
 function ISWashClothing:isValid()
-	if self.sink:getWaterAmount() < ISWashClothing.GetRequiredWater(self.item) then
+	if self.sink:getFluidAmount() < ISWashClothing.GetRequiredWater(self.item) then
 		return false
 	end
 	return true
@@ -155,7 +155,7 @@ function ISWashClothing:complete()
 		self.character:setSecondaryHandItem(item);
 	end
 
-	self.sink:useWater(water);
+	self.sink:useFluid(water);
 
 	return true;
 end
@@ -198,7 +198,7 @@ function ISWashClothing:getDuration()
 		maxTime = 100;
 	end
 
-	return maxTime;
+	return self:adjustMaxTime(maxTime);
 end
 
 function ISWashClothing:new(character, sink, soaps, item, bloodAmount, dirtAmount, noSoap)

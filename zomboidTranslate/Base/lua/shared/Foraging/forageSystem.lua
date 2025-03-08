@@ -7,6 +7,50 @@
 --
 -------------------------------------------------
 --]]---------------------------------------------
+
+
+--[[
+MODDING FAQ:
+
+[*] How do I add an item to be foraged?
+	To add an item, it needs at least two things:
+		-a category defined, with a chance in a zone, and:
+		-an item definition, with a chance in a zone.
+
+	To ease adding definitions, events are provided in forageSystem.init() before each step of table generation.
+	The important step is getting the definitions into the table before generateLootTable() is called, or items will not be findable!
+
+	The easiest way to add an item, is to:
+	 -Create an itemDef (see addItemDef() for examples)
+	 -Add a chance to the itemDef for the zones to find it in. (see addItemDef for examples)
+	 -Make sure the category can be found in the zones you want it found in. (see addCatDef for examples)
+	 -Insert them into the definition tables. There are two ways to do this provided:
+	 	=For just a few itemDefs or for maximum control, use addItemDef() directly.
+	 	=For a table of itemDefs, pass the table to populateItemDefs().
+
+	 Events are provided before each step to allow overwriting definitions and preserving the order of operations.
+	 	-When using the add<x>Def helpers, the first definition provided takes precedence.
+	    -When using the populateItemDefs helper, the last definition added takes precedence.
+			-If a definition exists, it will use the modifyItemDef helper function.
+	    -When using any other populate<x>Defs helper other than populateItemDefs, it will skip existing entries.
+	        -To overwrite entries, use the add<x>Def helpers.
+		-Order of operations is important when definitions are added.
+
+[*] Do I need to use the events and helpers? Can I just put data into the forage tables?
+	Short answer: No. You can put data directly into the forage definition tables.
+		-If it breaks, you may keep both halves.
+
+	Long answer: Yes, it's highly recommended.
+		-If the order of operations change the event should be moved along with that change inside of forageSystem.init().
+		  -It provides a bit of extra insurance against updates changing the order.
+		-Helper functions (add<x>Def) (populate<x>Defs) can help with backwards + forwards compatibility.
+			-It provides a bit of extra insurance against table structure changes.
+		-Please note: I cannot guarantee multiple mods will play nice together where they affect the same definitions.
+]]
+
+
+
+
 --if isServer() then return; end;
 -------------------------------------------------
 -------------------------------------------------
@@ -39,6 +83,9 @@ end
 -- forageSystem
 --
 --]]---------------------------------------------
+
+
+
 
 --[[--======== forageSystem ========--]]--
 
@@ -233,9 +280,11 @@ forageSystem = {
 			"trash_01_52", "trash_01_53",
 		},
 		stones = {
+			--stones on the ground
 			"d_generic_1_13", "d_generic_1_22", "d_generic_1_23",
 			"d_generic_1_24", "d_generic_1_25", "d_generic_1_40",
 			"d_generic_1_41", "d_generic_1_42", "d_generic_1_43",
+			--cracks in the road
 			"floors_overlay_street_01_0", "floors_overlay_street_01_1", "floors_overlay_street_01_2",
 			"floors_overlay_street_01_3", "floors_overlay_street_01_4", "floors_overlay_street_01_5",
 			"floors_overlay_street_01_6", "floors_overlay_street_01_7", "floors_overlay_street_01_8",
@@ -268,6 +317,18 @@ forageSystem = {
 			"blends_streetoverlays_01_23", "blends_streetoverlays_01_24", "blends_streetoverlays_01_25",
 			"blends_streetoverlays_01_26", "blends_streetoverlays_01_27", "blends_streetoverlays_01_28",
 			"blends_streetoverlays_01_29", "blends_streetoverlays_01_30", "blends_streetoverlays_01_31",
+			--larger boulders
+			"boulders_0", "boulders_1", "boulders_2", "boulders_3", "boulders_4", "boulders_5", "boulders_6", "boulders_7",
+			"boulders_8", "boulders_9", "boulders_10", "boulders_11", "boulders_12", "boulders_13", "boulders_14", "boulders_15",
+			"boulders_16", "boulders_17", "boulders_18", "boulders_19", "boulders_20", "boulders_21", "boulders_22", "boulders_23",
+			"boulders_24", "boulders_25", "boulders_26", "boulders_27", "boulders_28", "boulders_29", "boulders_30", "boulders_31",
+			"boulders_32", "boulders_33", "boulders_34", "boulders_35",
+			--ore deposits stone/clay
+			"crafting_ore_32", "crafting_ore_33", "crafting_ore_34", "crafting_ore_35",
+			"crafting_ore_35", "crafting_ore_36", "crafting_ore_37", "crafting_ore_38",
+			"crafting_ore_39", "crafting_ore_40", "crafting_ore_41", "crafting_ore_42",
+			"crafting_ore_43", "crafting_ore_44", "crafting_ore_45", "crafting_ore_46",
+			"crafting_ore_47", "crafting_ore_48", "crafting_ore_49",
 		},
 	},
 };
@@ -354,26 +415,42 @@ function forageSystem.integrityCheck()
 	end;
 end
 
-function forageSystem.doItemDefCheck()
-	--print("=============");
-	--print("[forageSystem][doItemDefCheck] testing all items for missing forage definitions.");
-	--print("=============");
-	--local allItems = getAllItems();
-	--local itemFullName, itemExists;
-	--for item in iterList(allItems) do
-	--	if not item:getObsolete() and not item:isHidden() then
-	--		itemFullName = item:getFullName();
-	--		if forageSystem.itemDefs[itemFullName] == nil then
-	--			print(itemFullName);
-	--		end;
-	--	end;
-	--end;
-	--print("=============");
+function forageSystem.doItemDefCheck(_doItemFile)
+	log(DebugType.Foraging, "=============");
+	log(DebugType.Foraging, "[forageSystem][doItemDefCheck] testing all items for missing forage definitions.");
+	log(DebugType.Foraging, "=============");
+	local allItems = getAllItems();
+	local itemFullName;
+	local fileWriterObj = getFileWriter("forageMissingItems.log", true, false);
+	for item in iterList(allItems) do
+		if not item:getObsolete() and not item:isHidden() then
+			itemFullName = item:getFullName();
+			if not forageSystem.itemDefs[itemFullName] then
+				if _doItemFile then
+					fileWriterObj:write(itemFullName.."\r\n");
+				else
+					log(DebugType.Foraging, itemFullName);
+				end;
+			end;
+		end;
+	end;
+	fileWriterObj:close();
+	log(DebugType.Foraging, "=============");
+end
+
+function forageSystem.clearTables()
+	forageSystem.itemDefs = {};
+	forageSystem.catDefs = {};
+	forageSystem.zoneDefs = {};
+	forageSystem.skillDefs = {occupation = {}, trait = {}};
 end
 
 function forageSystem.init()
 	--prevent multiple initialisations
 	if forageSystem.isInitialised then return; end;
+	--
+	--clear all imported definition tables
+	forageSystem.clearTables();
 	--
 	triggerEvent("preAddForageDefs", forageSystem);
 	forageSystem.setOptionValues();
@@ -381,18 +458,18 @@ function forageSystem.init()
 	triggerEvent("preAddSkillDefs", forageSystem);
 	forageSystem.populateSkillDefs();
 	--
-	triggerEvent("preAddZoneDefs", forageSystem);
-	forageSystem.populateZoneDefs();
-	--
 	triggerEvent("preAddCatDefs", forageSystem);
 	forageSystem.populateCatDefs();
+	--
+	triggerEvent("preAddZoneDefs", forageSystem);
+	forageSystem.populateZoneDefs();
+	forageSystem.populateMixedZoneCategories();
 	--
 	triggerEvent("preAddItemDefs", forageSystem);
 	forageSystem.populateScavengeDefs();
 	forageSystem.populateItemDefs();
 	--
 	triggerEvent("onAddForageDefs", forageSystem);
-	--forageSystem.generateLootTable2();
 	forageSystem.generateLootTable();
 	--
 	--initialise forageData table
@@ -404,11 +481,11 @@ function forageSystem.init()
 	--check integrity of forageData
 	forageSystem.integrityCheck();
 	--
-	if isDebugEnabled() then
-		forageSystem.doItemDefCheck();
-	end;
-	--
-	--forageSystem.statisticsDebug(); --debug spawn rates
+	--these can also be called from the Lua debugger.
+	--forageSystem.doItemDefCheck(); --list all items without forage definitions
+	--forageSystem.statisticsDebug(); --generate spawn rates table on load.
+	--forageSystem.createDebugLog(true); --create picker stats file (statisticsDebug.log) on load.
+
 	--forageClient.clearData(); --debug clear forageData database
 	--forageClient.syncForageData();
 	--
@@ -614,6 +691,76 @@ end
 --	fileWriterObj:close();
 --end
 
+
+--[[--======== statisticsDebug ========--
+	Gathers and stores item spawn statistics for every loot table
+
+	For debugging and balancing loot rates.
+]]--
+
+function forageSystem.statisticsDebug()
+	forageSystem.statisticsTable = {zones = {}};
+	local categoryTable = {};
+	local itemTable = {};
+	for zoneName, zoneLoot in pairs(forageSystem.lootTables) do
+		forageSystem.statisticsTable.zones[zoneName] = {};
+		for month, monthLoot in pairs(zoneLoot) do
+			forageSystem.statisticsTable.zones[zoneName][month] = {};
+			for timeOfDay, timeLoot in pairs(monthLoot) do
+				forageSystem.statisticsTable.zones[zoneName][month][timeOfDay] = {};
+				for weatherType, weatherLoot in pairs(timeLoot) do
+					forageSystem.statisticsTable.zones[zoneName][month][timeOfDay][weatherType] = {};
+					categoryTable = {};
+					for _, categoryLoot in ipairs(weatherLoot) do
+						itemTable = {};
+						if (not forageSystem.statisticsTable.zones[zoneName][month][timeOfDay][weatherType][categoryLoot.category]) then
+							forageSystem.statisticsTable.zones[zoneName][month][timeOfDay][weatherType][categoryLoot.category] = {
+								items = {},
+								chance = 0;
+							};
+							for __, itemLoot in ipairs(categoryLoot.items) do
+								itemTable[itemLoot] = (itemTable[itemLoot] or 0) + 1;
+								forageSystem.statisticsTable.zones[zoneName][month][timeOfDay][weatherType][categoryLoot.category].items[itemLoot] = (itemTable[itemLoot] / #categoryLoot.items);
+							end;
+						end;
+						categoryTable[categoryLoot.category] = (categoryTable[categoryLoot.category] or 0) + 1;
+						forageSystem.statisticsTable.zones[zoneName][month][timeOfDay][weatherType][categoryLoot.category].chance = (categoryTable[categoryLoot.category] / #weatherLoot);
+					end;
+				end;
+			end;
+		end;
+	end;
+end
+
+function forageSystem.createDebugLog(_doItemStats)
+	local fileWriterObj = getFileWriter("statisticsDebug.log", true, false);
+
+	for zoneName, zoneLoot in pairs(forageSystem.statisticsTable.zones) do
+		fileWriterObj:write("-------\r\n"..zoneName.."\r\n-------\r\n" );
+		for monthName, monthLoot in pairs(zoneLoot) do
+			fileWriterObj:write("-------\r\nMonth = "..monthName.."\r\n-------\r\n" );
+			for timeOfDay, timeLoot in pairs(monthLoot) do
+				fileWriterObj:write("-------\r\nTime = "..timeOfDay.."\r\n-------\r\n" );
+				for weatherType, weatherLoot in pairs(timeLoot) do
+					fileWriterObj:write("-------\r\nWeather = "..weatherType.."\r\n-------\r\n" );
+					for categoryName, categoryLoot in pairs(weatherLoot) do
+						fileWriterObj:write("\r\nCategory = "..categoryName.." = " .. string.format("%.2f", categoryLoot.chance * 100).. "%\r\n");
+						if _doItemStats then
+							for itemName, itemChance in pairs(categoryLoot.items) do
+								fileWriterObj:write("    Item = "..itemName.." = " .. string.format("%.2f", itemChance * 100).. "% = (" .. string.format("%.6f", (itemChance * categoryLoot.chance) * 100) .. "%)\r\n");
+							end;
+						end;
+					end;
+					fileWriterObj:write("\r\n\r\n\r\n\r\n");
+				end;
+			end;
+		end;
+	end;
+
+	fileWriterObj:write("\r\n");
+	fileWriterObj:close();
+end
+
 --[[--======== createForageIcons ========--
 	@param _zoneData
 	@param _recreate
@@ -658,13 +805,11 @@ function forageSystem.createForageIcons(_zoneData, _recreate, _count)
 		local y1, y2    = _zoneData.bounds.y1, _zoneData.bounds.y2;
 		local rX, rY    = x1, y1;
 		local forageIcon, itemType, catName;
-		local getRandomCoord = forageSystem.getRandomCoord;
 		local location = Location.new();
 		repeat
 			itemType, catName = forageSystem.pickRandomItemType(lootTable);
 			if itemType and catName then
---				rX, rY = getRandomCoord(x1, x2, y1, y2);
-				local location = _zoneData.metaZone:pickRandomLocation(location)
+				location = _zoneData.metaZone:pickRandomLocation(location)
 				if location then
 					rX, rY = location:getX(), location:getY()
 					forageIcon = {
@@ -883,7 +1028,7 @@ function forageSystem.generateLootTable()
 						if zoneDefs[zoneName] then
 							for _, catName in ipairs(itemDef.categories) do
 								if catDefs[catName] then
-									for i = 1, zoneChance * monthBonus * timeBonus * weatherBonus do
+									for _ = 1, zoneChance * monthBonus * timeBonus * weatherBonus do
 										insert(zoneLootTable[zoneName][month][timeOfDay][weatherType][catName].items, itemType);
 									end;
 								else
@@ -899,6 +1044,8 @@ function forageSystem.generateLootTable()
 		end;
 	end;
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Finished populating loot table");
+	--
+
 	--
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Begin populating loot table categories");
 	for zoneName in pairs(zoneDefs) do
@@ -917,6 +1064,7 @@ function forageSystem.generateLootTable()
 			end;
 		end;
 	end;
+	--
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Finished populating loot table categories");
 	--
 	forageSystem.lootTables = lootTables;
@@ -967,14 +1115,48 @@ end
 
 function forageSystem.addItemDef(_itemDef)
 	if not (_itemDef and _itemDef.type) then return; end;
-	if forageSystem.isItemExist(nil, _itemDef) then
-		if forageSystem.isItemScriptValid(nil, _itemDef) then
+	local itemDef = _itemDef;
+	if forageSystem.isItemExist(nil, itemDef) then
+		if forageSystem.isItemScriptValid(nil, itemDef) then
 			--ensuring any blacklisted items are not added in this step will also remove them from existing zoneData on load, this is handled by forageSystem.integrityCheck()
-			if (not forageSystem.itemBlacklist:contains(_itemDef.type)) then
-				local def = forageSystem.importDef(_itemDef, forageDefaultDefs.defaultItemDef);
+			if (not forageSystem.itemBlacklist:contains(itemDef.type)) then
+				local def = forageSystem.importDef(itemDef, forageDefaultDefs.defaultItemDef);
 				local defType = def.type;
 				--set itemSize before importing
 				if (not def.itemSize) then def.itemSize = forageSystem.getItemDefSize(def); end;
+				--handle mixed zones. inject the chances for the other zone, multiplied by the chanceRatio
+				local rollAverage = 1;
+				local zoneNumber = 1;
+				for zoneName, zoneDef in pairs(forageSystem.zoneDefs) do
+					--if there is already a chance specified for the parent zone, it won't be overwritten here
+					if (not itemDef.zones[zoneName]) then
+						if zoneDef.containsBiomes then
+							for containedZone, chanceRatio in pairs(zoneDef.containsBiomes) do
+								--if the itemDef has a chance to spawn in one of the contained zones we add a chance for the parent zone
+
+								if itemDef.zones[containedZone] then
+									--average out the chance here for each contained zone before applying it to the new zone
+
+									rollAverage = rollAverage + (itemDef.zones[containedZone] * chanceRatio);
+
+									--/!\ These log lines generate quite a lot of console text, even for debugging purposes. Don't uncomment unless needed for debugging ratios /!\
+									--log(DebugType.Foraging, "[forageSystem][addItemDef] mixed zone chance added for "..itemDef.type.." for zone "..zoneName.." which contains the zone "..containedZone);
+									--log(DebugType.Foraging, "[forageSystem][addItemDef] " ..itemDef.type.." contained zone chance is "..itemDef.zones[containedZone].." for zone "..containedZone.." chanceRatio is: "..chanceRatio);
+								end;
+								zoneNumber = zoneNumber + 1;
+							end;
+
+							--round up the value as all roll chances are defined as whole numbers
+							itemDef.zones[zoneName] = math.ceil(rollAverage / zoneNumber);
+
+							--/!\ These log lines generate quite a lot of console text, even for debugging purposes. Don't uncomment unless needed for debugging ratios /!\
+							--log(DebugType.Foraging, "[forageSystem][addItemDef] mixed zone chance added for "..itemDef.type.." for zone "..zoneName.." is: "..itemDef.zones[zoneName]);
+
+							zoneNumber = 1;
+							rollAverage = 1;
+						end;
+					end;
+				end;
 				if not forageSystem.itemDefs[defType] then
 					--add definition
 					forageSystem.itemDefs[defType] = def;
@@ -983,19 +1165,19 @@ function forageSystem.addItemDef(_itemDef)
                     scriptItem:setCanBeForaged(true);
 					return defType, true; -- defType is added
 				else
-					log(DebugType.Foraging, "[forageSystem][addItemDef] item is already defined! ".._itemDef.type);
-					log(DebugType.Foraging, "[forageSystem][addItemDef] using forageSystem.modifyItemDef to change a defined itemDef for ".._itemDef.type);
-					forageSystem.modifyItemDef(_itemDef);
+					log(DebugType.Foraging, "[forageSystem][addItemDef] item is already defined! "..itemDef.type);
+					log(DebugType.Foraging, "[forageSystem][addItemDef] using forageSystem.modifyItemDef to change a defined itemDef for "..itemDef.type);
+					forageSystem.modifyItemDef(itemDef);
 				end;
 				return defType, false; -- defType was not added
 			else
-				log(DebugType.Foraging, "[forageSystem][addItemDef] item matches entry in LootItemRemovalList sandbox setting, skipping ".._itemDef.type);
+				log(DebugType.Foraging, "[forageSystem][addItemDef] item matches entry in LootItemRemovalList sandbox setting, skipping "..itemDef.type);
 			end;
 		end;
 	else
-		log(DebugType.Foraging, "[forageSystem][addItemDef] no such item, ignoring ".._itemDef.type);
+		log(DebugType.Foraging, "[forageSystem][addItemDef] no such item, ignoring "..itemDef.type);
 	end;
-	return _itemDef.type, false; -- _itemDef.type could not be added
+	return itemDef.type, false; -- _itemDef.type could not be added
 end
 
 --[[--======== removeItemDef ========--
@@ -1093,17 +1275,12 @@ end
 
 --[[--======== populateItemDefs ========--
 	@param _itemDefs - (optional) a table of itemsDefs to add
-	@param _clearAllExisting - (optional) clear all existing definitions
 
-	The main function for bulk adding definitions. It can also be used to clear and recreate the entire itemDef table.
+	The main function for bulk adding definitions.
 	A table full of itemDefs may be added via this function. See forageDefs for how to structure bulk tables.
 ]]--
 
-function forageSystem.populateItemDefs(_itemDefs, _clearAllExisting)
-	--clear the tables
-	if (not _itemDefs) or _clearAllExisting then
-		forageSystem.itemDefs = {};
-	end;
+function forageSystem.populateItemDefs(_itemDefs)
 	--populate itemDefs
 	for _, def in pairs(_itemDefs or forageDefs) do
 		forageSystem.addItemDef(def);
@@ -1137,11 +1314,10 @@ end
 
 function forageSystem.getForageZoneAt(_x, _y)
 	local zones = getZones(_x, _y, 0);
-	local forageZone, defZone;
+	local defZone;
 	if zones then
 		for zone in iterList(zones) do
-			local zoneName = zone:getType();
-			if forageSystem.zoneDefs[zoneName] then defZone = zone; end;
+			if forageSystem.zoneDefs[zone:getType()] then defZone = zone; end;
 		end;
 		if not defZone then return nil; end;
 		-- There can be multiple rectangular ForageZone zones at the location.
@@ -1197,7 +1373,9 @@ end
 --[[--======== getRefillBonus ========--
 	@param _value - (optional) alternate value
 
-	Returns refill bonus value for sandbox setting NatureAbundance
+	Returns refill bonus value for sandbox setting specified in zoneDef.
+
+	Must be a sandbox setting, see SandboxVars for possible options.
 ]]--
 
 function forageSystem.getRefillBonus(_zoneData)
@@ -1247,40 +1425,105 @@ end
 --[[--======== addZoneDef ========--]]--
 
 function forageSystem.addZoneDef(_zoneDef, _overwrite)
-	local def = forageSystem.importDef(_zoneDef, forageDefaultDefs.defaultZoneDef);
-	if forageSystem.zoneDefs[def.name] then
+	local zoneDef = forageSystem.importDef(_zoneDef, forageDefaultDefs.defaultZoneDef);
+	local zoneName = zoneDef.name;
+
+	if forageSystem.zoneDefs[zoneName] then
 		if _overwrite then
-			forageSystem.zoneDefs[def.name] = def;
-			log(DebugType.Foraging, "[forageSystem][addZoneDef] overwriting definition for "..def.name);
+			forageSystem.zoneDefs[zoneName] = zoneDef;
+			log(DebugType.Foraging, "[forageSystem][addZoneDef] overwriting definition for "..zoneName);
 		else
-			log(DebugType.Foraging, "[forageSystem][addZoneDef] definition for "..def.name.." exists, ignoring");
+			log(DebugType.Foraging, "[forageSystem][addZoneDef] definition for "..zoneName.." exists, ignoring");
 		end;
 	else
-		forageSystem.zoneDefs[def.name] = def;
+		forageSystem.zoneDefs[zoneName] = zoneDef;
 	end;
 end
 
 --[[--======== populateZoneDefs ========--
-	@param _zoneDefs - (optional) override default (forageZones) with a new table
+	@param _zoneDefs - (optional) add zoneDefs from a provided table
 
-	Initialises the zone list, clears forageSystem.zoneDefs
+	Initialises the zone list
 ]]--
 
 function forageSystem.populateZoneDefs(_zoneDefs)
-	--clear the table
-	forageSystem.zoneDefs = {};
 	--populate zones
+	log(DebugType.Foraging, "[forageSystem][populateZoneDefs] Begin adding zoneDefs");
 	for _, def in pairs(_zoneDefs or forageZones) do
-		log(DebugType.Foraging, "[forageSystem][populateZoneDefs] Adding zoneDef: " .. def.name)
+		log(DebugType.Foraging, "[forageSystem][populateZoneDefs] Adding zoneDef: " .. def.name);
 		forageSystem.addZoneDef(def);
 	end;
+	log(DebugType.Foraging, "[forageSystem][populateZoneDefs] Finished adding zoneDefs");
+end;
+
+--[[--======== populateMixedZoneCategories ========--
+	Adds mixed zone definitions to the category definition tables
+
+	This is used for mixed biomes, such as BirchMixForest, where loot can be from from multiple tables.
+]]--
+
+function forageSystem.populateMixedZoneCategories()
+	local zoneDefs = forageSystem.zoneDefs;
+	local catDefs = forageSystem.catDefs;
+
+	log(DebugType.Foraging, "[forageSystem][populateMixedZoneCategories] Populating mixed category tables");
+	for zoneName, zoneDef in pairs(zoneDefs) do
+
+		for containedZone, chanceRatio  in pairs(zoneDef.containsBiomes) do
+			--/!\ this generates a lot of debug lines, uncomment with caution
+			--log(DebugType.Foraging, "[forageSystem][generateLootTable] "..zoneName.." contains loot from "..containedZone..", adding loot to mixed table");
+
+			--category chances are multiplied by a ratio so loot chances can be adjusted for sub-biomes
+			for _, catDef in pairs(catDefs) do
+				catDef.zoneChance[zoneName] = (catDef.zoneChance[containedZone] or 0) * chanceRatio;
+				--/!\ this generates a lot of debug lines, uncomment with caution
+				--log(DebugType.Foraging, "[forageSystem][generateLootTable] "..containedZone.." category chance injected into category "..catDef.name.." for mixed zone " ..zoneName..", chance = "..catDef.zoneChance[zoneName].." at a chanceRatio of "..chanceRatio..". original chance: "..(catDef.zoneChance[containedZone] or 0));
+			end;
+
+		end;
+	end;
+	log(DebugType.Foraging, "[forageSystem][populateMixedZoneCategories] Finished populating mixed category tables");
 end;
 
 --[[--======== addCatDef ========--
 	@param _catDef
-	@param _overwrite - (optional) force overwrite if definition exists
+	@param _overwrite - (optional) forces overwrite if definition exists
 
-	Adds category definition to global table, optionally overwrites existing definition
+	Adds a category definition to forageSystem.catDefs, optionally overwrites existing definition
+
+	example:
+
+	local animalDef = {
+		name                    = "Animals",
+		typeCategory            = "Animals",
+		identifyCategoryPerk    = "PlantScavenging",
+		identifyCategoryLevel   = 5,
+		categoryHidden          = false,
+		validFloors             = { "ANY" },
+		zoneChance              = {
+			BirchForest  	= 15,
+			DeepForest      = 15,
+			FarmLand        = 20,
+			ForagingNav     = 3,
+			Forest          = 15,
+			OrganicForest  	= 15,
+			PHForest     	= 15,
+			PRForest     	= 15,
+			TownZone        = 5,
+			TrailerPark     = 5,
+			Vegitation      = 25,
+		},
+		spriteAffinities        = forageSystem.spriteAffinities.genericPlants,
+		chanceToMoveIcon        = 3.0,
+		chanceToCreateIcon      = 0.1,
+		focusChanceMin			= 5.0,
+		focusChanceMax			= 15.0,
+	};
+
+
+	forageSystem.addCatDef(animalDef, true);
+
+	this would add a category for "Animals" to the category definitions, overwriting it if already existing.
 ]]--
 
 function forageSystem.addCatDef(_catDef, _overwrite)
@@ -1308,14 +1551,12 @@ function forageSystem.addCatDef(_catDef, _overwrite)
 end
 
 --[[--======== populateCatDefs ========--
-	@param _catDefs - (optional) override default (forageCategories) with a new table
+	@param _catDefs - (optional) use a provided table to add categories
 
-	Initialises the category list, clears forageSystem.catDefs
+	This function serves as a bulk-adder helper.
 ]]--
 
 function forageSystem.populateCatDefs(_catDefs)
-	--clear the table
-	forageSystem.catDefs = {};
 	--populate catDefs
 	for _, def in pairs(_catDefs or forageCategories) do
 		forageSystem.addCatDef(def);
@@ -1352,12 +1593,10 @@ end
 --[[--======== populateSkillDefs ========--
 	@param _skillDefs - (optional) override default table (forageSkills) with a new table
 
-	Initialises the skill list, clears forageSystem.skillDefs
+	This function serves as a bulk-adder helper.
 ]]--
 
 function forageSystem.populateSkillDefs(_skillDefs)
-	--clear the table
-	forageSystem.skillDefs = {occupation = {}, trait = {}};
 	--populate skillDefs
 	for _, def in pairs(_skillDefs or forageSkills) do
 		forageSystem.addSkillDef(def);
@@ -1366,7 +1605,7 @@ end
 
 --[[---------------------------------------------
 --
--- Item
+-- Items
 --
 --]]---------------------------------------------
 
@@ -2067,7 +2306,7 @@ function forageSystem.itemFound(_character, _itemType, _amount)
 end
 
 function forageSystem.giveItemXP(_character, _itemDef, _amount)
-	local pfPerk, currentXP, gainedXP;
+	local pfPerk, currentXP;
 	--
 	local xpAmount              = _itemDef.xp * (_amount or 1);
 	local globalXPModifier      = forageSystem.globalXPModifier / 100;
@@ -2133,7 +2372,16 @@ end
 --
 --]]---------------------------------------------
 
-function forageSystem.doPoisonItemSpawn(_character, _inventory, _itemDef, _items)
+function forageSystem.doPoisonItemSpawn(_character, _inventory, _itemDef, _items, isKnownPoison)
+	if isKnownPoison then
+		for item in iterList(_items) do
+			item:setPoisonPower(ZombRand(_itemDef.poisonPowerMin, _itemDef.poisonPowerMax) + 1);
+			item:setPoisonDetectionLevel(_itemDef.poisonDetectionLevel or 0);
+			item:setUseForPoison(item:getHungChange());
+		end;
+		return _items;
+	end
+
 	if _itemDef.poisonChance and _itemDef.poisonPowerMin and _itemDef.poisonPowerMax then
 		if _itemDef.poisonChance > 0 and _itemDef.poisonPowerMax > 0 then
 			local perkLevel = forageSystem.getPerkLevel(_character, _itemDef);
@@ -2203,21 +2451,66 @@ end
 
 function forageSystem.doWildCropSpawn(_character, _inventory, _itemDef, _items)
 	local seedTable = {
-		["Base.Carrots"] = "Base.CarrotSeed",
+		["Base.BarleySheaf"] = "Base.BarleySeed",
+		["Base.Basil"] = "Base.BasilSeed",
+		["Base.BellPepper"] = "Base.BellPepperSeed",
+		["Base.BlackSage"] = "Base.BlackSageSeed",
 		["Base.Broccoli"] = "Base.BroccoliSeed",
-		["Base.RedRadish"] = "Base.RedRadishSeed",
-		["Base.Strewberrie"] = "Base.StrewberrieSeed",
-		["Base.Potato"] = "Base.PotatoSeed",
-		["Base.Tomato"] = "Base.TomatoSeed",
 		["Base.Cabbage"] = "Base.CabbageSeed",
+		["Base.Carrots"] = "Base.CarrotSeed",
+		["Base.Cauliflower"] = "Base.CauliflowerSeed",
+		["Base.Chamomile"] = "Base.ChamomileSeed",
+		["Base.Chives"] = "Base.ChivesSeed",
+		["Base.Cilantro"] = "Base.CilantroSeed",
+		["Base.Comfrey"] = "Base.ComfreySeed",
+		["Base.CommonMallow"] = "Base.CommonMallowSeed",
+		["Base.Corn"] = "Base.CornSeed",
+		["Base.Cucumber"] = "Base.CucumberSeed",
+		["Base.Flax"] = "Base.FlaxSeed",
+		["Base.Garlic"] = "Base.GarlicSeed",
+		["Base.Greenpeas"] = "Base.GreenpeasSeed",
+		["Base.Kale"] = "Base.KaleSeed",
+		["Base.Lavender"] = "Base.LavenderSeed",
+		["Base.Leek"] = "Base.LeekSeed",
+		["Base.LemonGrass"] = "Base.LemonGrassSeed",
+		["Base.Lettuce"] = "Base.LettuceSeed",
+		["Base.Marigold"] = "Base.MarigoldSeed",
+		["Base.Marigold"] = "Base.MintSeed",
+		["Base.Onion"] = "Base.OnionSeed",
+		["Base.Oregano"] = "Base.OreganoSeed",
+		["Base.Parsley"] = "Base.ParsleySeed",
+		["Base.PepperHabanero"] = "Base.HabaneroSeed",
+		["Base.PepperJalapeno"] = "Base.JalapenoSeed",
+		["Base.Plantain"] = "Base.BroadleafPlantainSeed",
+		["Base.PoppyPods"] = "Base.PoppySeed",
+		["Base.Potato"] = "Base.PotatoSeed",
+		["Base.RedRadish"] = "Base.RedRadishSeed",
+		["Base.Rosemary"] = "Base.RosemarySeed",
+		["Base.Roses"] = "Base.RoseSeed",
+		["Base.RyeSheaf"] = "Base.RyeSeed",
+		["Base.Sage"] = "Base.SageSeed",
+		["Base.Soybeans"] = "Base.SoybeansSeed",
+		["Base.Spinach"] = "Base.SpinachSeed",
+		["Base.Strewberrie"] = "Base.StrewberrieSeed",
+		["Base.SugarBeet"] = "Base.SugarBeetSeed",
+		["Base.SunflowerHead"] = "Base.SunflowerSeeds",
+		["Base.SweetPotato"] = "Base.SweetPotatoSeed",
+		["Base.Thyme"] = "Base.ThymeSeed",
+		["Base.Tobacco"] = "Base.TobaccoSeed",
+		["Base.Tomato"] = "Base.TomatoSeed",
+		["Base.Turnip"] = "Base.TurnipSeed",
+		["Base.Watermelon"] = "Base.WatermelonSeed",
+		["Base.WheatSheaf"] = "Base.WheatSeed",
+		["Base.WildGarlic2"] = "Base.WildGarlicSeed",
+		["Base.Zucchini"] = "Base.ZucchiniSeed",
 	};
 	--chance to generate a few seeds
 	if seedTable[_itemDef.type] then
 		local seedChance = 75;
 		if ZombRand(100) + 1 <= seedChance then
-			local seedAmount = ZombRand(20) + 1;
+			local seedAmount = ZombRand(10) + 1;
 			local seedItemType = seedTable[_itemDef.type];
-			for i = 1, seedAmount do
+			for _ = 1, seedAmount do
 				_items:add(instanceItem(seedItemType));
 			end;
 		end;

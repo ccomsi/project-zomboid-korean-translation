@@ -82,8 +82,13 @@ end
 function ISFluidContainerPanel:clickedDropBox(x, y)
     self = self.parent;
     local validItems = self.itemDropBox:getValidItems();
+    if #validItems == 0 then return end
     local parent = self.parent;
-    local context = ISContextMenu.get(0, 0, 0)
+    local playerNum = self.player:getPlayerNum()
+    local oldFocus = JoypadState.players[playerNum+1] and JoypadState.players[playerNum+1].focus or nil
+    local x = parent:getAbsoluteX() + parent:getWidth();
+    local y = parent:getAbsoluteY() + self:getY();
+    local context = ISContextMenu.get(playerNum, x, y)
     local addedItems = {};
     for i,item in ipairs(validItems) do
         local name = item:getName() .. " (" .. round(item:getFluidContainer():getAmount() * 1000, 2) .. " mL)";
@@ -94,14 +99,16 @@ function ISFluidContainerPanel:clickedDropBox(x, y)
     for i,v in pairs(addedItems) do
         context:addOption(i, self.itemDropBox, ISItemDropBox.onDropItem, v);
     end
-    local x = parent:getAbsoluteX() + parent:getWidth();
-    local y = parent:getAbsoluteY() + self:getY();
     if self.isLeft then
         x = parent:getAbsoluteX() - context:getWidth();
+        context:setSlideGoalX(x + 20, x);
     end
     context:bringToTop();
-    context:setX(x);
-    context:setY(y);
+    if oldFocus then
+        context.origin = oldFocus
+        context.mouseOver = 1
+        setJoypadFocus(playerNum, context)
+    end
 end
 
 function ISFluidContainerPanel:drawTextureIso(texture, x, y, a, r, g, b)

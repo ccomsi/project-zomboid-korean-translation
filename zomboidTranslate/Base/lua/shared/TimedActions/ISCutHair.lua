@@ -98,18 +98,18 @@ function ISCutHair:complete()
 	return true
 end
 
-function ISCutHair:getDuration()
+function ISCutHair:getDuration(maxTime)
 	if self.character:isTimedActionInstant() then
 		return 1
 	end
 
-	return self.maxTime
+	return maxTime
 end
 
 function ISCutHair:new(character, hairStyle, item, maxTime)
 	local o = ISBaseTimedAction.new(self, character)
 	o.hairStyle = hairStyle or "";
 	o.item = item;
-	o.maxTime = maxTime;
+	o.maxTime = o:getDuration(maxTime);
 	return o;
 end

@@ -7,9 +7,9 @@
     UI that can handle transferring fluids between items/objects that have FluidContainers.
 --]]
 
-require "ISUI/ISPanel"
+require "ISUI/ISPanelJoypad"
 
-ISFluidTransferUI = ISPanel:derive("ISFluidTransferUI");
+ISFluidTransferUI = ISPanelJoypad:derive("ISFluidTransferUI");
 ISFluidTransferUI.players = {};
 ISFluidTransferUI.cheatSkill = false;
 ISFluidTransferUI.cheatTransfer = false;
@@ -62,23 +62,24 @@ function ISFluidTransferUI.OpenPanel(_player, _container, _source)
     ISFluidTransferUI.players[playerNum].instance = ui;
 
     --first time open panel and isoobject then middle of screen.
-    if adjustPos and instanceof(_container:getOwner(), "IsoObject") then
-        local x = (getCore():getScreenWidth()/2) - (ui:getWidth()/2);
-        local y = (getCore():getScreenHeight()/2) - (ui:getHeight()/2);
-        ui:setX(x);
-        ui:setY(y);
-        ISFluidTransferUI.players[playerNum].x = x;
-        ISFluidTransferUI.players[playerNum].y = y;
+    if getJoypadData(playerNum) or (adjustPos and instanceof(_container:getOwner(), "IsoObject")) then
+        ui:centerOnScreen(playerNum)
+        ISFluidTransferUI.players[playerNum].x = ui.x;
+        ISFluidTransferUI.players[playerNum].y = ui.y;
+    end
+
+    if getJoypadData(playerNum) then
+        setJoypadFocus(playerNum, ui);
     end
 end
 
 -- INIT --
 function ISFluidTransferUI:initialise()
-    ISPanel.initialise(self);
+    ISPanelJoypad.initialise(self);
 end
 
 function ISFluidTransferUI:createChildren()
-    ISPanel.createChildren(self);
+    ISPanelJoypad.createChildren(self);
 
     local btnHgt = FONT_HGT_SMALL + 8;
     local pad = 10;
@@ -121,7 +122,7 @@ function ISFluidTransferUI:createChildren()
     local x = self.panelLeft:getX() + self.panelLeft:getWidth() + pad;
     local midWidth = 200;
 
-    self.panelMiddle = ISPanel:new(x, y, midWidth, 100)
+    self.panelMiddle = ISPanelJoypad:new(x, y, midWidth, 100)
     self.panelMiddle:noBackground()
     self:addChild(self.panelMiddle)
     x = 0
@@ -389,7 +390,7 @@ function ISFluidTransferUI:validatePanel(_forceUpdate)
 end
 
 function ISFluidTransferUI:prerender()
-    ISPanel.prerender(self);
+    ISPanelJoypad.prerender(self);
 
     --draws a background for transfer button and action progress if action exists.
     if self.btnTransfer then
@@ -408,6 +409,14 @@ function ISFluidTransferUI:prerender()
 end
 
 function ISFluidTransferUI:render()
+    if getJoypadData(self.playerNum) and self.panelLeft.itemDropBox then
+        local tex = Joypad.Texture.LBumper
+        self:drawTextureScaled(tex, self.panelLeft.x + self.panelLeft.width / 2 - tex:getWidth() / 2, self.panelLeft.y - tex:getHeight(), tex:getWidth(), tex:getHeight(), 1, 1, 1, 1)
+    end
+    if getJoypadData(self.playerNum) then
+        local tex = Joypad.Texture.RBumper
+        self:drawTextureScaled(tex, self.panelRight.x + self.panelRight.width / 2 - tex:getWidth() / 2, self.panelRight.y - tex:getHeight(), tex:getWidth(), tex:getHeight(), 1, 1, 1, 1)
+    end
 end
 
 function ISFluidTransferUI:update()
@@ -427,12 +436,15 @@ end
 
 function ISFluidTransferUI:close()
     if self.player then
-        local playerNum = self.player:getPlayerNum();
+        local playerNum = self.playerNum
         if ISFluidTransferUI.players[playerNum] then
             ISFluidTransferUI.players[playerNum].x = self:getX();
             ISFluidTransferUI.players[playerNum].y = self:getY();
 
             ISFluidTransferUI.players[playerNum].instance = nil;
+        end
+        if JoypadState.players[playerNum+1] then
+            setJoypadFocus(playerNum, nil)
         end
     end
 
@@ -501,7 +513,7 @@ end
 
 function ISFluidTransferUI:onRightMouseUp(x, y)
     if getCore():getDebug() then
-        local playerNum = self.player:getPlayerNum()
+        local playerNum = self.playerNum
         local context = ISContextMenu.get(playerNum, self:getAbsoluteX()+x, self:getAbsoluteY()+y)
 
         local s = "[Debug] Set Test High Skill To '"..tostring(not ISFluidTransferUI.cheatSkill).."'";
@@ -515,11 +527,41 @@ function ISFluidTransferUI:onRightMouseUp(x, y)
     return false;
 end
 
+function ISFluidTransferUI:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData)
+    self:setISButtonForA(self.btnTransfer)
+    self:setISButtonForB(self.btnClose)
+    self:setISButtonForX(self.btnSwap)
+    self.joypadButtonsY = {}
+    self.joypadButtons = {}
+    self.joypadIndexY = 1
+    self.joypadIndex = 1
+    self:insertNewLineOfButtons(self.slider)
+    self.slider:setJoypadFocused(true, joypadData)
+end
+
+function ISFluidTransferUI:onJoypadDown(button, joypadData)
+    if button == Joypad.LBumper then
+        return self:setOrClearItem(self.panelLeft)
+    end
+    if button == Joypad.RBumper then
+        return self:setOrClearItem(self.panelRight)
+    end
+    ISPanelJoypad.onJoypadDown(self, button, joypadData)
+end
+
+function ISFluidTransferUI:setOrClearItem(panel)
+    if panel.itemDropBox then
+        if panel.itemDropBox.boxOccupied then
+            panel.itemDropBox:onRightMouseUp(0, 0) -- remove item
+        else
+            panel.itemDropBox:onMouseDown(0, 0) -- choose item via context menu
+        end
+    end
+end
+
 function ISFluidTransferUI:new(x, y, width, height, _player, _container, source)
-    local o = {};
-    o = ISPanel:new(x, y, 400, height);
-    setmetatable(o, self);
-    self.__index = self;
+    local o = ISPanelJoypad.new(self, x, y, 400, height);
     o.variableColor={r=0.9, g=0.55, b=0.1, a=1};
     o.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
     o.backgroundColor = {r=0, g=0, b=0, a=0.8};
@@ -528,6 +570,7 @@ function ISFluidTransferUI:new(x, y, width, height, _player, _container, source)
     o.zOffsetSmallFont = 25;
     o.moveWithMouse = true;
     o.player = _player;
+    o.playerNum = o.player:getPlayerNum();
     o.container = _container;
 	o.source = source;
     --o.owner = _container:getOwner();
@@ -538,5 +581,7 @@ function ISFluidTransferUI:new(x, y, width, height, _player, _container, source)
         transferring = 0;
     }
     o.errorDefault = "";
+    -- The right shoulder button is used for navigation, and also to choose the target container.
+    o.disableJoypadNavigation = true;
     return o;
 end

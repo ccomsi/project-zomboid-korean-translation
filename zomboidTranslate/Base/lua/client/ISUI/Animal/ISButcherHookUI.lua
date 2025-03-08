@@ -6,29 +6,50 @@
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.NewSmall)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
+local BUTTON_HGT = FONT_HGT_SMALL + 6
 
 local function predicateNotBroken(item)
     return not item:isBroken()
 end
 
-ISButcherHookUI = ISCollapsableWindow:derive("ISButcherHookUI");
-ISButcherHookUI.ui = nil;
+ISButcherHookUI = ISCollapsableWindowJoypad:derive("ISButcherHookUI");
+ISButcherHookUI.ui = {};
 
 function ISButcherHookUI:render()
-    ISCollapsableWindow.render(self);
+    ISCollapsableWindowJoypad.render(self);
 
     -- reset height because the debug stuff modify it
     self:setHeight(320);
     self.animalPanel:setHeight(self.originalAnimalPanelHeight);
 
+    self:checkAnimalOnHook() -- splitscreen / multiplayer
+
+    local joypadData = getJoypadData(self.playerNum)
+
     if not self.animal3D then
-        self.noAnimalPanel:setVisible(true);
-        self.animalPanel:setVisible(false);
+        if not self.noAnimalPanel:isVisible() then
+            self.noAnimalPanel:setVisible(true);
+            self.animalPanel:setVisible(false);
+            self.configJoypadLater = true
+        end
+        if isPlayerDoingActionThatCanBeCancelled(self.chr) then
+            self.addCorpseBtn:setEnable(false)
+        else
+            self.addCorpseBtn:setEnable(true)
+        end
+        if self.configJoypadLater then
+            self.configJoypadLater = false
+            self:configJoypad()
+        end
+        self:checkDistance()
         return;
     end
 
-    self.noAnimalPanel:setVisible(false);
-    self.animalPanel:setVisible(true);
+    if self.noAnimalPanel:isVisible() then
+        self.noAnimalPanel:setVisible(false);
+        self.animalPanel:setVisible(true);
+        self.configJoypadLater = true
+    end
 
     local x,y,w,h = self.avatarX, self.avatarY, self.avatarWidth, self.avatarHeight
     self.animalPanel:drawRectBorder(x - 2, y - 2, w + 4, h + 4, 1, 0.3, 0.3, 0.3);
@@ -43,12 +64,52 @@ function ISButcherHookUI:render()
     self:checkDistance();
 
     --self:setWidth(self.avatarX + self.avatarWidth + self.biggestWidth + 20)
+
+    if self.configJoypadLater then
+        self.configJoypadLater = false
+        self:configJoypad()
+    end
+end
+
+function ISButcherHookUI:configJoypad()
+    local joypadData = getJoypadData(self.playerNum)
+    self:clearISButtons()
+    if not joypadData then return end
+    self:clearJoypadFocus(joypadData)
+    self.joypadIndexY = 1
+    self.joypadIndex = 1
+    self.joypadButtonsY = {}
+    self.joypadButtons = {}
+    if self.animal3D then
+        self:insertNewLineOfButtons(self.removeLeatherBtn)
+        self:insertNewLineOfButtons(self.removeBloodBtn)
+        self:insertNewLineOfButtons(self.removeHeadBtn)
+        self:insertNewLineOfButtons(self.removeMeatBtn)
+        self.joypadIndexY = self:getMinVisibleRow()
+        self:setISButtonForX(self.removeCorpseBtn)
+    else
+        self:insertNewLineOfButtons(self.addCorpseBtn)
+    end
+    self:restoreJoypadFocus(joypadData)
+end
+
+function ISButcherHookUI:checkAnimalOnHook()
+    if self.hook == nil or self.hook:getAnimal() == self.animal3D then
+        return
+    end
+    if self.animal3D then
+        self.animal3D = self.hook:getAnimal()
+    else
+        self.animal3D = self.hook:getAnimal()
+    end
+    self:setAnimalAvatar();
+    self:updateCorpseDatas();
 end
 
 -- check if you're not too far or if the hook doesn't exist anymore
 function ISButcherHookUI:checkDistance()
     if not self.hook or not self.hook:isExistInTheWorld() or not self.hook:getSquare() or not self.chr:getCurrentSquare() or self.hook:getSquare():DistToProper(self.chr:getCurrentSquare()) > 4 then
-        self:removeFromUIManager();
+        self:close();
     end
 end
 
@@ -161,6 +222,15 @@ function ISButcherHookUI:updateLabelAndButtons()
         self.progress = 0;
     end
 
+    local joypadData = getJoypadData(self.playerNum)
+    if joypadData then
+        local children = self:getVisibleChildren(self.joypadIndexY)
+        if #children == 0 then
+            self:clearJoypadFocus(joypadData) -- button was hidden
+            self.joypadIndexY = self:getMinVisibleRow()
+            self:restoreJoypadFocus(joypadData)
+        end
+    end
 end
 
 function ISButcherHookUI:renderDebugStuff(yoffset)
@@ -194,7 +264,7 @@ end
 function ISButcherHookUI:updatePositions(test, button, label, infoLabel, yoffset)
     local xoffset = self.avatarX + self.avatarWidth;
     local buttonOffset = 70;
-    local labelSize = 25;
+    local labelSize = math.max(FONT_HGT_MEDIUM, BUTTON_HGT + 2);
 
     label:setX(xoffset + 10);
     label:setY(yoffset);
@@ -288,12 +358,15 @@ function ISButcherHookUI:create()
     self.avatarHeight = 230;
 
     local btnWid = 70
-    local btnHgt = FONT_HGT_SMALL + 5
+    local btnHgt = BUTTON_HGT
 
     --self.corpse = self.hook:getCorpse();
     self.animal3D = self.hook:getAnimal()
 
-    self.noAnimalPanel = ISPanel:new(1, 16, self.width-2, self.height-27)
+    local titleBarHeight = self:titleBarHeight()
+    local resizeWidgetHeight = self.resizable and self:resizeWidgetHeight() or 0
+
+    self.noAnimalPanel = ISPanel:new(1, titleBarHeight, self.width-2, self.height-resizeWidgetHeight-titleBarHeight)
     self.noAnimalPanel.backgroundColor = {r=0, g=0, b=0, a=1};
     self.noAnimalPanel.borderColor = {r=0, g=0, b=0, a=0};
     self:addChild(self.noAnimalPanel);
@@ -307,7 +380,7 @@ function ISButcherHookUI:create()
     self.addCorpseBtn:setY((self.height / 2) - self.addCorpseBtn.height / 2 - 32)
     self.noAnimalPanel:addChild(self.addCorpseBtn);
 
-    self.animalPanel = ISPanel:new(1, 16, self.width-2, self.height-17)
+    self.animalPanel = ISPanel:new(1, titleBarHeight, self.width-2, self.height-resizeWidgetHeight-titleBarHeight)
     self.animalPanel.backgroundColor = {r=0, g=0, b=0, a=1};
     self.animalPanel.borderColor = {r=1, g=1, b=1, a=0.5};
     self:addChild(self.animalPanel);
@@ -394,7 +467,7 @@ function ISButcherHookUI:create()
     self.removeMeatBtn:setY(self.animalPanel.height - btnHgt - 10)
     self.animalPanel:addChild(self.removeMeatBtn);
 
-    self.progressBar = ISProgressBar:new (self.avatarX + 20, self.avatarY, 100, 20, "", UIFont.NewSmall);
+    self.progressBar = ISProgressBar:new (self.avatarX + 20, self.avatarY, 100, FONT_HGT_SMALL, "", UIFont.NewSmall);
     self.progressBar:setVisible(false);
     self.animalPanel:addChild(self.progressBar);
 
@@ -471,7 +544,7 @@ function ISButcherHookUI:setAnimalAvatar(newModData, newCorpse)
 end
 
 function ISButcherHookUI:onClickAddCorpse()
-    local context = ISContextMenu.get(0, self.addCorpseBtn:getAbsoluteX() + 10, self.addCorpseBtn:getAbsoluteY() + 10)
+    local context = ISContextMenu.get(self.playerNum, self.addCorpseBtn:getAbsoluteX() + 10, self.addCorpseBtn:getAbsoluteY() + 10)
 
     local corpseList = self:lookForCorpse()
     for i,v in ipairs(corpseList) do
@@ -504,6 +577,12 @@ function ISButcherHookUI:onClickAddCorpse()
         tooltip:setName(getText("Tooltip_ButcherUI_AddAnimalCorpse"));
         option.toolTip = tooltip;
     end
+
+    if getJoypadData(self.playerNum) then
+        context.mouseOver = 1
+        context.origin = self
+        setJoypadFocus(self.playerNum, context)
+    end
 end
 
 -- add a corpse on the hook and remove the corpse from either inventory or ground if isodeadbody
@@ -535,6 +614,9 @@ function ISButcherHookUI:onClickRemoveCorpse()
     body:setX(self.animal3D:getX());
     body:setY(self.animal3D:getY());
     body:setZ(self.hook:getZ());
+    if self.animal3D:getModData()["skeleton"] == "true" then
+        body:changeRotStage(2); -- switch to a bloody skeleton
+    end
     body:invalidateCorpse();
     body:setInvalidateNextRender(true);
     body:setModData(self.animal3D:getModData())
@@ -693,6 +775,12 @@ function ISButcherHookUI:onRemoveBlood()
             context:addOption(text, self, ISButcherHookUI.onSelectBucketForBlood, bucket);
         end
     end
+
+    if getJoypadData(self.playerNum) then
+        context.mouseOver = 1
+        context.origin = self
+        setJoypadFocus(self.playerNum, context)
+    end
 end
 
 function ISButcherHookUI:onBleedAnimal()
@@ -711,13 +799,16 @@ function ISButcherHookUI:onSelectBucketForBlood(bucket)
 end
 
 function ISButcherHookUI:initialise()
-    ISCollapsableWindow.initialise(self);
+    ISCollapsableWindowJoypad.initialise(self);
     self:create();
 end
 
 function ISButcherHookUI:close()
     self:setVisible(false);
     self:removeFromUIManager();
+    if getJoypadData(self.playerNum) then
+        setJoypadFocus(self.playerNum, nil)
+    end
 end
 
 -- when we load an animal that was on a hook we need to recreate his corpse
@@ -745,30 +836,43 @@ function ISButcherHookUI.onReattachAnimal(hook, animal)
 end
 
 function ISButcherHookUI:setVisible(vis)
+    ISCollapsableWindowJoypad.setVisible(self, vis)
     if not vis then
-        ISButcherHookUI.ui = nil;
+        ISButcherHookUI.ui[self.playerNum] = nil;
     end
 end
 
-function ISButcherHookUI:new(x, y, width, height, hook, player)
-    if ISButcherHookUI.ui then
-        return ISButcherHookUI.ui;
+function ISButcherHookUI:onGainJoypadFocus(joypadData)
+    ISCollapsableWindowJoypad.onGainJoypadFocus(self, joypadData)
+    self.configJoypadLater = true
+end
+
+function ISButcherHookUI:onJoypadDown(button, joypadData)
+    if button == Joypad.BButton then
+        self:close()
+        return
     end
-    local o = {};
+    ISCollapsableWindowJoypad.onJoypadDown(self, button, joypadData)
+end
+
+function ISButcherHookUI:new(x, y, width, height, hook, player)
+    if ISButcherHookUI.ui[player:getPlayerNum()] then
+        return ISButcherHookUI.ui[player:getPlayerNum()];
+    end
     width = 500;
     height = 320;
-    o = ISCollapsableWindow:new(x, y, width, height);
-    --    o:noBackground();
-    setmetatable(o, self);
-
-    self.__index = self;
+    local o = ISCollapsableWindowJoypad.new(self, x, y, width, height);
+    o:setResizable(false)
+--    o:noBackground();
     o.hook = hook;
     o.chr = player;
+    o.playerNum = player:getPlayerNum()
     o.corpse = nil;
     o.animal3D = nil;
     o.playerNum = player:getPlayerNum();
     o.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
     o.backgroundColor = {r=0, g=0, b=0, a=0.8};
-    ISButcherHookUI.ui = o;
+    o.configJoypadLater = true
+    ISButcherHookUI.ui[o.playerNum] = o;
     return o;
 end

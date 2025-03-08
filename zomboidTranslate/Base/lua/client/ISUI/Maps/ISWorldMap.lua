@@ -699,7 +699,7 @@ function ISWorldMap:close()
 		end
 	end
 	if JoypadState.players[self.playerNum+1] then
-		setJoypadFocus(self.playerNum, nil)
+		setJoypadFocus(self.playerNum, self.prevFocus)
 	end
 	if MainScreen.instance and not MainScreen.instance.inGame then
 		-- Debug in main menu
@@ -751,6 +751,7 @@ function ISWorldMap:updateJoypad()
 	if self.getJoypadFocus then
 		self.getJoypadFocus = false;
 		if JoypadState.players[self.playerNum+1] then
+			self.prevFocus = getJoypadFocus(self.playerNum)
 			setJoypadFocus(self.playerNum, self)
 		end
 	end
@@ -765,7 +766,7 @@ function ISWorldMap:updateJoypad()
 	local cx = self.mapAPI:getCenterWorldX()
 	local cy = self.mapAPI:getCenterWorldY()
 
-	if isJoypadLTPressed(self.joyfocus.id, Joypad.LBumper) then
+	if isJoypadLTPressed(self.joyfocus.id) then
 		if not self.LBumperZoom then
 			self.LBumperZoom = self.mapAPI:getZoomF()
 		end
@@ -776,7 +777,7 @@ function ISWorldMap:updateJoypad()
 	else
 		self.LBumperZoom = nil
 	end
-	if isJoypadRTPressed(self.joyfocus.id, Joypad.RBumper) then
+	if isJoypadRTPressed(self.joyfocus.id) then
 		if not self.RBumperZoom then
 			self.RBumperZoom = self.mapAPI:getZoomF()
 		end

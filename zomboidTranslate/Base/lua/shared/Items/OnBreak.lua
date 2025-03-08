@@ -53,7 +53,7 @@ function OnBreak.HandleHandler(item, player, newItemString, breakItem)
 end
 
 function OnBreak.HeadHandler(item, player, newItemString, stickIn, forceLocation, bonusCount, fullCondition)
-    print("HEAD HANDLER 1 " .. tostring(newItemString))
+--     print("HEAD HANDLER 1 " .. tostring(newItemString))
     if not item then return end
     local inv
     local cont = item:getContainer()
@@ -62,23 +62,23 @@ function OnBreak.HeadHandler(item, player, newItemString, stickIn, forceLocation
     if item:getWorldItem() and item:getWorldItem():getSquare() then sq = item:getWorldItem():getSquare() end
     local newItem
     if sq then
-        newItem = item:getSquare():AddWorldInventoryItem(newItemString, ZombRand(100)/100, ZombRand(100)/100, 0.0)
+        sq:AddWorldInventoryItem(newItemString, ZombRand(100)/100, ZombRand(100)/100, 0.0)
     elseif player and player:getSquare() and cont == player:getInventory() then
-        print("HEAD HANDLER 2 " .. tostring(newItemString))
+--         print("HEAD HANDLER 2 " .. tostring(newItemString))
         local sq = player:getSquare()
 --         if player:getAttackTargetSquare() then sq = player:getAttackTargetSquare() end
         local hit
         if player:isAttacking() and player:getLastHitCharacter() and instanceof(player:getLastHitCharacter(), "IsoZombie") then  hit = player:getLastHitCharacter() end
         if hit and hit:getSquare() then sq = hit:getSquare() end
 --         if hit:isDead() or hit:isFakeDead() then hit = nil end
-        print("stickIn " .. tostring(stickIn))
-        print("hit " .. tostring(hit))
+--         print("stickIn " .. tostring(stickIn))
+--         print("hit " .. tostring(hit))
         if stickIn and hit and instanceof(hit, "IsoZombie") then -- and player:getTarget():getLastHitPart() then
 
             -- NOTE: use the following to evaluate back attacks
 -- 			local fromBehind = player:isBehind(hit))
 
-            print("STICK IN")
+--             print("STICK IN")
             local part = hit:getLastHitPart()
 --             print("LAST HIT PART " .. tostring(part))
             inv = player:getInventory()
@@ -95,8 +95,8 @@ function OnBreak.HeadHandler(item, player, newItemString, stickIn, forceLocation
 
             if location ~= "Stomach" and hit:getAttachedItem(location) then location = "Stomach" end
             if forceLocation then location = forceLocation end
-            print("NEW ITEM " .. tostring(newItem))
-            print("location " .. tostring(location))
+--             print("NEW ITEM " .. tostring(newItem))
+--             print("location " .. tostring(location))
 --             if  not hit:isFacing(player) then
 -- --             if (not hit:isDead()) and (not hit:isFakeDead()) and not hit:isFacing(player) then
 --                 if backLocation then location = backLocation
@@ -107,12 +107,12 @@ function OnBreak.HeadHandler(item, player, newItemString, stickIn, forceLocation
 --             end
 --             hit:setAttachedItem(location, newItem)
             if not hit:getAttachedItem(location) then
-                print("setAttachedItem")
+--                 print("setAttachedItem")
                 hit:setAttachedItem(location, newItem)
 
 		        hit:reportEvent("EventAttachItem");
             else
-                print("sq:AddWorldInventoryItem")
+--                 print("sq:AddWorldInventoryItem")
                 sq:AddWorldInventoryItem(newItem, ZombRand(100)/100, ZombRand(100)/100, 0.0)
             end
 
@@ -120,7 +120,7 @@ function OnBreak.HeadHandler(item, player, newItemString, stickIn, forceLocation
 --             elseif part == "Torso_Lower" then hit:setAttachedItem("Knife Stomach", newItem)
 --             else hit:setAttachedItem("Stomach", newItem) end
 
-        else
+        elseif sq then
             newItem = sq:AddWorldInventoryItem(newItemString, ZombRand(100)/100, ZombRand(100)/100, 0.0)
         end
     elseif cont then
@@ -747,4 +747,44 @@ function OnBreak.OldAxe(item, player)
     OnBreak.HeadHandler(item, player, "Base.OldAxeHead")
     OnBreak.HandleHandler(item, player, "Base.LongHandle_Broken", false)
     OnBreak.GroundHandler(item, player, "Base.Splinters")
+end
+
+function OnBreak.MetalBar(item, player)
+    OnBreak.HandleHandler(item, player, "Base.SteelRodHalf", false)
+    OnBreak.GroundHandler(item, player, "Base.SteelRodHalf")
+end
+
+function OnBreak.SteelRodHalf(item, player)
+    OnBreak.HandleHandler(item, player, "Base.SteelRodQuarter", false)
+    OnBreak.GroundHandler(item, player, "Base.SteelRodQuarter")
+end
+
+function OnBreak.SteelBar(item, player)
+    OnBreak.HandleHandler(item, player, "Base.SteelBarHalf", false)
+    OnBreak.GroundHandler(item, player, "Base.SteelBarHalf")
+end
+
+function OnBreak.SteelBarHalf(item, player)
+    OnBreak.HandleHandler(item, player, "Base.SteelBarQuarter", false)
+    OnBreak.GroundHandler(item, player, "Base.SteelBarQuarter")
+end
+
+function OnBreak.IronRod(item, player)
+    OnBreak.HandleHandler(item, player, "Base.IronRodHalf", false)
+    OnBreak.GroundHandler(item, player, "Base.IronRodHalf")
+end
+
+function OnBreak.IronRodHalf(item, player)
+    OnBreak.HandleHandler(item, player, "Base.IronRodQuarter", false)
+    OnBreak.GroundHandler(item, player, "Base.IronRodQuarter")
+end
+
+function OnBreak.IronBar(item, player)
+    OnBreak.HandleHandler(item, player, "Base.IronBarHalf", false)
+    OnBreak.GroundHandler(item, player, "Base.IronBarHalf")
+end
+
+function OnBreak.IronBarHalf(item, player)
+    OnBreak.HandleHandler(item, player, "Base.IronBarQuarter", false)
+    OnBreak.GroundHandler(item, player, "Base.IronBarQuarter")
 end

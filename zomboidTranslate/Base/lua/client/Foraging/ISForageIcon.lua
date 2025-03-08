@@ -34,7 +34,7 @@ function ISForageIcon:doForage(_x, _y, _contextOption, _targetContainer)
 	local targetContainer = _targetContainer or getPlayerInventory(self.player).inventory or self.character:getInventory();
 	if targetContainer:isItemAllowed(self.itemObj) then
 		if targetContainer and targetSquare and luautils.walkAdj(self.character, targetSquare) then
-			ISTimedActionQueue.add(ISForageAction:new(self.character, self.iconID, targetContainer, false, self.itemType));
+			ISTimedActionQueue.add(ISForageAction:new(self.character, self.iconID, targetContainer, false, self.itemType, self.isKnownPoison));
 		end;
 	end;
 end

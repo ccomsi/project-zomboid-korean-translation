@@ -12,10 +12,20 @@ function ISTextEntryBox:initialise()
 	ISPanelJoypad.initialise(self);
 end
 
+function ISTextEntryBox:setFont(font)
+    self.font = font
+    if self.javaObject then
+        self.javaObject:setFont(self.font)
+    end
+end
+
 function ISTextEntryBox:onCommandEntered()
 end
 
 function ISTextEntryBox:onTextChange()
+	if self.onTextChangeFunction then
+		self.onTextChangeFunction(self.target, self);
+	end
 end
 
 function ISTextEntryBox:onLostFocus()

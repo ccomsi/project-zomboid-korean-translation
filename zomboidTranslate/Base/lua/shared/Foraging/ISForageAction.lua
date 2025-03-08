@@ -75,7 +75,7 @@ function ISForageAction:forage()
 	local itemTexture;
 	for _, itemData in pairs(itemsTable) do
 		local item = itemData.item;
-		local count = itemData.count;
+		self.itemCount = itemData.count;
 		if item:getTexture() ~= nil then
 			if string.find(tostring(item:getTexture():getName()), "media") and string.find(tostring(item:getTexture():getName()), "textures") then
 				itemTexture = "[img="..tostring(item:getTexture():getName()).."]";
@@ -86,7 +86,7 @@ function ISForageAction:forage()
 			itemTexture = ""
 		end
 		if not self.discardItems then
-			table.insert(self.manager.haloNotes,itemTexture.."    "..count.. " "..item:getDisplayName());
+			table.insert(self.manager.haloNotes,itemTexture.."    "..self.itemCount.. " "..item:getDisplayName());
 		end;
 	end;
 end
@@ -96,20 +96,15 @@ function ISForageAction:complete()
 	-- add the items to player inventory
 	forageSystem.giveItemXP(self.character, self.itemDef, 0.75);
 	local itemList = {}
-	local itemCount = self.itemDef.minCount;
 	if self.itemDef then
-		if self.itemDef.minCount ~= self.itemDef.maxCount then
-			itemCount = ZombRand(self.itemDef.minCount, self.itemDef.maxCount) + 1;
-		end;
-		--
 		itemList = ArrayList.new();
-		for _ = 1, itemCount do
+		for _ = 1, self.itemCount do
 			itemList:add(instanceItem(self.itemDef.type));
 		end;
 		--
 		if self.itemDef.spawnFuncs then
 			for _, spawnFunc in ipairs(self.itemDef.spawnFuncs) do
-				itemList = spawnFunc(self.character, self.character:getInventory(), self.itemDef, itemList) or itemList;
+				itemList = spawnFunc(self.character, self.character:getInventory(), self.itemDef, itemList, self.isPoison) or itemList;
 			end;
 		end;
 	end;
@@ -130,12 +125,13 @@ function ISForageAction:getDuration()
 	end
 end
 
-function ISForageAction:new(character, iconID, targetContainer, discardItems, itemType)
+function ISForageAction:new(character, iconID, targetContainer, discardItems, itemType, isPoison)
 	local o = ISBaseTimedAction.new(self, character)
 	o.targetContainer = targetContainer;
 	o.discardItems = discardItems;
 	o.iconID = iconID;
 	o.itemType = itemType;
+	o.isPoison = isPoison
 	--
 	if not isServer() then
 		o.manager = ISSearchManager.getManager(character);

@@ -3,14 +3,14 @@
 --**				  Author: turbotutone				   **
 --***********************************************************
 
-require "ISUI/ISPanel"
+require "ISUI/ISPanelJoypad"
 
 local FONT_SCALE = getTextManager():getFontHeight(UIFont.Small) / 19; -- normalize to 1080p
 local BUTTON_SIZE = getTextManager():getFontHeight(UIFont.Small) * 1.5
 local ICON_SCALE = math.max(1, math.floor(FONT_SCALE));
 local BUTTON_ICON_SIZE = 16 * ICON_SCALE;
 
-ISWidgetBuildControl = ISPanel:derive("ISWidgetBuildControl");
+ISWidgetBuildControl = ISPanelJoypad:derive("ISWidgetBuildControl");
 
 local debugSpam = true
 -- local debugSpam = false
@@ -20,11 +20,11 @@ local debugSpam = true
 --************************************************************************--
 
 function ISWidgetBuildControl:initialise()
-	ISPanel.initialise(self);
+	ISPanelJoypad.initialise(self);
 end
 
 function ISWidgetBuildControl:createChildren()
-    ISPanel.createChildren(self);
+    ISPanelJoypad.createChildren(self);
 
     self.colProgress = safeColorToTable(self.xuiSkin:color("C_ValidGreen"));
 
@@ -193,6 +193,18 @@ function ISWidgetBuildControl:calculateLayout(_preferredWidth, _preferredHeight)
 
     self:setWidth(width);
     self:setHeight(height);
+
+    self.joypadButtonsY = {}
+    self.joypadButtons = {}
+    self.joypadIndexY = 1
+    self.joypadIndex = 1
+    if self.slider and self.slider:isVisible() then
+        self:insertNewLineOfButtons(self.slider)
+    end
+    self:insertNewLineOfButtons(self.buttonCraft)
+    if self.buttonForceCraft then
+        self:insertNewLineOfButtons(self.buttonForceCraft)
+    end
 end
 
 function ISWidgetBuildControl:onResize()
@@ -200,7 +212,7 @@ function ISWidgetBuildControl:onResize()
 end
 
 function ISWidgetBuildControl:prerender()
-    --ISPanel.prerender(self);
+    --ISPanelJoypad.prerender(self);
 
 	if self.background then
 		self:drawRectStatic(0, 0, self.width, self.boxHeight, self.backgroundColor.a, self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b);
@@ -267,11 +279,12 @@ function ISWidgetBuildControl:prerender()
 end
 
 function ISWidgetBuildControl:render()
-    ISPanel.render(self);
+    ISPanelJoypad.render(self);
+    self:renderJoypadFocus()
 end
 
 function ISWidgetBuildControl:update()
-    ISPanel.update(self);
+    ISPanelJoypad.update(self);
 end
 
 function ISWidgetBuildControl:onAutoToggled(_newState)
@@ -328,13 +341,22 @@ function ISWidgetBuildControl.onTextChange(box)
     end
 end
 
+function ISWidgetBuildControl:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData)
+    self:restoreJoypadFocus()
+end
+
+function ISWidgetBuildControl:onLoseJoypadFocus(joypadData)
+    ISPanelJoypad.onLoseJoypadFocus(self, joypadData)
+    self:clearJoypadFocus()
+end
 
 --************************************************************************--
 --** ISWidgetBuildControl:new
 --**
 --************************************************************************--
 function ISWidgetBuildControl:new(x, y, width, height, player, logic)
-    local o = ISPanel:new(x, y, width, height);
+    local o = ISPanelJoypad:new(x, y, width, height);
     setmetatable(o, self)
     self.__index = self
 

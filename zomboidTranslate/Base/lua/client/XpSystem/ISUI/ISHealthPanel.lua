@@ -403,13 +403,11 @@ function ISHealthPanel:update()
     end
     if self:isReallyVisible() then
         self:updateBodyPartList()
-        if self.textRight and self.listbox.textRight then
-            local width = math.max(self.textRight, self.listbox.x + self.listbox.textRight)
-            if width > 0 then
-                width = math.max(width, self.healthPanel:getRight())
-                self:setWidthAndParentWidth(width + UI_BORDER_SPACING+1);
-            end
-        end
+        self.listbox:setWidth(self.width - self.listbox.x - UI_BORDER_SPACING - 1)
+
+        local width = math.max(self.tabtotalwidth, self.healthPanel:getRight(), self.fitness:getRight(), self.listbox.x + self.listbox.textRight)
+        self:setWidthAndParentWidth(width + UI_BORDER_SPACING+1);
+
         self:setHeightAndParentHeight(math.max(self.healthPanel:getBottom(), self.allTextHeight or 0) + FONT_HGT_SMALL + UI_BORDER_SPACING * 2);
 --        self.healthPanel:setX(self:getAbsoluteX());
 --        self.healthPanel:setY(self:getAbsoluteY() + 8);
@@ -565,7 +563,8 @@ end
 function ISHealthPanel:drawText(str, x, y, r, g, b, a, font)
 	ISUIElement.drawText(self, str, x, y, r, g, b, a, font)
 	local width = getTextManager():MeasureStringX(font or UIFont.Small, str)
-	self.textRight = math.max(self.textRight or 0, x + width)
+    local roundToNearest = 20
+	self.textRight = x + width - math.fmod(x + width, roundToNearest) + roundToNearest*2
 end
 
 function ISHealthBodyPartListBox:doDrawItem(y, item, alt)
@@ -975,6 +974,7 @@ function ISHealthPanel:new (player, x, y, width, height)
     o:noBackground();
     o.abutton = Joypad.Texture.AButton
     o.damagedParts = {}
+    o.tabtotalwidth = width
     ISHealthPanel.instance = o;
     return o;
 end

@@ -81,8 +81,11 @@ function ISTakeEngineParts:getExtraLogData()
 	end;
 end
 
-function ISTakeEngineParts:getDuration()
-	return self.maxTime;
+function ISRepairEngine:getDuration(maxTime)
+	if self.character:isTimedActionInstant() then
+		return 1;
+	end
+	return maxTime;
 end
 
 function ISTakeEngineParts:new(character, part, item, maxTime)
@@ -90,7 +93,7 @@ function ISTakeEngineParts:new(character, part, item, maxTime)
 	o.vehicle = part:getVehicle()
 	o.part = part
 	o.item = item
-	o.maxTime = maxTime
+	o.maxTime = o:getDuration(maxTime)
 	o.jobType = getText("IGUI_TakeEngineParts")
 	return o
 end

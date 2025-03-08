@@ -1630,6 +1630,28 @@ function MainOptions:addUIPanel()
 	end
 	self.gameOptions:add(gameOption)
 
+	----- SIDEBAR SIZE -----
+
+	local sidebarSize = self:addCombo(splitpoint, y, comboWidth, 20, getText("UI_optionscreen_SidebarSize"), { getText("UI_optionscreen_MoodleSize1"), getText("UI_optionscreen_MoodleSize2"), getText("UI_optionscreen_MoodleSize3"), getText("UI_optionscreen_MoodleSize4"), getText("UI_optionscreen_MoodleSize5"), getText("UI_optionscreen_MoodleSize6") }, 1)
+	local tooltipSidebarSize = {}
+	tooltipSidebarSize["defaultTooltip"] = getText("UI_optionscreen_SidebarSize_tt")
+	sidebarSize:setToolTipMap(tooltipSidebarSize)
+
+	gameOption = GameOption:new('sidebarSize', sidebarSize)
+	function gameOption.toUI(self)
+		local box = self.control
+		box.selected = getCore():getOptionSidebarSize()
+	end
+	function gameOption.apply(self)
+		local box = self.control
+		if box.options[box.selected] then
+			if getCore():getOptionSidebarSize() ~= box.selected then
+				getCore():setOptionSidebarSize(box.selected)
+			end
+		end
+	end
+	self.gameOptions:add(gameOption)
+
 	----- CRAFTING XP -----
 	local showCraftXP = self:addYesNo(splitpoint, y, BUTTON_HGT, BUTTON_HGT, getText("UI_optionscreen_showCraftingXP"))
 
@@ -2486,6 +2508,22 @@ function MainOptions:addSoundPanel()
         self.mainPanel:addChild(self.currentMusicLabel);
         self.addY = self.addY + FONT_HGT_SMALL + 6
     --]]
+
+	----- PLAY MUSIC WHEN PAUSED -----
+	local playMusicWhenPaused = self:addYesNo(splitpoint, y, BUTTON_HGT, BUTTON_HGT, getText("UI_optionscreen_PlayMusicWhenPaused"))
+--	playMusicWhenPaused.tooltip = getText("UI_optionscreen_PlayMusicWhenPaused_tt");
+	gameOption = GameOption:new('playMusicWhenPaused', playMusicWhenPaused)
+	function gameOption.toUI(self)
+		local box = self.control
+		box:setSelected(1, getCore():getOptionPlayMusicWhenPaused())
+	end
+	function gameOption.apply(self)
+		local box = self.control
+		getCore():setOptionPlayMusicWhenPaused(box:isSelected(1))
+		getSoundManager():resumeSoundAndMusic()
+		getSoundManager():pauseSoundAndMusic(true)
+	end
+	self.gameOptions:add(gameOption)
 
 	----- RakVoice -----
 	local voiceEnable = self:addCombo(splitpoint, y, comboWidth, 20, getText("UI_optionscreen_voiceEnable"), {getText("UI_Yes"), getText("UI_No")}, 1)

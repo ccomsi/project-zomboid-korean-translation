@@ -277,6 +277,7 @@ end
 
 function ISWidgetRecipeListPanel:render()
     ISPanel.render(self);
+    self:renderJoypadFocus()
 end
 
 function ISWidgetRecipeListPanel:update()

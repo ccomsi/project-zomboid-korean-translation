@@ -12,7 +12,7 @@ function ISWorldMenuElements.ContextFluidContainer()
     end
 
     function self.createMenu( _data )
-        if getCore():getGameMode() == "Tutorial" then
+        if getCore():getGameMode() == "Tutorial" or _data.context.dontShowLiquidOption then
             return;
         end
 
@@ -38,12 +38,12 @@ function ISWorldMenuElements.ContextFluidContainer()
                         local option = subMenu:addOption("[Debug] Remove FluidContainer", _data, self.removeContainer, obj );
                     end
                 end
-            elseif getCore():getDebug() and index==#_data.objects then
-                local parent = _data.context:addOption(getText("Fluid_Fluid_Options"), _data, nil );
-                local subMenu = ISContextMenu:getNew(_data.context);
-                _data.context:addSubMenu(parent, subMenu);
-                local option = subMenu:addOption("[Debug] Add Water Container", _data, self.addWater, obj );
-                local option = subMenu:addOption("[Debug] Add Petrol Container", _data, self.addPetrol, obj );
+            --elseif getCore():getDebug() and index==#_data.objects then
+            --    local parent = _data.context:addOption(getText("Fluid_Fluid_Options"), _data, nil );
+            --    local subMenu = ISContextMenu:getNew(_data.context);
+            --    _data.context:addSubMenu(parent, subMenu);
+            --    local option = subMenu:addOption("[Debug] Add Water Container", _data, self.addWater, obj );
+            --    local option = subMenu:addOption("[Debug] Add Petrol Container", _data, self.addPetrol, obj );
             end
         end
     end

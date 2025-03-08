@@ -234,7 +234,7 @@ function ISHandcraftAction:getDuration()
 	if not self.craftRecipe then
 		return -1;
 	end
-	return self.craftRecipe:getTime() * 5;
+	return self.craftRecipe:getTime(self.character) * 5;
 end
 
 function ISHandcraftAction:setOnStart(_func, _target)

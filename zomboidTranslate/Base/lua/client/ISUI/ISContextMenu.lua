@@ -379,11 +379,7 @@ function ISContextMenu:render()
 			if k.isDisabled then
 				self:drawRect(0, y, self.width, self.itemHgt, 0.1, 0.05, 0.05, 0.05);
 				self:drawRectBorder(0, y, self.width, self.itemHgt, 0.15, 0.9, 0.9, 1);
-				if k.color ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1.0, k.color.r, k.color.g, k.color.b)
-				elseif k.iconTexture ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1, 1, 1, 1)
-				end
+				self:renderOptionTextureOrColor(k, iconShiftX, y + iconShiftY, iconSize, iconSize)
 				self:drawText(k.name, textForIconShift, y+textDY, 0.5, 0.5, 0.5, 0.85, self.font);
 				if k.subOption ~= nil then
 					self:drawTextRight(">", self.width - 4, y+textDY, 0.5, 0.5, 0.5, 0.85, self.font);
@@ -391,9 +387,7 @@ function ISContextMenu:render()
 			elseif k.notAvailable then
 				self:drawRect(0, y, self.width, self.itemHgt, 0.1, 0.05, 0.05, 0.05);
 				self:drawRectBorder(0, y, self.width, self.itemHgt, 0.15, 0.9, 0.9, 1);
-				if k.iconTexture ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1, 1, 1, 1)
-				end
+				self:renderOptionTextureOrColor(k, iconShiftX, y + iconShiftY, iconSize, iconSize)
 				self:drawText(k.name, textForIconShift, y+textDY, 1, 0.2, 0.2, 0.85, self.font);
                 if k.subOption ~= nil then
                     self:drawTextRight(">", self.width - 4, y+textDY, 1, 0.2, 0.2, 0.85, self.font);
@@ -401,11 +395,7 @@ function ISContextMenu:render()
 			else
 				self:drawRect(0, y, self.width, self.itemHgt, 0.8, 0.5, 0.5, 0.5);
 				self:drawRectBorder(0, y, self.width, self.itemHgt, 0.15, 0.9, 0.9, 1);
-				if k.color ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1.0, k.color.r, k.color.g, k.color.b)
-				elseif k.iconTexture ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1)
-				end
+				self:renderOptionTextureOrColor(k, iconShiftX, y + iconShiftY, iconSize, iconSize)
 				self:drawText(k.name, textForIconShift, y+textDY, 1, 1, 1, 1, self.font);
 			end
 --~ 			if k.textDisplay then
@@ -449,20 +439,14 @@ function ISContextMenu:render()
 			self.currentOptionRect = { x = self.x, y = self.y + y + self:getYScroll(), width = 100, height = self.itemHgt }
 		else
 			if k.isDisabled then
-				if k.color ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1.0, k.color.r, k.color.g, k.color.b)
-				elseif k.iconTexture ~= nil then
-				self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1, 1, 1, 1)
-				end
+                self:renderOptionTextureOrColor(k, iconShiftX, y + iconShiftY, iconSize, iconSize)
 				self:drawText(k.name, textForIconShift, y+textDY, 0.5, 0.5, 0.5, 0.85, self.font);
 
 				if k.subOption ~= nil then
 				self:drawTextRight(">", self.width - 4, y+textDY, 0.5, 0.5, 0.5, 0.85, self.font);
 				end
 			elseif k.notAvailable then
-				if k.iconTexture ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1, 1, 1, 1)
-				end
+				self:renderOptionTextureOrColor(k, iconShiftX, y + iconShiftY, iconSize, iconSize)
 				self:drawText(k.name, textForIconShift, y+textDY, 1, 0.2, 0.2, 0.85, self.font);
 
                 if k.subOption ~= nil then
@@ -491,11 +475,7 @@ function ISContextMenu:render()
 
                     self:drawRect(0, y, self.width, self.itemHgt, self.blinkAlpha, 1, 1, 1);
                 end
-				if k.color ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1.0, k.color.r, k.color.g, k.color.b)
-				elseif k.iconTexture ~= nil then
-					self:drawTextureScaledAspect(k.iconTexture, iconShiftX, y + iconShiftY, iconSize, iconSize, 1, 1, 1, 1)
-				end
+				self:renderOptionTextureOrColor(k, iconShiftX, y + iconShiftY, iconSize, iconSize)
 				self:drawText(k.name, textForIconShift, y+textDY, 1, 0.8, 0.8, 0.9, self.font);
 
 				if k.isDefaultOption then
@@ -672,6 +652,7 @@ end
 
 function ISContextMenu:setSlideGoalX(startX, finalX)
 	self:setX(finalX)
+	self.slideGoalX = nil
 	if not self:isOptionSingleMenu() then return end
 	if not JoypadState.players[self.player+1] then return end
 	self:setX(startX)
@@ -681,6 +662,7 @@ end
 
 function ISContextMenu:setSlideGoalY(startY, finalY)
 	self:setY(finalY)
+	self.slideGoalY = nil
 	if not self:isOptionSingleMenu() then return end
 	if JoypadState.players[self.player+1] then return end
 	self:setY(startY)
@@ -1018,6 +1000,16 @@ function ISContextMenu:onGetUpAndThen(onSelect, p1, p2, p3, p4, p5, p6, p7, p8, 
 	local action = ISWaitWhileGettingUp:new(playerObj)
 	action:setOnComplete(onSelect, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
 	ISTimedActionQueue.add(action)
+end
+
+function ISContextMenu:renderOptionTextureOrColor(option, x, y, w, h)
+	if option.color ~= nil then
+		self:drawTextureScaledAspect(option.iconTexture, x, y, w, h, 1.0, option.color.r, option.color.g, option.color.b)
+	elseif option.iconTexture ~= nil then
+		self:drawTextureScaledAspect(option.iconTexture, x, y, w, h, 1.0, 1.0, 1.0, 1.0)
+	elseif option.itemForTexture ~= nil then
+		ISInventoryItem.renderItemIcon(self, option.itemForTexture, x, y, 1.0, w, h)
+	end
 end
 
 function ISContextMenu:getMenuOptionNames()

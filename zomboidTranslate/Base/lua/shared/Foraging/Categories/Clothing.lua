@@ -563,6 +563,7 @@ local function generateClothingDefs()
 				["WristWatch_Right_DigitalBlack"] = "Base.WristWatch_Right_DigitalBlack",
 				["WristWatch_Right_DigitalDress"] = "Base.WristWatch_Right_DigitalDress",
 				["WristWatch_Right_DigitalRed"] = "Base.WristWatch_Right_DigitalRed",
+				["BlackRobe"] = "Base.BlackRobe",
 				--["Bag_BaseballBag"] = "Base.Bag_BaseballBag",
 				--["Bag_BurglarBag"] = "Base.Bag_BurglarBag",
 				--["Bag_ConstructionBag"] = "Base.Bag_ConstructionBag",

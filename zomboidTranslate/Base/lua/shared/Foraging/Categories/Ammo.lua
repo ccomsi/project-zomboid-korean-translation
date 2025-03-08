@@ -65,7 +65,6 @@ local function generateAmmoDefs()
 				xp = spawnTable.xp,
 				categories = { "Ammunition" },
 				zones = {
-					Vegitation  = spawnTable.chance,
 					TrailerPark = spawnTable.chance,
 					TownZone    = spawnTable.chance,
 					ForagingNav = spawnTable.chance,

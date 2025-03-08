@@ -90,7 +90,7 @@ function SPlantGlobalObject:stateToIsoObject(isoObject)
 	end
 
 	isoObject:setName(self.objectName)
-	isoObject:setSprite(self.spriteName)
+	isoObject:setSpriteFromName(self.spriteName)
 	self:toModData(isoObject:getModData())
 
 	if isServer() then
@@ -124,7 +124,7 @@ function SPlantGlobalObject:setSpriteName(spriteName)
 	self.spriteName = spriteName
 	local object = self:getObject()
 	if object then
-		object:setSprite(self.spriteName)
+		object:setSpriteFromName(self.spriteName)
 		if isServer() then
 			object:sendObjectChange('sprite')
 		end

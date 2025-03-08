@@ -53,7 +53,8 @@ function ISCraftRecipeInfoBox:createDynamicChildren()
         self:addInfo("Recipe Reports: " .. self.recipe:getName());
     end
 
-    local time = round(self.recipe:getTime()/10,2);
+    local time = round(self.recipe:getTime(self.player)/10,2);
+--     local time = round(self.recipe:getTime()/10,2);
     self:addInfoPair(getText("IGUI_CraftingWindow_CraftTime"), tostring(time).." " .. getText("IGUI_CraftingWindow_Seconds"));
 
     if self.recipe:isInHandCraftCraft() then

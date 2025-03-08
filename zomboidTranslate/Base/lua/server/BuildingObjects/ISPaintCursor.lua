@@ -35,7 +35,7 @@ function ISPaintCursor:create(x, y, z, north, sprite)
 	if self.action == "paintSign" then
 		local paintCan = nil
 		if not ISBuildMenu.cheat then
-			local paintBrush = playerInv:getFirstTypeRecurse("Paintbrush")
+			local paintBrush = playerInv:getFirstTagRecurse("Paintbrush")
 			ISWorldObjectContextMenu.transferIfNeeded(playerObj, paintBrush)
 			paintCan = playerInv:getFirstTypeRecurse(args.paintType)
 			ISWorldObjectContextMenu.transferIfNeeded(playerObj, paintCan)
@@ -45,7 +45,7 @@ function ISPaintCursor:create(x, y, z, north, sprite)
 	if self.action == "paintThump" then
 		local paintCan = nil
 		if not ISBuildMenu.cheat then
-			local paintBrush = playerInv:getFirstTypeRecurse("Paintbrush")
+			local paintBrush = playerInv:getFirstTagRecurse("Paintbrush")
 			ISWorldObjectContextMenu.transferIfNeeded(playerObj, paintBrush)
 			paintCan = playerInv:getFirstTypeRecurse(args.paintType)
 			ISWorldObjectContextMenu.transferIfNeeded(playerObj, paintCan)

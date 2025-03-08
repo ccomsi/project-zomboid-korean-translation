@@ -201,7 +201,7 @@ function ISCraftInventoryPanel:populate()
             if node:isExpanded() then
                 for k=0,node:getItems():size()-1 do
                     local inventoryItem = node:getItems():get(k);
-                    item = self:createListItemEntree(node, inventoryItem, k);
+                    item = self:createListItemEntry(node, inventoryItem, k);
                     self.itemListBox:addItem(item.name, item);
                 end
             end
@@ -223,7 +223,7 @@ function ISCraftInventoryPanel:populate()
             if node:isExpanded() then
                 for k=0,node:getItems():size()-1 do
                     local inventoryItem = node:getItems():get(k);
-                    item = self:createListItemEntree(node, inventoryItem, k);
+                    item = self:createListItemEntry(node, inventoryItem, k);
                     local listItem = self.itemListBox:addItem(item.name, item);
                     
                     -- restore selection
@@ -246,8 +246,9 @@ function ISCraftInventoryPanel:populate()
         header.isUnavailableItemsHeader = true;
         self.itemListBox:addItem(header.name, header);
 
-        if self.unavailablesExpanded or ((not addedToolsHeader) and (not addedItemsHeader)) then
+        if self.unavailablesExpanded then -- or ((not addedToolsHeader) and (not addedItemsHeader)) then
             local index = 0;
+            local inputItems = {}
             for i = 0, allInputItems:size()-1 do
                 local inputItem = allInputItems:get(i);
                 local found = false;
@@ -256,13 +257,14 @@ function ISCraftInventoryPanel:populate()
                         found = true;
                     end
                 end
-
                 if not found then
-                    item = self:createUnavailableListItemEntree(inputItem, index);
-                    self.itemListBox:addItem(item.name, item);
-
-                    index = index + 1;
+                    table.insert(inputItems, inputItem)
                 end
+            end
+            table.sort(inputItems, function(a,b) return not string.sort(a:getDisplayName(), b:getDisplayName()) end)
+            for index,inputItem in ipairs(inputItems) do
+                item = self:createUnavailableListItemEntry(inputItem, index)
+                self.itemListBox:addItem(item.name, item)
             end
         end
     end
@@ -297,7 +299,7 @@ function ISCraftInventoryPanel:createListItemNode(_node) -- _node:InputItemNode
     return item;
 end
 
-function ISCraftInventoryPanel:createListItemEntree(_node, _inventoryItem, _index)
+function ISCraftInventoryPanel:createListItemEntry(_node, _inventoryItem, _index)
     local item = {};
 
     item.isHeader = false;
@@ -313,7 +315,7 @@ function ISCraftInventoryPanel:createListItemEntree(_node, _inventoryItem, _inde
     return item;
 end
 
-function ISCraftInventoryPanel:createUnavailableListItemEntree(_item, _index)
+function ISCraftInventoryPanel:createUnavailableListItemEntry(_item, _index)
     local item = {};
 
     item.isHeader = false;

@@ -42,24 +42,33 @@ function CharacterCreationMainCharacterPanel:render()
 end
 
 function CharacterCreationMainCharacterPanel:positionRelativeToScrollBar()
-	-- if false, state of scroll bar hasn't changed, don't move children
-	-- if true, state of scroll bar has changed, move children accordingly
 	if self.scrollBar ~= self:isVScrollBarVisible() then
 		self.scrollBar = self:isVScrollBarVisible()
+	end
 
-		-- determine whether scroll bar has appeared or disappeared
-		-- if appeared, multiplier is -1, moving items to the left
-		-- if disappeared, multiplier is 1, moving items to the right
-		local multiplier = 1
-		if self.scrollBar then
-			multiplier = -1
-		end
+	local multiplier = (self.scrollBar and 1 or 0) * (UI_BORDER_SPACING + 13) --13 is scroll bar width
+	local maxWidth = self.columnWidth + 300 + UI_BORDER_SPACING
+	local xOffset = math.max(self.width - maxWidth, 0)
 
-		for _,child in pairs(self:getChildren()) do
-			if child ~= self.vscroll then --to prevent the scroll bar itself from moving
-				child:setX(child:getX() + (UI_BORDER_SPACING + 13)*multiplier)
-			end
-		end
+	for _,v in pairs(self.reposTable) do ---section headers
+		v:setX(xOffset)
+	end
+
+	for _,v in pairs(self.repos2Table) do ---control titles
+		v:setX(xOffset + self.columnWidth - v:getWidth())
+	end
+
+	for _,v in pairs(self.repos3Table) do ---controls
+		v:setX(xOffset + self.columnWidth + UI_BORDER_SPACING)
+	end
+
+	for _,v in pairs(self.dividerResizeTable) do ---dividers
+		v:setWidth(math.min(self.width, maxWidth) - multiplier)
+		v:setX(xOffset)
+	end
+
+	for _,v in pairs(self.comboResizeTable) do ---combo boxes and slider bar
+		v:setWidth(math.min(300, self.width - self.columnWidth - UI_BORDER_SPACING) - multiplier)
 	end
 end
 
@@ -113,6 +122,13 @@ function CharacterCreationMainCharacterPanel:new(x, y, width, height)
 	local o = ISPanelJoypad.new(self, x, y, width, height)
 	self.prevJoypadIndexY = -1
 	o.scrollBar = false;
+	o.columnWidth = 10
+	o.reposTable = {}
+	o.repos2Table = {}
+	o.repos3Table = {}
+	o.comboResizeTable = {}
+	o.dividerResizeTable = {}
+	o.columnWidth = 0
 	return o
 end
 
@@ -238,13 +254,12 @@ function CharacterCreationMain:create()
 			getTextManager():MeasureStringX(UIFont.Small, getText("UI_Stubble")),
 			getTextManager():MeasureStringX(UIFont.Small, getText("UI_characreation_beardtype"))
 	)
-	local scrollBarVisibleOffset = UI_BORDER_SPACING + 13 -- see positionRelativeToScrollBar()
-	self.comboWid = math.min(300, self.characterPanel.width - self.columnWidth - UI_BORDER_SPACING - scrollBarVisibleOffset)
-	self.xOffset = self.characterPanel.width - self.columnWidth - self.comboWid - UI_BORDER_SPACING
+	self.characterPanel.columnWidth = self.columnWidth
 	self.yOffset = 0;
 	self.clothingTextureComboWidth = UI_BORDER_SPACING*4 + getTextManager():MeasureStringX(UIFont.Small, getText("UI_characreation_Type").." " .. (9))
 
-    self:createNameAndGender();
+	self.characterPanel.columnWidth = self.columnWidth
+	self:createNameAndGender();
 
 	-- BODY TYPE SELECTION
 	self:createBodyTypeBtn();
@@ -449,6 +464,8 @@ function CharacterCreationMain:saveBuildStep2(button, joypadData, param2)
 		savestring = savestring .. "beard=" .. beardStyle .. ";";
         savestring = savestring .. "beardstubble=" .. (self.beardStubbleTickBox:isSelected(1) and "1" or "2") .. ";";
 	end
+	savestring = savestring .. "voiceStyle=" .. self.voiceTypeCombo:getOptionData(self.voiceTypeCombo.selected):getName() .. ";";
+	savestring = savestring .. "voicePitch=" .. self:getVoicePitch() .. ";";
 	for i,v in pairs(self.clothingCombo) do
 		if v:getOptionData(v.selected) ~= nil then
 			savestring = savestring ..  i .. "=" .. v:getOptionData(v.selected);
@@ -548,8 +565,23 @@ function CharacterCreationMain:loadOutfit(box)
 			local stubble = tonumber(options[1]) == 1
 			self.beardStubbleTickBox:setSelected(1, stubble);
 			self:onBeardStubbleSelected(1, stubble);
+		elseif location[1] == "voiceStyle" then
+			local foundVoice = false;
+			for i in ipairs(self.voiceTypeCombo.options) do
+				local voiceOption = self.voiceTypeCombo:getOptionData(i);
+				if (voiceOption ~= nil) and (voiceOption:getName() == options[1]) then
+					self.voiceTypeCombo:selectData(voiceOption);
+					foundVoice = true;
+					break;
+				end;
+			end;
+			if (not foundVoice) then self:randomVoice(); end;
+			self:onVoiceTypeSelected();
+		elseif location[1] == "voicePitch" then
+			self.voicePitchSlider:setCurrentValue(options and tonumber(options[1]) or 0.0, true);
+			self:onVoiceTypeSelected();
 		elseif self.clothingCombo[location[1]]  then
---			print("dress on ", location[1], "with", options[1])
+			--			print("dress on ", location[1], "with", options[1])
 			local bodyLocation = location[1];
 			local itemType = options[1];
 			self.clothingCombo[bodyLocation].selected = 1;
@@ -604,75 +636,67 @@ function CharacterCreationMain.writeSaveFile(options)
 end
 
 function CharacterCreationMain:createNameAndGender()
-    local rightX = self.xOffset + self.columnWidth + UI_BORDER_SPACING
-    local labelX = self.xOffset + self.columnWidth -- right-justified
-
-	local lbl = ISLabel:new(labelX, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_forename"), 1, 1, 1, 1, UIFont.Medium, false);
+	local lbl = ISLabel:new(0, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_forename"), 1, 1, 1, 1, UIFont.Medium, false);
 	lbl:initialise();
 	lbl:instantiate();
-	lbl:setAnchorLeft(false);
-	lbl:setAnchorRight(true);
 	self.characterPanel:addChild(lbl);
+	table.insert(self.characterPanel.repos2Table, lbl)
 
-	self.forenameEntry = ISTextEntryBox:new(MainScreen.instance.desc:getForename(), rightX, self.yOffset, self.comboWid, BUTTON_HGT);
+	self.forenameEntry = ISTextEntryBox:new(MainScreen.instance.desc:getForename(), 0, self.yOffset, 0, BUTTON_HGT);
 	self.forenameEntry:initialise();
 	self.forenameEntry:instantiate();
-	self.forenameEntry:setAnchorLeft(false);
-	self.forenameEntry:setAnchorRight(true);
 	self.characterPanel:addChild(self.forenameEntry);
+	table.insert(self.characterPanel.comboResizeTable, self.forenameEntry)
+	table.insert(self.characterPanel.repos3Table, self.forenameEntry)
 
-	lbl = ISLabel:new(labelX, self.forenameEntry:getBottom() + UI_BORDER_SPACING, FONT_HGT_MEDIUM, getText("UI_characreation_surname"), 1, 1, 1, 1, UIFont.Medium, false);
+	lbl = ISLabel:new(0, self.forenameEntry:getBottom() + UI_BORDER_SPACING, FONT_HGT_MEDIUM, getText("UI_characreation_surname"), 1, 1, 1, 1, UIFont.Medium, false);
 	lbl:initialise();
 	lbl:instantiate();
-	lbl:setAnchorLeft(false);
-	lbl:setAnchorRight(true);
 	self.characterPanel:addChild(lbl);
+	table.insert(self.characterPanel.repos2Table, lbl)
 
-	self.surnameEntry = ISTextEntryBox:new(MainScreen.instance.desc:getSurname(), rightX, self.forenameEntry:getBottom() + UI_BORDER_SPACING, self.comboWid, BUTTON_HGT);
+	self.surnameEntry = ISTextEntryBox:new(MainScreen.instance.desc:getSurname(), 0, self.forenameEntry:getBottom() + UI_BORDER_SPACING, 0, BUTTON_HGT);
 	self.surnameEntry:initialise();
 	self.surnameEntry:instantiate();
-	self.surnameEntry:setAnchorLeft(false);
-	self.surnameEntry:setAnchorRight(true);
 	self.characterPanel:addChild(self.surnameEntry);
+	table.insert(self.characterPanel.comboResizeTable, self.surnameEntry)
+	table.insert(self.characterPanel.repos3Table, self.surnameEntry)
 
-	self.genderCombo = ISComboBox:new(rightX, self.surnameEntry:getBottom() + UI_BORDER_SPACING, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onGenderSelected);
+	self.genderCombo = ISComboBox:new(0, self.surnameEntry:getBottom() + UI_BORDER_SPACING, 0, BUTTON_HGT, self, CharacterCreationMain.onGenderSelected);
 	self.genderCombo:initialise();
-	self.genderCombo:setAnchorLeft(false);
-	self.genderCombo:setAnchorRight(true);
 	self.genderCombo:addOption(getText("IGUI_char_Female"))
 	self.genderCombo:addOption(getText("IGUI_char_Male"))
 	self.genderCombo.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
 	self.characterPanel:addChild(self.genderCombo)
+	table.insert(self.characterPanel.comboResizeTable, self.genderCombo)
+	table.insert(self.characterPanel.repos3Table, self.genderCombo)
 
 	self.yOffset = self.genderCombo:getBottom() + UI_BORDER_SPACING;
 end
 
 function CharacterCreationMain:createBodyTypeBtn()
-	local lbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_body"), 1, 1, 1, 1, UIFont.Medium, true);
+	local lbl = ISLabel:new(0, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_body"), 1, 1, 1, 1, UIFont.Medium, true);
 	lbl:initialise();
 	lbl:instantiate();
-	lbl:setAnchorLeft(false);
-	lbl:setAnchorRight(true);
 	self.characterPanel:addChild(lbl);
+	table.insert(self.characterPanel.reposTable, lbl)
 	
-	local rect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
+	local rect = ISRect:new(0, self.yOffset + FONT_HGT_MEDIUM + 5, 0, 1, 1, 0.3, 0.3, 0.3);
 	rect:initialise();
 	rect:instantiate();
-	rect:setAnchorLeft(false);
-	rect:setAnchorRight(true);
 	self.characterPanel:addChild(rect);
+	table.insert(self.characterPanel.dividerResizeTable, rect)
 	
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
 
 	-------------
 	-- SKIN COLOR 
 	-------------
-	self.skinColorLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_SkinColor"), 1, 1, 1, 1, UIFont.Small);
+	self.skinColorLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_SkinColor"), 1, 1, 1, 1, UIFont.Small);
 	self.skinColorLbl:initialise();
 	self.skinColorLbl:instantiate();
-	self.skinColorLbl:setAnchorLeft(false);
-	self.skinColorLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.skinColorLbl);
+	table.insert(self.characterPanel.repos2Table, self.skinColorLbl)
 
 	self.skinColors = { {r=1,g=0.91,b=0.72},
 		{r=0.98,g=0.79,b=0.49},
@@ -682,15 +706,14 @@ function CharacterCreationMain:createBodyTypeBtn()
 	--	for _,color in ipairs(skinColors) do
 	--		color:desaturate(0.5)
 	--	end
-	local skinColorBtn = ISButton:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, BUTTON_HGT, BUTTON_HGT, "", self, CharacterCreationMain.onSkinColorSelected)
+	local skinColorBtn = ISButton:new(0, self.yOffset, BUTTON_HGT, BUTTON_HGT, "", self, CharacterCreationMain.onSkinColorSelected)
 	skinColorBtn:initialise()
 	skinColorBtn:instantiate()
-	skinColorBtn:setAnchorLeft(false);
-	skinColorBtn:setAnchorRight(true);
 	local color = self.skinColors[1]
 	skinColorBtn.backgroundColor = {r = color.r, g = color.g, b = color.b, a = 1}
 	self.characterPanel:addChild(skinColorBtn)
 	self.skinColorButton = skinColorBtn
+	table.insert(self.characterPanel.repos3Table, self.skinColorButton)
 	
 	self.colorPickerSkin = ISColorPicker:new(0, 0, nil)
 	self.colorPickerSkin:initialise()
@@ -704,55 +727,48 @@ function CharacterCreationMain:createBodyTypeBtn()
 	-------------
 	-- CHEST HAIR
 	-------------
-	self.chestHairLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_ChestHair"), 1, 1, 1, 1, UIFont.Small);
+	self.chestHairLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_ChestHair"), 1, 1, 1, 1, UIFont.Small);
 	self.chestHairLbl:initialise();
 	self.chestHairLbl:instantiate();
-	self.chestHairLbl:setAnchorLeft(false);
-	self.chestHairLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.chestHairLbl);
+	table.insert(self.characterPanel.repos2Table, self.chestHairLbl)
 
-	local tickBox = ISTickBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, "", self, CharacterCreationMain.onChestHairSelected)
+	local tickBox = ISTickBox:new(0, self.yOffset, 0, BUTTON_HGT, "", self, CharacterCreationMain.onChestHairSelected)
 	tickBox:initialise()
-	tickBox:setAnchorLeft(false);
-	tickBox:setAnchorRight(true);
 	self.characterPanel:addChild(tickBox)
 	tickBox:addOption("")
 	self.chestHairLbl:setHeight(tickBox.height)
 	self.chestHairTickBox = tickBox
+	table.insert(self.characterPanel.repos3Table, self.chestHairTickBox)
 
 	self.yOffset = self.yOffset + UI_BORDER_SPACING+BUTTON_HGT;
 end
 
 
 function CharacterCreationMain:createHairTypeBtn()
-	local lbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_hair"), 1, 1, 1, 1, UIFont.Medium, true);
+	local lbl = ISLabel:new(0, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_hair"), 1, 1, 1, 1, UIFont.Medium, true);
 	lbl:initialise();
 	lbl:instantiate();
-	lbl:setAnchorLeft(false);
-	lbl:setAnchorRight(true);
 	self.characterPanel:addChild(lbl);
+	table.insert(self.characterPanel.reposTable, lbl)
 	
-	local rect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
+	local rect = ISRect:new(0, self.yOffset + FONT_HGT_MEDIUM + 5, 0, 1, 1, 0.3, 0.3, 0.3);
 	rect:setAnchorRight(false);
 	rect:initialise();
 	rect:instantiate();
-	rect:setAnchorLeft(false);
-	rect:setAnchorRight(true);
 	self.characterPanel:addChild(rect);
+	table.insert(self.characterPanel.dividerResizeTable, rect)
 	
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
 	
-	self.hairTypeLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_hairtype"), 1, 1, 1, 1, UIFont.Small);
+	self.hairTypeLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_characreation_hairtype"), 1, 1, 1, 1, UIFont.Small);
 	self.hairTypeLbl:initialise();
 	self.hairTypeLbl:instantiate();
-	self.hairTypeLbl:setAnchorLeft(false);
-	self.hairTypeLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairTypeLbl);
+	table.insert(self.characterPanel.repos2Table, self.hairTypeLbl)
 	
-	self.hairTypeCombo = ISComboBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onHairTypeSelected);
+	self.hairTypeCombo = ISComboBox:new(0, self.yOffset, 0, BUTTON_HGT, self, CharacterCreationMain.onHairTypeSelected);
 	self.hairTypeCombo:initialise();
-	self.hairTypeCombo:setAnchorLeft(false);
-	self.hairTypeCombo:setAnchorRight(true);
 	self.hairTypeCombo.pointOnItem = function(_self, _index)
 		if _self.lastIndex ~= _index then
 			MainScreen.instance.desc:getHumanVisual():setHairModel(_self:getOptionData(_index))
@@ -761,17 +777,18 @@ function CharacterCreationMain:createHairTypeBtn()
 		end
 	end
 	self.characterPanel:addChild(self.hairTypeCombo)
+	table.insert(self.characterPanel.comboResizeTable, self.hairTypeCombo)
+	table.insert(self.characterPanel.repos3Table, self.hairTypeCombo)
 	
 	self.hairType = 0
 	
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 	
-	self.hairColorLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_color"), 1, 1, 1, 1, UIFont.Small);
+	self.hairColorLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_characreation_color"), 1, 1, 1, 1, UIFont.Small);
 	self.hairColorLbl:initialise();
 	self.hairColorLbl:instantiate();
-	self.hairColorLbl:setAnchorLeft(false);
-	self.hairColorLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairColorLbl);
+	table.insert(self.characterPanel.repos2Table, self.hairColorLbl)
 
 
 	local hairColors = MainScreen.instance.desc:getCommonHairColor();
@@ -784,11 +801,9 @@ function CharacterCreationMain:createHairTypeBtn()
 		--		info:desaturate(0.5)
 		table.insert(hairColors1, { r=info:getR(), g=info:getG(), b=info:getB() })
 	end
-	local hairColorBtn = ISButton:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, BUTTON_HGT, BUTTON_HGT, "", self, CharacterCreationMain.onHairColorMouseDown)
+	local hairColorBtn = ISButton:new(0, self.yOffset, BUTTON_HGT, BUTTON_HGT, "", self, CharacterCreationMain.onHairColorMouseDown)
 	hairColorBtn:initialise()
 	hairColorBtn:instantiate()
-	hairColorBtn:setAnchorLeft(false);
-	hairColorBtn:setAnchorRight(true);
 	local color = hairColors1[1]
 	hairColorBtn.backgroundColor = {r=color.r, g=color.g, b=color.b, a=1}
 	self.characterPanel:addChild(hairColorBtn)
@@ -801,58 +816,54 @@ function CharacterCreationMain:createHairTypeBtn()
 	self.colorPickerHair.pickedTarget = self
 	self.colorPickerHair.resetFocusTo = self.characterPanel
 	self.colorPickerHair:setColors(hairColors1, math.min(#hairColors1, 10), math.ceil(#hairColors1 / 10))
+	table.insert(self.characterPanel.repos3Table, self.hairColorButton)
 
 	----------------------
 	-- STUBBLE
 	----------------------
-	self.hairStubbleLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_Stubble"), 1, 1, 1, 1, UIFont.Small);
+	self.hairStubbleLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_Stubble"), 1, 1, 1, 1, UIFont.Small);
 	self.hairStubbleLbl:initialise();
 	self.hairStubbleLbl:instantiate();
-	self.hairStubbleLbl:setAnchorLeft(false);
-	self.hairStubbleLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairStubbleLbl);
+	table.insert(self.characterPanel.repos2Table, self.hairStubbleLbl)
 	
-	self.hairStubbleTickBox = ISTickBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, "", self, CharacterCreationMain.onShavedHairSelected);
+	self.hairStubbleTickBox = ISTickBox:new(0, self.yOffset, 0, BUTTON_HGT, "", self, CharacterCreationMain.onShavedHairSelected);
 	self.hairStubbleTickBox:initialise();
-	self.hairStubbleTickBox:setAnchorLeft(false);
-	self.hairStubbleTickBox:setAnchorRight(true);
 	self.characterPanel:addChild(self.hairStubbleTickBox)
 	self.hairStubbleTickBox:addOption("")
 	self.hairStubbleLbl:setHeight(self.hairStubbleTickBox.height)
+	table.insert(self.characterPanel.repos3Table, self.hairStubbleTickBox)
 
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 end
 
 function CharacterCreationMain:createVoiceTypeBtn()
-	self.voiceLbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_voice"), 1, 1, 1, 1, UIFont.Medium, true);
+	self.voiceLbl = ISLabel:new(0, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_voice"), 1, 1, 1, 1, UIFont.Medium, true);
 	self.voiceLbl:initialise();
 	self.voiceLbl:instantiate();
-	self.voiceLbl:setAnchorLeft(false);
-	self.voiceLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceLbl);
+	table.insert(self.characterPanel.reposTable, self.voiceLbl)
 
-	self.voiceRect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
+	self.voiceRect = ISRect:new(0, self.yOffset + FONT_HGT_MEDIUM + 5, 0, 1, 1, 0.3, 0.3, 0.3);
 	self.voiceRect:setAnchorRight(false);
 	self.voiceRect:initialise();
 	self.voiceRect:instantiate();
-	self.voiceRect:setAnchorLeft(false);
-	self.voiceRect:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceRect);
+	table.insert(self.characterPanel.dividerResizeTable, self.voiceRect)
 
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
 
-	self.voiceTypeLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_voicetype"), 1, 1, 1, 1, UIFont.Small);
+	self.voiceTypeLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_characreation_voicetype"), 1, 1, 1, 1, UIFont.Small);
 	self.voiceTypeLbl:initialise();
 	self.voiceTypeLbl:instantiate();
-	self.voiceTypeLbl:setAnchorLeft(false);
-	self.voiceTypeLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceTypeLbl);
+	table.insert(self.characterPanel.repos2Table, self.voiceTypeLbl)
 
-	self.voiceTypeCombo = ISComboBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onVoiceTypeSelected);
+	self.voiceTypeCombo = ISComboBox:new(0, self.yOffset, 0, BUTTON_HGT, self, CharacterCreationMain.onVoiceTypeSelected);
 	self.voiceTypeCombo:initialise();
-	self.voiceTypeCombo:setAnchorLeft(false);
-	self.voiceTypeCombo:setAnchorRight(true);
 	self.characterPanel:addChild(self.voiceTypeCombo);
+	table.insert(self.characterPanel.comboResizeTable, self.voiceTypeCombo)
+	table.insert(self.characterPanel.repos3Table, self.voiceTypeCombo)
 
 	local voiceStyles = getAllVoiceStyles();
 
@@ -867,32 +878,32 @@ function CharacterCreationMain:createVoiceTypeBtn()
 
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 
-	self.voicePitchLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_voicepitch"), 1, 1, 1, 1, UIFont.Small);
+	self.voicePitchLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_characreation_voicepitch"), 1, 1, 1, 1, UIFont.Small);
 	self.voicePitchLbl:initialise();
 	self.voicePitchLbl:instantiate();
-	self.voicePitchLbl:setAnchorLeft(false);
-	self.voicePitchLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.voicePitchLbl);
+	table.insert(self.characterPanel.repos2Table, self.voicePitchLbl)
 
-	self.voicePitchSlider = ISSliderPanel:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT);
+	self.voicePitchSlider = ISSliderPanel:new(0, self.yOffset, 0, BUTTON_HGT);
 	self.voicePitchSlider:initialise();
+	self.voicePitchSlider:instantiate();
 	self.voicePitchSlider:setValues(-100.0, 100.0, 1.0, 5.0);
 	self.voicePitchSlider:setCurrentValue(0.0, true);
-	self.voicePitchSlider:setAnchorLeft(false);
-	self.voicePitchSlider:setAnchorRight(true);
 	self.characterPanel:addChild(self.voicePitchSlider);
+	table.insert(self.characterPanel.comboResizeTable, self.voicePitchSlider)
+	table.insert(self.characterPanel.repos3Table, self.voicePitchSlider)
 
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 
-	self.voiceDemoButton = ISButton:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, getText("UI_characreation_playdemovoice"), self, self.onOptionMouseDown);
+	self.voiceDemoButton = ISButton:new(0, self.yOffset, 0, BUTTON_HGT, getText("UI_characreation_playdemovoice"), self, self.onOptionMouseDown);
 	self.voiceDemoButton.internal = "PLAYDEMOVOICE";
 	self.voiceDemoButton:initialise();
 	self.voiceDemoButton:instantiate();
-	self.voiceDemoButton:setAnchorLeft(false);
-	self.voiceDemoButton:setAnchorRight(true);
 	self.voiceDemoButton:setEnable(true);
 	self.voiceDemoButton:setSound("activate", nil);
 	self.characterPanel:addChild(self.voiceDemoButton);
+	table.insert(self.characterPanel.comboResizeTable, self.voiceDemoButton)
+	table.insert(self.characterPanel.repos3Table, self.voiceDemoButton)
 
     if not instanceof(getSoundManager(), "DummySoundManager") then
 	    self.soundPlayer = getSoundManager():getUIEmitter();
@@ -903,31 +914,28 @@ function CharacterCreationMain:createVoiceTypeBtn()
 end
 
 function CharacterCreationMain:createBeardTypeBtn()
-	self.beardLbl = ISLabel:new(self.xOffset, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_beard"), 1, 1, 1, 1, UIFont.Medium, true);
+	self.beardLbl = ISLabel:new(0, self.yOffset, FONT_HGT_MEDIUM, getText("UI_characreation_beard"), 1, 1, 1, 1, UIFont.Medium, true);
 	self.beardLbl:initialise();
 	self.beardLbl:instantiate();
-	self.beardLbl:setAnchorLeft(false);
-	self.beardLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardLbl);
+	table.insert(self.characterPanel.reposTable, self.beardLbl)
 	
-	self.beardRect = ISRect:new(self.xOffset, self.yOffset + FONT_HGT_MEDIUM + 5, self.characterPanel.width - self.xOffset, 1, 1, 0.3, 0.3, 0.3);
+	self.beardRect = ISRect:new(0, self.yOffset + FONT_HGT_MEDIUM + 5, 0, 1, 1, 0.3, 0.3, 0.3);
 	self.beardRect:setAnchorRight(false);
 	self.beardRect:initialise();
 	self.beardRect:instantiate();
-	self.beardRect:setAnchorLeft(false);
-	self.beardRect:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardRect);
+	table.insert(self.characterPanel.dividerResizeTable, self.beardRect)
 	
 	self.yOffset = self.yOffset + FONT_HGT_MEDIUM + 15;
 	
-	self.beardTypeLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_characreation_beardtype"), 1, 1, 1, 1, UIFont.Small);
+	self.beardTypeLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_characreation_beardtype"), 1, 1, 1, 1, UIFont.Small);
 	self.beardTypeLbl:initialise();
 	self.beardTypeLbl:instantiate();
-	self.beardTypeLbl:setAnchorLeft(false);
-	self.beardTypeLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardTypeLbl);
+	table.insert(self.characterPanel.repos2Table, self.beardTypeLbl)
 	
-	self.beardTypeCombo = ISComboBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onBeardTypeSelected);
+	self.beardTypeCombo = ISComboBox:new(0, self.yOffset, 0, BUTTON_HGT, self, CharacterCreationMain.onBeardTypeSelected);
 	self.beardTypeCombo:initialise();
 	self.beardTypeCombo.pointOnItem = function(_self, _index)
 		if _self.lastIndex ~= _index then
@@ -936,28 +944,26 @@ function CharacterCreationMain:createBeardTypeBtn()
 			_self.lastIndex = _index
 		end
 	end
-	self.beardTypeCombo:setAnchorLeft(false);
-	self.beardTypeCombo:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardTypeCombo)
+	table.insert(self.characterPanel.comboResizeTable, self.beardTypeCombo)
+	table.insert(self.characterPanel.repos3Table, self.beardTypeCombo)
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 
 	----------------------
 	-- STUBBLE
 	----------------------
-	self.beardStubbleLbl = ISLabel:new(self.xOffset+self.columnWidth, self.yOffset, BUTTON_HGT, getText("UI_Stubble"), 1, 1, 1, 1, UIFont.Small);
+	self.beardStubbleLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_Stubble"), 1, 1, 1, 1, UIFont.Small);
 	self.beardStubbleLbl:initialise();
 	self.beardStubbleLbl:instantiate();
-	self.beardStubbleLbl:setAnchorLeft(false);
-	self.beardStubbleLbl:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardStubbleLbl);
+	table.insert(self.characterPanel.repos2Table, self.beardStubbleLbl)
 	
-	self.beardStubbleTickBox = ISTickBox:new(self.xOffset+self.columnWidth+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, "", self, CharacterCreationMain.onBeardStubbleSelected);
+	self.beardStubbleTickBox = ISTickBox:new(0, self.yOffset, 0, BUTTON_HGT, "", self, CharacterCreationMain.onBeardStubbleSelected);
 	self.beardStubbleTickBox:initialise();
-	self.beardStubbleTickBox:setAnchorLeft(false);
-	self.beardStubbleTickBox:setAnchorRight(true);
 	self.characterPanel:addChild(self.beardStubbleTickBox)
 	self.beardStubbleTickBox:addOption("")
 	self.beardStubbleLbl:setHeight(self.beardStubbleTickBox.height)
+	table.insert(self.characterPanel.repos3Table, self.beardStubbleTickBox)
 
 	self.yOffset = self.yOffset + BUTTON_HGT + UI_BORDER_SPACING;
 end
@@ -965,11 +971,11 @@ end
 function CharacterCreationMain:createClothingComboDebug(bodyLocation)
 	local x = 0
 	
-	local label = ISLabel:new(self.xOffset*2, self.yOffset, BUTTON_HGT, getText("UI_ClothingType_" .. bodyLocation), 1, 1, 1, 1, UIFont.Small)
+	local label = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_ClothingType_" .. bodyLocation), 1, 1, 1, 1, UIFont.Small)
 	label:initialise()
 	self.clothingPanel:addChild(label)
 	
-	local combo = ISComboBox:new(self.xOffset*2+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, self.onClothingComboSelected, bodyLocation)
+	local combo = ISComboBox:new(UI_BORDER_SPACING, self.yOffset, 0, BUTTON_HGT, self, self.onClothingComboSelected, bodyLocation)
 	combo:initialise()
 	combo.pointOnItem = function(_self, _index)
 		if _self.lastIndex ~= _index then
@@ -998,7 +1004,7 @@ function CharacterCreationMain:createClothingComboDebug(bodyLocation)
 	button.backgroundColor = {r = 1, g = 1, b = 1, a = 1}
 	self.clothingPanel:addChild(button)
 	
-	local comboDecal = ISComboBox:new(button:getRight() + UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, self.onClothingDecalComboSelected, bodyLocation)
+	local comboDecal = ISComboBox:new(button:getRight() + UI_BORDER_SPACING, self.yOffset, 300, BUTTON_HGT, self, self.onClothingDecalComboSelected, bodyLocation)
 	comboDecal:initialise()
 	self.clothingPanel:addChild(comboDecal)
 	
@@ -1130,11 +1136,10 @@ function CharacterCreationMain:createClothingBtn()
 
 	self.clothingPanel:addScrollBars()
 
-	local rect = ISRect:new(x, 0 + FONT_HGT_MEDIUM + 5, 400, 1, 1, 0.3, 0.3, 0.3);
-	rect:setAnchorRight(true);
-	rect:initialise();
-	rect:instantiate();
-	self.clothingPanel:addChild(rect);
+	self.clothingRect = ISRect:new(x, 0 + FONT_HGT_MEDIUM + 5, self.clothingPanel.width, 1, 1, 0.3, 0.3, 0.3);
+	self.clothingRect:initialise();
+	self.clothingRect:instantiate();
+	self.clothingPanel:addChild(self.clothingRect);
 
 	self.originalYOffset = self.yOffset;
 	self.yOffset = UI_BORDER_SPACING+FONT_HGT_MEDIUM+6;
@@ -1155,7 +1160,7 @@ function CharacterCreationMain:createClothingCombo(bodyLocation)
 	label:initialise()
 	self.clothingPanel:addChild(label)
 	
-	local combo = ISComboBox:new(x + UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, self.onClothingComboSelected, bodyLocation)
+	local combo = ISComboBox:new(x + UI_BORDER_SPACING, self.yOffset, 0, BUTTON_HGT, self, self.onClothingComboSelected, bodyLocation)
 	combo:initialise()
 	combo.pointOnItem = function(_self, _index)
 		if _self.lastIndex ~= _index then
@@ -1206,6 +1211,8 @@ end
 
 function CharacterCreationMain:arrangeClothingUI()
 	if self.clothingCombo == nil then return end
+	local scrollBarOffset = self.clothingPanel:isVScrollBarVisible() and UI_BORDER_SPACING + 13 or 0
+	self.clothingRect:setWidth(self.clothingPanel.width - scrollBarOffset)
 	local maxLabelWidth = 0
 	if self.outfitLbl then
 		maxLabelWidth = getTextManager():MeasureStringX(UIFont.Small, self.outfitLbl:getName())
@@ -1219,12 +1226,15 @@ function CharacterCreationMain:arrangeClothingUI()
 	self.comboWid = math.min(300, self.clothingPanel.width - (maxLabelWidth + UI_BORDER_SPACING + UI_BORDER_SPACING + self.clothingTextureComboWidth + scrollBarW))
 	self.comboWid = math.max(self.comboWid, 50)
 	local totalWidth = maxLabelWidth + UI_BORDER_SPACING + self.comboWid + UI_BORDER_SPACING + self.clothingTextureComboWidth
---	local labelRight = math.max(UI_BORDER_SPACING + maxLabelWidth, (self.clothingPanel.width - totalWidth) / 2)
+	--	local labelRight = math.max(UI_BORDER_SPACING + maxLabelWidth, (self.clothingPanel.width - totalWidth) / 2)
 	local labelRight = maxLabelWidth
+
+
+	local nonComboWidth = self.clothingPanel.width - labelRight - UI_BORDER_SPACING - scrollBarOffset
 
 	if self.outfitLbl then
 		self.outfitLbl:setX(labelRight - self.outfitLbl.width)
-		self.outfitCombo:setWidth(self.comboWid)
+		self.outfitCombo:setWidth(math.min(300, nonComboWidth - self.randomizeOutfitBtn:getWidth() - UI_BORDER_SPACING))
 		self.outfitCombo:setX(labelRight + UI_BORDER_SPACING)
 		self.randomizeOutfitBtn:setX(self.outfitCombo:getRight() + UI_BORDER_SPACING)
 	end
@@ -1234,6 +1244,17 @@ function CharacterCreationMain:arrangeClothingUI()
 		label:setX(labelRight - label.width)
 		combo:setWidth(self.comboWid)
 		combo:setX(labelRight + UI_BORDER_SPACING)
+
+		local rightSideElements = 0
+		if self.clothingColorBtn[bodyLocation]:isVisible() then
+			rightSideElements = self.clothingColorBtn[bodyLocation]:getWidth() + UI_BORDER_SPACING
+		elseif self.clothingTextureCombo[bodyLocation]:isVisible() then
+			rightSideElements = self.clothingTextureCombo[bodyLocation]:getWidth() + UI_BORDER_SPACING
+		elseif self.outfitLbl == label and self.randomizeOutfitBtn then
+			rightSideElements = self.randomizeOutfitBtn:getWidth() + UI_BORDER_SPACING
+		end
+
+		combo:setWidth(math.min(300, nonComboWidth - rightSideElements))
 		self.clothingColorBtn[bodyLocation]:setX(combo:getRight() + UI_BORDER_SPACING)
 		self.clothingTextureCombo[bodyLocation]:setX(combo:getRight() + UI_BORDER_SPACING)
 		if self.clothingDecalCombo and self.clothingDecalCombo[bodyLocation] then
@@ -1497,15 +1518,15 @@ function CharacterCreationMain:initClothingDebug()
 
 	self:removeAllClothingWidgets()
 
-	self.outfitLbl = ISLabel:new(self.xOffset*2, self.yOffset, BUTTON_HGT, "Outfit", 1, 1, 1, 1, UIFont.Small)
+	self.outfitLbl = ISLabel:new(0, self.yOffset, BUTTON_HGT, getText("UI_ClothingType_Outfit"), 1, 1, 1, 1, UIFont.Small)
 	self.outfitLbl:initialise()
 	self.clothingPanel:addChild(self.outfitLbl)
 
-	self.outfitCombo = ISComboBox:new(self.xOffset*2+UI_BORDER_SPACING, self.yOffset, self.comboWid, BUTTON_HGT, self, CharacterCreationMain.onOutfitSelected);
+	self.outfitCombo = ISComboBox:new(UI_BORDER_SPACING, self.yOffset, 0, BUTTON_HGT, self, CharacterCreationMain.onOutfitSelected);
 	self.outfitCombo:initialise()
 	self.clothingPanel:addChild(self.outfitCombo)
 
-	local button = ISButton:new(self.outfitCombo:getRight() + UI_BORDER_SPACING, self.yOffset, 15, BUTTON_HGT, "Randomize", self)
+	local button = ISButton:new(self.outfitCombo:getRight() + UI_BORDER_SPACING, self.yOffset, 15, BUTTON_HGT, getText("UI_mapspawn_random"), self)
 	button:setOnClick(CharacterCreationMain.onRandomizeOutfitClicked)
 	button:initialise()
 	self.clothingPanel:addChild(button)
@@ -2021,12 +2042,11 @@ function CharacterCreationMain:onBeardTypeSelected(combo)
 	self:disableBtn()
 end
 
-function CharacterCreationMain:onVoiceTypeSelected(combo)
+function CharacterCreationMain:onVoiceTypeSelected()
 	local desc = MainScreen.instance.desc
 	desc:setVoicePrefix(self:getVoicePrefix());
 	desc:setVoiceType(self:getVoiceType());
 	desc:setVoicePitch(self:getVoicePitch());
-	self.voicePitchSlider:setCurrentValue(0.0, true);
 	self:disableBtn()
 end
 
@@ -2056,6 +2076,7 @@ function CharacterCreationMain:onClothingComboSelected(combo, bodyLocation)
 	
 	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
+	self:arrangeClothingUI()
 end
 
 function CharacterCreationMain:onClothingColorClicked(button, bodyLocation)
@@ -2095,6 +2116,7 @@ function CharacterCreationMain:onClothingTextureComboSelected(combo, bodyLocatio
 	end
 	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
+	self:arrangeClothingUI()
 end
 
 function CharacterCreationMain:onClothingDecalComboSelected(combo, bodyLocation)
@@ -2106,6 +2128,7 @@ function CharacterCreationMain:onClothingDecalComboSelected(combo, bodyLocation)
 	end
 	self.avatarPanel:setSurvivorDesc(desc)
 	self:disableBtn()
+	self:arrangeClothingUI()
 end
 
 function CharacterCreationMain:createAvatar()
@@ -2143,6 +2166,7 @@ function CharacterCreationMain:onOptionMouseDown(button, x, y)
 	end
 	if button.internal == "RANDOM" then
 		self:onRandomCharacter()
+		self:arrangeClothingUI()
 	end
 	if button.internal == "NEXT" then
 		--		MainScreen.instance.charCreationMain:setVisible(false);
@@ -2382,6 +2406,7 @@ function CharacterCreationMain:onResolutionChange(oldw, oldh, neww, newh)
 	self.clothingPanel:setWidth(self:getWidth() - x - UI_BORDER_SPACING - 1)
 
 	self:arrangeClothingUI()
+
 end
 
 function CharacterCreationMain:getVoicePrefix()

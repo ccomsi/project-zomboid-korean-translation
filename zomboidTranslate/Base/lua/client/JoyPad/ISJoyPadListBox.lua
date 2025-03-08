@@ -55,6 +55,12 @@ function ISJoypadListBox:fill()
 		end
 	end
 	listBox:addItem(getText("UI_Cancel"), { cmd = "cancel" })
+	local maxWidth = 200
+	for i=1,listBox:size() do
+		local textWidth = getTextManager():MeasureStringX(listBox.font, listBox.items[i].text)
+		maxWidth = math.max(maxWidth, 15 + textWidth + 15)
+	end
+	listBox:setWidth(maxWidth)
 	listBox.selected = 1
 	listBox:setHeight(math.min(listBox:getScrollHeight(), getCore():getScreenHeight()))
 end

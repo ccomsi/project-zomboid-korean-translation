@@ -85,21 +85,23 @@ end
 ISFarmingMenu.doFarmingMenu = function(player, context, worldobjects, test)
 	if test and ISWorldObjectContextMenu.Test then return true end
 
-	if JoypadState.players[player+1] then
+	local playerObj = getSpecificPlayer(player)
+	local playerInv = playerObj:getInventory()
 
+	if playerObj:getVehicle() then return false end
+
+	if JoypadState.players[player+1] then
 	    local plant
         for i,v in ipairs(worldobjects) do
             plant = CFarmingSystem.instance:getLuaObjectOnSquare(v:getSquare())
             if plant then break end
         end
 
-		local playerObj = getSpecificPlayer(player)
-		local playerInv = playerObj:getInventory()
 		if ISFarmingMenu.canDigHere(worldobjects) then
 			local handItem = ISFarmingMenu.getShovel(playerObj);
 			if handItem then
 				if test then return ISWorldObjectContextMenu.setTest() end
-				--context:addOption(getText("ContextMenu_Dig"), worldobjects, ISFarmingMenu.onPlow, playerObj, handItem)
+				context:addOption(getText("ContextMenu_Dig"), worldobjects, ISFarmingMenu.onPlow, playerObj, handItem)
 			else
 				if not playerObj:getBodyDamage():getBodyPart(BodyPartType.Hand_L):HasInjury() and not playerObj:getBodyDamage():getBodyPart(BodyPartType.Hand_R):HasInjury() then
 					if test then return ISWorldObjectContextMenu.setTest() end
@@ -209,10 +211,10 @@ ISFarmingMenu.doFarmingMenu2 = function(player, context, worldobjects, test)
         end
 	end
 
-    if not JoypadState.players[player:getPlayerNum()+1] and ISFarmingMenu.canDigHere(worldobjects) and not player:getVehicle() then
+    if not JoypadState.players[player:getPlayerNum()+1] and ISFarmingMenu.canDigHere(worldobjects) then
         if shovel then
             if test then return ISWorldObjectContextMenu.setTest() end
-            --context:addOption(getText("ContextMenu_Dig"), worldobjects, ISFarmingMenu.onPlow, player, shovel);
+            context:addOption(getText("ContextMenu_Dig"), worldobjects, ISFarmingMenu.onPlow, player, shovel);
         else
             if(not player:getBodyDamage():getBodyPart(BodyPartType.Hand_L):HasInjury() and not player:getBodyDamage():getBodyPart(BodyPartType.Hand_R):HasInjury()) then
                 if test then return ISWorldObjectContextMenu.setTest() end
@@ -230,7 +232,7 @@ ISFarmingMenu.doFarmingMenu2 = function(player, context, worldobjects, test)
             end
         end
 
-    elseif not JoypadState.players[player:getPlayerNum()+1] and shovel and (not ISFarmingMenu.canDigHere(worldobjects)) and not player:getVehicle() and not currentPlant then
+    elseif not JoypadState.players[player:getPlayerNum()+1] and shovel and (not ISFarmingMenu.canDigHere(worldobjects)) and not currentPlant then
         local option = context:addOption(getText("ContextMenu_no_soil"))
         option.notAvailable = true;
     end
@@ -242,6 +244,10 @@ ISFarmingMenu.doFarmingMenu2 = function(player, context, worldobjects, test)
 		context:addSubMenu(cropsOption, cropsMenu)
 	end
 
+	if info then
+		if test then return ISWorldObjectContextMenu.setTest() end
+		cropsMenu:addOption(getText("ContextMenu_Info"), worldobjects, ISFarmingMenu.onInfo, currentPlant, sq, player);
+	end
 	if fertilizer then
 		if test then return ISWorldObjectContextMenu.setTest() end
 		cropsMenu:addOption(getText("ContextMenu_Fertilize"), worldobjects, ISFarmingMenu.onFertilize, handItem, currentPlant, sq, player);
@@ -249,17 +255,6 @@ ISFarmingMenu.doFarmingMenu2 = function(player, context, worldobjects, test)
 	if compost then
 		if test then return ISWorldObjectContextMenu.setTest() end
 		cropsMenu:addOption(getText("ContextMenu_Compost"), worldobjects, ISFarmingMenu.onCompost, handItem, currentPlant, sq, player);
-	end
-	if currentPlant then
-		if test then return ISWorldObjectContextMenu.setTest() end
-		local opt = cropsMenu:addOption(getText("ContextMenu_Remove"), worldobjects, ISFarmingMenu.onShovel, currentPlant, player, sq);
-		if not shovel then
-			opt.notAvailable = true
-		end
-    end
-	if info then
-		if test then return ISWorldObjectContextMenu.setTest() end
-		cropsMenu:addOption(getText("ContextMenu_Info"), worldobjects, ISFarmingMenu.onInfo, currentPlant, sq, player);
 	end
 	if canHarvest then
 		if test then return ISWorldObjectContextMenu.setTest() end
@@ -473,6 +468,14 @@ ISFarmingMenu.doFarmingMenu2 = function(player, context, worldobjects, test)
 -- --		end
 	    end
     end
+	if currentPlant then
+		if test then return ISWorldObjectContextMenu.setTest() end
+		local opt = cropsMenu:addOption(getText("ContextMenu_Remove"), worldobjects, ISFarmingMenu.onShovel, currentPlant, player, sq);
+		if not shovel then
+			opt.notAvailable = true
+		end
+	end
+
 	if ISFarmingMenu.cheat and currentPlant then
 		if test then return ISWorldObjectContextMenu.setTest() end
 		local option = context:addOption("Cheat", worldobjects, nil);
@@ -647,46 +650,33 @@ ISFarmingMenu.canPlow = function(seedAvailable, typeOfSeed, option, seedName, pl
 end
 
 ISFarmingMenu.plantInfo = function(prop)
-    local text
-    text = getText("Farming_Tooltip_MinWater") .. prop.waterLvl .. "";
-    if prop.waterLvlMax then
-        text = text .. "<LINE>" .. getText("Farming_Tooltip_MaxWater") ..  prop.waterLvlMax;
-    end
-    text = text .. "<LINE>"  .. getText("Farming_Tooltip_TimeOfGrow") .. math.floor((prop.timeToGrow * prop.harvestLevel) / 24 * calcNextTimeFactor()) .. " " .. getText("IGUI_Gametime_days");
-    --         local waterPlus = "";
-    if prop.waterLvlMax then
-       local waterPlus = "-" .. prop.waterLvlMax;
-         text = text .. "<LINE>" .. getText("Farming_Tooltip_AverageWater") .. prop.waterLvl .. waterPlus;
-    end
-    --              text = text .. " <LINE> " .. getText("Farming_Tooltip_AverageWater") .. farming_vegetableconf.props[typeOfSeed].waterLvl .. waterPlus;
-    if getSandboxOptions():getOptionByName("PlantGrowingSeasons"):getValue() == true and prop.sowMonth then
-        text = text .. "<LINE>" .. getText("Farming_Tooltip_InSeason") .. ": " -- .. "<LINE>";
-        local comma = false
-        for i = 1, #prop.sowMonth do
-            if comma then  text = text .. ", " end
-            text = text .. getText("Farming_Month_" .. prop.sowMonth[i])
-            comma = true
-        end
-        if prop.bestMonth then
-             text = text .. "<LINE>" .. getText("Farming_Tooltip_BestMonth2") .. ": ";
-            local comma = false
-            for i = 1, #prop.bestMonth do
-                if comma then  text = text .. ", " end
-                text = text .. getText("Farming_Month_" .. prop.bestMonth[i])
-                comma = true
-            end
-        end
-        if prop.riskMonth then
-            text = text .. "<LINE>" .. getText("Farming_Tooltip_RiskMonth2") .. ": ";
-            local comma = false
-            for i = 1, #prop.riskMonth do
-                if comma then  text = text .. ", " end
-                text = text .. getText("Farming_Month_" .. prop.riskMonth[i])
-                comma = true
-            end
-        end
-    end
-    return text
+	local text = ""
+	text = text .. getText("Farming_Tooltip_MinWater") .. " " .. prop.waterLvl
+	text = text .. " <LINE> " .. getText("Farming_Tooltip_TimeOfGrow") .. math.floor((prop.timeToGrow * prop.harvestLevel) / 24 * calcNextTimeFactor()) .. " " .. getText("IGUI_Gametime_days")
+	if getSandboxOptions():getOptionByName("PlantGrowingSeasons"):getValue() == true and prop.sowMonth then
+		text = text .. " <LINE> " .. getText("Farming_Tooltip_InSeason") .. ": "
+		for i, monthNum in ipairs(prop.sowMonth) do
+			text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.sowMonth and ", ") or "")
+		end
+
+		if prop.bestMonth then
+			text = text .. " <LINE> " .. getText("Farming_Tooltip_BestMonth2") .. ": "
+			for i, monthNum in ipairs(prop.bestMonth) do
+				text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.bestMonth and ", ") or "")
+			end
+		else
+			text = text .. " <LINE> " .. getText("Farming_Tooltip_BestMonth2") .. ": ---";
+		end
+		if prop.riskMonth then
+			text = text .. " <LINE> " .. getText("Farming_Tooltip_RiskMonth2") .. ": "
+			for i, monthNum in ipairs(prop.riskMonth) do
+				text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.riskMonth and ", ") or "")
+			end
+		else
+			text = text .. " <LINE> " .. getText("Farming_Tooltip_RiskMonth2") .. ": ---";
+		end
+	end
+	return text
 end
 
 

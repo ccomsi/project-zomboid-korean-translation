@@ -175,6 +175,8 @@ end
 function ISHandcraftWindow:render()
     self:stayOnSplitScreen();
     ISCollapsableWindow.render(self);
+    local playerNum = self.player:getPlayerNum()
+    self:renderJoypadNavigateOverlay(playerNum)
 end
 
 function ISHandcraftWindow:update()
@@ -243,7 +245,7 @@ function ISHandcraftWindow:close()
     if JoypadState.players[self.playerNum+1] then
         if self.unfocusRecursive then
             self:unfocusRecursive(getFocusForPlayer(self.playerNum), self.playerNum);
-        elseif getFocusForPlayer(self.playerNum)==self then
+        elseif isJoypadFocusOnElementOrDescendant(self.playerNum, self) then
             setJoypadFocus(self.playerNum, nil);
         end
     end
@@ -284,10 +286,49 @@ function ISHandcraftWindow:onKeyRelease(key)
     end
 end
 
+function ISHandcraftWindow:onGainJoypadFocus(joypadData)
+    ISCollapsableWindow.onGainJoypadFocus(self, joypadData)
+    local recipeCategories = self.handCraftPanel.recipeCategories.recipeCategoryPanel
+    recipeCategories:setJoypadFocused(true, joypadData)
+end
+
+function ISHandcraftWindow:onLoseJoypadFocus(joypadData)
+    ISCollapsableWindow.onLoseJoypadFocus(self, joypadData)
+end
+
+function ISHandcraftWindow:onJoypadDown(button, joypadData)
+    ISCollapsableWindow.onJoypadDown(self, button, joypadData)
+end
+
+function ISHandcraftWindow:onJoypadDown_Descendant(descendant, button, joypadData)
+    if button == Joypad.AButton then
+        local craftControl = self.handCraftPanel.recipePanel.craftControl
+        craftControl.buttonCraft:forceClick()
+    end
+    if button == Joypad.BButton then
+        self:close()
+    end
+end
+
+function ISHandcraftWindow:onJoypadNavigateStart_Descendant(descendant, joypadData)
+    local recipeCategories = self.handCraftPanel.recipeCategories.recipeCategoryPanel
+    local recipeFilterPanel = self.handCraftPanel.recipesPanel.recipeFilterPanel
+    local recipeIconPanel = self.handCraftPanel.recipesPanel.recipeIconPanel
+    local recipeListPanel = self.handCraftPanel.recipesPanel.recipeListPanel.recipeListPanel
+    local listOrIconPanel = recipeIconPanel:isVisible() and recipeIconPanel or recipeListPanel
+    local recipePanel = self.handCraftPanel.recipePanel
+    local inventoryPanel = self.handCraftPanel.inventoryPanel.itemListBox
+    inventoryPanel.joypadNavigate = { left = recipePanel.inputs }
+    if not inventoryPanel:isReallyVisible() then inventoryPanel = nil end
+    recipeCategories.joypadNavigate = { right = listOrIconPanel }
+    recipeFilterPanel.joypadNavigate = { left = recipeCategories, right = recipePanel.inputs, down = listOrIconPanel }
+    listOrIconPanel.joypadNavigate = { left = recipeCategories,  up = recipeFilterPanel, right = recipePanel.inputs }
+    recipePanel.inputs.joypadNavigate = { left = listOrIconPanel, right = inventoryPanel, down = recipePanel.craftControl }
+    recipePanel.craftControl.joypadNavigate = { left = listOrIconPanel, right = inventoryPanel, up = recipePanel.inputs }
+end
+
 function ISHandcraftWindow:new(x, y, width, height, player, isoObject, queryOverride)
-    local o = ISCollapsableWindow:new(x, y, width, height);
-    setmetatable(o, self)
-    self.__index = self
+    local o = ISCollapsableWindow.new(self, x, y, width, height);
 
     o.x = x;
     o.y = y;

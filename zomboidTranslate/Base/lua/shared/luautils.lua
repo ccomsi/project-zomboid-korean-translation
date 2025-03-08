@@ -646,3 +646,41 @@ function luautils.findRootInventory(_inventory)
 	end;
 	return inventory;
 end
+
+--tests for rough equality, useful for checking if something is "close enough" such as the final step of a lerp operation.
+--
+--@param _value - current value.
+--
+--@param _value2 - the value we want to check against.
+--
+--@param _delta - how different can it be, before it's considered unequal.
+--
+--@return - whether or not it's equal enough.
+--
+--@author eris
+
+function luautils.roughlyEqual(_value, _value2, _delta)
+	return math.abs(_value - _value2) < _delta;
+end
+
+--Lerps towards a value, with a built in final step to prevent infinite lerp.
+--
+--@param _sourceValue - current value.
+--
+--@param _destinationValue - the value we want to step towards.
+--
+--@param _stepRate - ratio of steps, higher values are faster.
+--
+--@param _finalStepRatio - optional, override the final step ratio.
+--
+--@return - the new value after one step.
+--
+--@author eris
+
+function luautils.lerp(_sourceValue, _destinationValue, _stepRate, _finalStepRatio)
+	--prevent endless lerping towards a target, if the next step would fall below the ratio threshold.
+	if (luautils.roughlyEqual(_sourceValue, _destinationValue, _finalStepRatio or _stepRate)) then return _destinationValue; end;
+
+	--return the new value
+	return _sourceValue + (_destinationValue - _sourceValue) * _stepRate;
+end

@@ -350,7 +350,7 @@ VehicleDistributions.SurvivalistGloveBox = {
 	rolls = 1,
 	items = {
 		-- Tools/Knives
-        "Fleshing_Tool", 1,
+		"Fleshing_Tool", 1,
 		"Handiknife", 1,
 		"HuntingKnife", 8,
 		"KnifePocket", 1,
@@ -482,6 +482,7 @@ VehicleDistributions.SurvivalistGloveBox = {
 		"MeleeWeaponSchematic", 1,
 		"PrimitiveToolMag1", 1,
 		"PrimitiveToolMag2", 1,
+		"PrimitiveToolMag3", 1,
 		"SmithingMag1", 0.1,
 		"SmithingMag10", 0.1,
 		"SmithingMag11", 0.1,
@@ -493,6 +494,7 @@ VehicleDistributions.SurvivalistGloveBox = {
 		"SmithingMag7", 0.1,
 		"SmithingMag8", 0.1,
 		"SmithingMag9", 0.1,
+		"SurvivalSchematic", 8,
 		"TrickMag1", 1,
 		"WeaponMag1", 1,
 		"WeaponMag2", 1,
@@ -532,9 +534,10 @@ VehicleDistributions.SurvivalistTruckBed = {
 		"NoiseTrap", 10,
 		-- Tools
 		"BoltCutters", 10,
-        "Fleshing_Tool", 10,
+		"Fleshing_Tool", 10,
 		"Machete", 1,
 		"Pliers", 8,
+		"Sledgehammer", 0.5,
 		-- Accessories
 		"AmmoStrap_Bullets", 4,
 		"AmmoStrap_Shells", 4,
@@ -564,6 +567,7 @@ VehicleDistributions.SurvivalistTruckBed = {
 		-- Survival
 		"Candle", 10,
 		"Canteen", 10,
+		"FirewoodBundle", 4,
 		"InsectRepellent", 10,
 		"Lantern_Hurricane", 1,
 		"Lantern_Propane", 4,
@@ -658,6 +662,7 @@ VehicleDistributions.SurvivalistTruckBed = {
 		"MeleeWeaponSchematic", 1,
 		"PrimitiveToolMag1", 1,
 		"PrimitiveToolMag2", 1,
+		"PrimitiveToolMag3", 1,
 		"SmithingMag1", 0.1,
 		"SmithingMag10", 0.1,
 		"SmithingMag11", 0.1,
@@ -669,6 +674,7 @@ VehicleDistributions.SurvivalistTruckBed = {
 		"SmithingMag7", 0.1,
 		"SmithingMag8", 0.1,
 		"SmithingMag9", 0.1,
+		"SurvivalSchematic", 4,
 		"TrickMag1", 1,
 		"WeaponMag1", 1,
 		"WeaponMag2", 1,
@@ -718,12 +724,13 @@ VehicleDistributions.SurvivalistSeatFront = {
 		"PipeBomb", 6,
 		"SmokeBomb", 10,
 		-- Tools/Knives
-        "Fleshing_Tool", 1,
-		"Multitool", 0.1,
-		"KnifePocket", 1,
+		"Fleshing_Tool", 1,
 		"Handiknife", 1,
-		"Pliers", 8,
+		"KnifePocket", 1,
 		"Machete", 1,
+		"Multitool", 0.1,
+		"Pliers", 8,
+		"Sledgehammer", 0.5,
 		-- Accessories
 		"GasmaskFilter", 4,
 		"Hat_GasMask", 1,
@@ -844,6 +851,7 @@ VehicleDistributions.SurvivalistSeatFront = {
 		"MeleeWeaponSchematic", 1,
 		"PrimitiveToolMag1", 1,
 		"PrimitiveToolMag2", 1,
+		"PrimitiveToolMag3", 1,
 		"SmithingMag1", 0.1,
 		"SmithingMag10", 0.1,
 		"SmithingMag11", 0.1,
@@ -855,6 +863,7 @@ VehicleDistributions.SurvivalistSeatFront = {
 		"SmithingMag7", 0.1,
 		"SmithingMag8", 0.1,
 		"SmithingMag9", 0.1,
+		"SurvivalSchematic", 8,
 		"TrickMag1", 1,
 		"WeaponMag1", 1,
 		"WeaponMag2", 1,
@@ -911,12 +920,13 @@ VehicleDistributions.SurvivalistSeatRear = {
 		"PipeBomb", 6,
 		"SmokeBomb", 10,
 		-- Tools/Knives
-        "Fleshing_Tool", 1,
-		"Multitool", 0.1,
-		"KnifePocket", 1,
+		"Fleshing_Tool", 1,
 		"Handiknife", 1,
-		"Pliers", 8,
+		"KnifePocket", 1,
 		"Machete", 1,
+		"Multitool", 0.1,
+		"Pliers", 8,
+		"Sledgehammer", 0.5,
 		-- Accessories
 		"GasmaskFilter", 4,
 		"Hat_GasMask", 1,
@@ -1037,6 +1047,7 @@ VehicleDistributions.SurvivalistSeatRear = {
 		"MeleeWeaponSchematic", 1,
 		"PrimitiveToolMag1", 1,
 		"PrimitiveToolMag2", 1,
+		"PrimitiveToolMag3", 1,
 		"SmithingMag1", 0.1,
 		"SmithingMag10", 0.1,
 		"SmithingMag11", 0.1,
@@ -1048,6 +1059,7 @@ VehicleDistributions.SurvivalistSeatRear = {
 		"SmithingMag7", 0.1,
 		"SmithingMag8", 0.1,
 		"SmithingMag9", 0.1,
+		"SurvivalSchematic", 8,
 		"TrickMag1", 1,
 		"WeaponMag1", 1,
 		"WeaponMag2", 1,
@@ -1647,7 +1659,7 @@ VehicleDistributions.CarpenterGloveBox = {
 		"Gloves_LeatherGloves", 10,
 		"GraphPaper", 1,
 		"Hammer", 8,
-		"HandAxe", 1,
+		"HandAxe", 4,
 		"HandDrill", 4,
 		"Hat_Bandana", 1,
 		"Hat_BandanaTINT", 1,
@@ -1709,7 +1721,7 @@ VehicleDistributions.CarpenterTruckBed = {
 		"Gloves_LeatherGloves", 10,
 		"Glue", 8,
 		"Hammer", 8,
-		"HandAxe", 1,
+		"HandAxe", 4,
 		"HandDrill", 4,
 		"Handle", 8,
 		"Hat_BuildersRespirator", 2,
@@ -1743,6 +1755,7 @@ VehicleDistributions.CarpenterTruckBed = {
 		"RubberHose", 10,
 		"Saw", 6,
 		"ScrewsBox", 8,
+		"Sledgehammer", 0.5,
 		"SmallHandle", 8,
 		"Toolbox", 2,
 		"Twine", 10,
@@ -1794,6 +1807,7 @@ VehicleDistributions.CarpenterSeatFront = {
 		"Saw", 8,
 		"ScrewsBox", 8,
 		"Shoes_WorkBoots", 6,
+		"Sledgehammer", 0.5,
 		"Twine", 10,
 		"Vest_Foreman", 1,
 		"Vest_HighViz", 4,
@@ -1926,6 +1940,7 @@ VehicleDistributions.ElectricianTruckBed = {
 		"RippedSheets", 10,
 		"RippedSheetsDirty", 10,
 		"Rope", 10,
+		"Sledgehammer", 0.5,
 		"TimerCrafted", 8,
 		"TriggerCrafted", 8,
 		"Twine", 10,
@@ -2288,6 +2303,7 @@ VehicleDistributions.MetalWelderTruckBed = {
 		"MetalworkingPunch", 8,
 		"PetrolCan", 4,
 		"Pliers", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 8,
 		"SmallPunchSet", 8,
 		"SmallSaw", 8,
@@ -2324,8 +2340,8 @@ VehicleDistributions.MetalWelderTruckBed = {
 		-- Materials
 		"SteelWool", 10,
 		"Twine", 10,
-        "IronBand", 1,
-        "IronBandSmall", 4,
+		"IronBand", 1,
+		"IronBandSmall", 4,
 		"IronBar", 4,
 		"IronBarHalf", 6,
 		"IronBarQuarter", 8,
@@ -2370,6 +2386,7 @@ VehicleDistributions.MetalWelderSeatFront = {
 		"MetalworkingPliers", 1,
 		"MetalworkingPunch", 8,
 		"Pliers", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 8,
 		"SmallPunchSet", 8,
 		"SmallSaw", 8,
@@ -2528,6 +2545,7 @@ VehicleDistributions.BlacksmithTruckBed = {
 		"MetalworkingPunch", 8,
 		"PetrolCan", 4,
 		"Pliers", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 8,
 		"SmallPunchSet", 8,
 		"SmallSaw", 8,
@@ -2571,8 +2589,8 @@ VehicleDistributions.BlacksmithTruckBed = {
 		-- Materials
 		"SteelWool", 10,
 		"Twine", 10,
-        "IronBand", 1,
-        "IronBandSmall", 4,
+		"IronBand", 1,
+		"IronBandSmall", 4,
 		"IronBar", 4,
 		"IronBarHalf", 6,
 		"IronBarQuarter", 8,
@@ -2622,6 +2640,7 @@ VehicleDistributions.BlacksmithSeatFront = {
 		"MetalworkingPunch", 8,
 		"PetrolCan", 4,
 		"Pliers", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 8,
 		"SmallPunchSet", 8,
 		"SmallSaw", 8,
@@ -3185,6 +3204,7 @@ VehicleDistributions.ConstructionWorkerGloveBox = {
 		"Gloves_LeatherGloves", 10,
 		"GraphPaper", 1,
 		"Hammer", 8,
+		"HandAxe", 1,
 		"Hat_BuildersRespirator", 2,
 		"Hat_DustMask", 10,
 		"Hat_EarMuff_Protectors", 10,
@@ -3261,6 +3281,7 @@ VehicleDistributions.ConstructionWorkerTruckBed = {
 		"Glasses_SafetyGoggles", 10,
 		"Gloves_LeatherGloves", 10,
 		"Gravelbag", 10,
+		"HandAxe", 1,
 		"Hat_BuildersRespirator", 2,
 		"Hat_DustMask", 10,
 		"Hat_EarMuff_Protectors", 10,
@@ -3300,6 +3321,7 @@ VehicleDistributions.ConstructionWorkerTruckBed = {
 		"Rope", 10,
 		"RubberHose", 10,
 		"SheetMetal", 10,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 1,
 		"SmallPunchSet", 1,
 		"SmallSaw", 1,
@@ -3311,14 +3333,14 @@ VehicleDistributions.ConstructionWorkerTruckBed = {
 		"Vest_Foreman", 1,
 		"Vest_HighViz", 4,
 		"ViseGrips", 4,
-        "Wallpaper_BeigeStripe", 0.1,
-        "Wallpaper_BlackFloral", 0.1,
-        "Wallpaper_BlueStripe", 0.1,
-        "Wallpaper_GreenDiamond", 0.1,
-        "Wallpaper_GreenFloral", 0.1,
-        "Wallpaper_PinkChevron", 0.1,
-        "Wallpaper_PinkFloral", 0.1,
-        "WallpaperPastePowder", 0.1,
+		"Wallpaper_BeigeStripe", 0.1,
+		"Wallpaper_BlackFloral", 0.1,
+		"Wallpaper_BlueStripe", 0.1,
+		"Wallpaper_GreenDiamond", 0.1,
+		"Wallpaper_GreenFloral", 0.1,
+		"Wallpaper_PinkChevron", 0.1,
+		"Wallpaper_PinkFloral", 0.1,
+		"WallpaperPastePowder", 0.1,
 		"WeldingMask", 10,
 		"WeldingRods", 10,
 		"Whetstone", 4,
@@ -3358,6 +3380,7 @@ VehicleDistributions.ConstructionWorkerSeatFront = {
 		"GardenSaw", 10,
 		"Glasses_SafetyGoggles", 10,
 		"Gloves_LeatherGloves", 10,
+		"HandAxe", 1,
 		"Hat_BuildersRespirator", 2,
 		"Hat_DustMask", 10,
 		"Hat_EarMuff_Protectors", 10,
@@ -3378,6 +3401,7 @@ VehicleDistributions.ConstructionWorkerSeatFront = {
 		"RippedSheetsDirty", 10,
 		"Saw", 8,
 		"ScrewsBox", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 1,
 		"SmallPunchSet", 1,
 		"SmallSaw", 1,
@@ -3989,6 +4013,7 @@ VehicleDistributions.FireTruckBed = {
 		"RubberHose", 10,
 		"SCBA", 2,
 		"Shoes_WorkBoots", 6,
+		"Sledgehammer", 0.5,
 		"Socks_Heavy", 6,
 		"Trousers_Fireman", 8,
 		"Tshirt_WhiteLongSleeveTINT", 6,
@@ -4062,6 +4087,7 @@ VehicleDistributions.McCoyGloveBox = {
 		"Flask", 0.5,
 		"Glasses_SafetyGoggles", 10,
 		"Gloves_LeatherGloves", 10,
+		"HandAxe", 4,
 		"Hammer", 8,
 		"Hat_Bandana", 1,
 		"Hat_BandanaTINT", 1,
@@ -4088,7 +4114,7 @@ VehicleDistributions.McCoyGloveBox = {
 		"TobaccoChewing", 1,
 		"Tsquare", 1,
 		"Twine", 10,
-        "Whetstone", 10,
+		"Whetstone", 10,
 		"Woodglue", 2,
 	},
 	junk = ClutterTables.GloveBoxWorkJunk,
@@ -4116,6 +4142,7 @@ VehicleDistributions.McCoyTruckBed = {
 		"Generator", 0.1,
 		"Glasses_SafetyGoggles", 10,
 		"Gloves_LeatherGloves", 10,
+		"HandAxe", 4,
 		"Hat_BuildersRespirator", 2,
 		"Hat_DustMask", 10,
 		"Hat_EarMuff_Protectors", 10,
@@ -4139,10 +4166,11 @@ VehicleDistributions.McCoyTruckBed = {
 		"Rope", 10,
 		"RubberHose", 10,
 		"Saw", 8,
+		"Sledgehammer", 0.5,
 		"Twine", 10,
 		"Vest_Foreman", 1,
 		"Vest_HighViz", 4,
-        "Whetstone", 10,
+		"Whetstone", 10,
 		"WoodAxe", 2,
 	},
 	junk = ClutterTables.TrunkJunk,
@@ -4163,6 +4191,7 @@ VehicleDistributions.McCoySeatFront = {
 		"BookMaintenance5", 0.05,
 		"CarpentryChisel", 4,
 		"ElbowPad_Left_Workman", 1,
+		"HandAxe", 4,
 		"Hat_BuildersRespirator", 2,
 		"Hat_DustMask", 10,
 		"Hat_EarMuff_Protectors", 10,
@@ -4174,7 +4203,7 @@ VehicleDistributions.McCoySeatFront = {
 		"RespiratorFilters", 2,
 		"TVMagazine", 1,
 		"Twine", 10,
-        "Whetstone", 10,
+		"Whetstone", 10,
 	},
 	junk = ClutterTables.SeatFrontJunk,
 }
@@ -4220,9 +4249,9 @@ VehicleDistributions.HunterGloveBox = {
 		"CopperCup", 0.5,
 		"FirstAidKit_Camping", 1,
 		"FlashLight_AngleHead", 1,
-        "Fleshing_Tool", 1,
+		"Fleshing_Tool", 1,
 		"Glasses_Shooting", 4,
-		"HandAxe", 2,
+		"HandAxe", 4,
 		"Handiknife", 1,
 		"HandTorch", 8,
 		"Hat_Bandana", 1,
@@ -4297,7 +4326,7 @@ VehicleDistributions.HunterTruckBed = {
 		"DeadSquirrel", 8,
 		"DoubleBarrelShotgun", 8,
 		"FlashLight_AngleHead", 1,
-        "Fleshing_Tool", 10,
+		"Fleshing_Tool", 10,
 		"HandAxe", 4,
 		"HandAxe_Old", 1,
 		"HandTorch", 8,
@@ -4375,7 +4404,7 @@ VehicleDistributions.HunterSeatFront = {
 		"CopperCup", 0.5,
 		"DoubleBarrelShotgun", 8,
 		"FlashLight_AngleHead", 1,
-        "Fleshing_Tool", 1,
+		"Fleshing_Tool", 1,
 		"Glasses_Shooting", 4,
 		"HandAxe", 4,
 		"HandAxe_Old", 1,
@@ -4499,6 +4528,7 @@ VehicleDistributions.FossoilTruckBed = {
 		"RippedSheetsDirty", 10,
 		"RubberHose", 20,
 		"RubberHose", 10,
+		"Sledgehammer", 0.5,
 		"Twine", 1,
 		"Vest_HighViz", 4,
 	},
@@ -5005,6 +5035,7 @@ VehicleDistributions.MassGenFacTruckBed = {
 		"RippedSheetsDirty", 10,
 		"RubberHose", 10,
 		"SheetMetal", 10,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 8,
 		"SmallPunchSet", 8,
 		"SmallSaw", 8,
@@ -5066,6 +5097,7 @@ VehicleDistributions.MassGenFacSeatFront = {
 		"RespiratorFilters", 2,
 		"RippedSheets", 10,
 		"RippedSheetsDirty", 10,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 8,
 		"SmallPunchSet", 8,
 		"SmallSaw", 8,
@@ -5151,6 +5183,7 @@ VehicleDistributions.TransitTruckBed = {
 		"RippedSheetsDirty", 10,
 		"RubberHose", 10,
 		"Screwdriver", 10,
+		"Sledgehammer", 0.5,
 		"TirePump", 10,
 		"Toolbox", 10,
 		"Torch", 2,
@@ -6800,6 +6833,7 @@ VehicleDistributions.MechanicTruckBed = {
 		"Screwdriver", 10,
 		"Screws", 10,
 		"Shoes_TrainerTINT", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 4,
 		"SmallPunchSet", 4,
 		"SmallSaw", 4,
@@ -6858,6 +6892,7 @@ VehicleDistributions.MechanicSeatFront = {
 		"Screwdriver", 10,
 		"Screws", 10,
 		"Shoes_TrainerTINT", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 4,
 		"SmallPunchSet", 4,
 		"SmallSaw", 4,
@@ -7416,6 +7451,7 @@ VehicleDistributions.PlumberTruckBed = {
 		"RippedSheetsDirty", 10,
 		"RubberHose", 10,
 		"Shoes_Wellies", 8,
+		"Sledgehammer", 0.5,
 		"SteelWool", 10,
 		"Tarp", 10,
 		"Toolbox", 2,
@@ -7452,6 +7488,7 @@ VehicleDistributions.PlumberSeatFront = {
 		"RippedSheetsDirty", 10,
 		"RubberHose", 10,
 		"Shoes_Wellies", 8,
+		"Sledgehammer", 0.5,
 		"SteelWool", 10,
 		"Toolbox", 2,
 		"ViseGrips", 4,
@@ -8124,6 +8161,7 @@ VehicleDistributions.PoliceSWATTruckBed = {
 		"ShinKneeGuard_L_Protective", 2,
 		"Shotgun", 8,
 		"ShotgunShellsBox", 10,
+		"Sledgehammer", 2,
 		"ThighProtective_L", 1,
 		"Vest_BulletSWAT", 8,
 		"WalkieTalkie4", 4,
@@ -8179,6 +8217,7 @@ VehicleDistributions.PoliceSWATSeatFront = {
 		"Shirt_CamoUrban", 6,
 		"Shoes_ArmyBoots", 6,
 		"ShotgunShellsBox", 10,
+		"Sledgehammer", 8,
 		"ThighProtective_L", 1,
 		"Trousers_CamoUrban", 6,
 		"Tshirt_CamoUrban", 8,
@@ -8241,6 +8280,7 @@ VehicleDistributions.PoliceSWATSeatRear = {
 		"Shoes_ArmyBoots", 6,
 		"Shotgun", 8,
 		"ShotgunShellsBox", 10,
+		"Sledgehammer", 8,
 		"ThighProtective_L", 1,
 		"Trousers_CamoUrban", 6,
 		"Tshirt_CamoUrban", 8,
@@ -8762,6 +8802,7 @@ VehicleDistributions.CamperGloveBox = {
 		"Pliers", 4,
 		"ShemaghScarf", 1,
 		"Socks_Heavy", 10,
+		"SurvivalSchematic", 1,
 		"Tacklebox", 2,
 		"Whetstone", 4,
 	},
@@ -8783,6 +8824,7 @@ VehicleDistributions.CamperTruckBed = {
 		"Cooler_Beer", 10,
 		"Cooler_Meat", 20,
 		"Cooler_Soda", 20,
+		"FirewoodBundle", 10,
 		"FishingRod", 10,
 		"FlashLight_AngleHead", 1,
 		"Hat_BandanaTINT", 10,
@@ -8806,6 +8848,7 @@ VehicleDistributions.CamperTruckBed = {
 		"SleepingBag_Spiffo_Packed", 0.1,
 		"SleepingBag_RedPlaid_Packed", 2,
 		"Suitcase", 10,
+		"SurvivalSchematic", 1,
 		"Tacklebox", 2,
 		"TentBlue_Packed", 4,
 		"TentBrown_Packed", 4,
@@ -8846,6 +8889,7 @@ VehicleDistributions.CamperSeatFront = {
 		"Pliers", 4,
 		"ShemaghScarf", 1,
 		"Socks_Heavy", 10,
+		"SurvivalSchematic", 1,
 		"Tacklebox", 2,
 		"Toolbox_Fishing", 2,
 		"Whetstone", 4,
@@ -9321,6 +9365,7 @@ VehicleDistributions.MasonTruckBed = {
 		"Pliers", 8,
 		"RippedSheets", 10,
 		"RippedSheetsDirty", 10,
+		"Sledgehammer", 0.5,
 		"StoneBlock", 50,
 		"StoneBlock", 20,
 		"Twine", 10,
@@ -9354,6 +9399,7 @@ VehicleDistributions.MasonSeatFront = {
 		"RippedSheets", 10,
 		"RippedSheetsDirty", 10,
 		"Shoes_WorkBoots", 6,
+		"Sledgehammer", 0.5,
 		"Twine", 10,
 		"ViseGrips", 4,
 	},
@@ -10441,8 +10487,8 @@ VehicleDistributions.Van_LocksmithGloveBox = {
 }
 
 VehicleDistributions.Van_LocksmithTruckBed = {
-    rolls = 4,
-    items = {
+	rolls = 4,
+	items = {
 		-- Equipment
 		"ElbowPad_Left_Workman", 1,
 		"Glasses_SafetyGoggles", 4,
@@ -10465,14 +10511,15 @@ VehicleDistributions.Van_LocksmithTruckBed = {
 		"HeavyChain", 20,
 		"Pliers", 20,
 		"Saw", 20,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 20,
 		"SmallSaw", 20,
 		"SmallSawblade", 20,
 		"ViseGrips", 20,
 		-- Bags/Containers
 		"Bag_ProtectiveCaseSmall_KeyCutting", 20,
-    },
-    junk = ClutterTables.TrunkJunk,
+	},
+	junk = ClutterTables.TrunkJunk,
 }
 
 VehicleDistributions.Van_LocksmithSeatFront = {
@@ -10494,6 +10541,7 @@ VehicleDistributions.Van_LocksmithSeatFront = {
 		"HeavyChain", 10,
 		"Pliers", 8,
 		"Saw", 8,
+		"Sledgehammer", 0.5,
 		"SmallFileSet", 10,
 		"SmallSaw", 10,
 		"SmallSawblade", 10,
@@ -10508,12 +10556,12 @@ VehicleDistributions.Van_LocksmithSeatFront = {
 }
 
 VehicleDistributions.Van_Locksmith = {
-    TruckBed = VehicleDistributions.Van_LocksmithTruckBed;
+	TruckBed = VehicleDistributions.Van_LocksmithTruckBed;
 
-    GloveBox = VehicleDistributions.Van_LocksmithGloveBox;
+	GloveBox = VehicleDistributions.Van_LocksmithGloveBox;
 
-    SeatFrontLeft = VehicleDistributions.DriverSeat;
-    SeatFrontRight = VehicleDistributions.Van_LocksmithSeatFront;
+	SeatFrontLeft = VehicleDistributions.DriverSeat;
+	SeatFrontRight = VehicleDistributions.Van_LocksmithSeatFront;
 }
 
 VehicleDistributions.StepVan_FloristGloveBox = {
@@ -10585,12 +10633,12 @@ VehicleDistributions.Van_FloristSeatFront = {
 }
 
 VehicleDistributions.StepVan_Florist = {
-    TruckBed = VehicleDistributions.StepVan_FloristTruckBed;
+	TruckBed = VehicleDistributions.StepVan_FloristTruckBed;
 
-    GloveBox = VehicleDistributions.StepVan_FloristGloveBox;
+	GloveBox = VehicleDistributions.StepVan_FloristGloveBox;
 
-    SeatFrontLeft = VehicleDistributions.DriverSeat;
-    SeatFrontRight = VehicleDistributions.StepVan_FloristSeatFront;
+	SeatFrontLeft = VehicleDistributions.DriverSeat;
+	SeatFrontRight = VehicleDistributions.StepVan_FloristSeatFront;
 }
 
 VehicleDistributions.Van_CraftSuppliesGloveBox = {
@@ -10629,8 +10677,8 @@ VehicleDistributions.Van_CraftSuppliesGloveBox = {
 }
 
 VehicleDistributions.Van_CraftSuppliesTruckBed = {
-    rolls = 4,
-    items = {
+	rolls = 4,
+	items = {
 		-- Equipment
 		"ElbowPad_Left_Workman", 1,
 		"Glasses_SafetyGoggles", 4,
@@ -10652,8 +10700,8 @@ VehicleDistributions.Van_CraftSuppliesTruckBed = {
 		"BookPottery5", 0.05,
 		-- Bags/Containers
 		"Toolbox", 20,
-    },
-    junk = ClutterTables.TrunkJunk,
+	},
+	junk = ClutterTables.TrunkJunk,
 }
 
 VehicleDistributions.Van_CraftSuppliesSeatFront = {
@@ -10683,18 +10731,18 @@ VehicleDistributions.Van_CraftSuppliesSeatFront = {
 }
 
 VehicleDistributions.Van_CraftSupplies = {
-    TruckBed = VehicleDistributions.Van_CraftSuppliesTruckBed;
+	TruckBed = VehicleDistributions.Van_CraftSuppliesTruckBed;
 
-    GloveBox = VehicleDistributions.Van_CraftSuppliesGloveBox;
+	GloveBox = VehicleDistributions.Van_CraftSuppliesGloveBox;
 
-    SeatFrontLeft = VehicleDistributions.DriverSeat;
-    SeatFrontRight = VehicleDistributions.Van_CraftSuppliesFront;
+	SeatFrontLeft = VehicleDistributions.DriverSeat;
+	SeatFrontRight = VehicleDistributions.Van_CraftSuppliesFront;
 }
 
 -- High-value spawn with rare books/magazines.
 VehicleDistributions.MobileLibraryTruckBed = {
-    rolls = 4,
-    items = {
+	rolls = 4,
+	items = {
 		-- Kids Stuff
 		"Book_Childs", 20,
 		"Book_Childs", 10,
@@ -10780,6 +10828,7 @@ VehicleDistributions.MobileLibraryTruckBed = {
 		"MetalworkMag4", 4,
 		"PrimitiveToolMag1", 1,
 		"PrimitiveToolMag2", 1,
+		"PrimitiveToolMag3", 1,
 		"SmithingMag1", 1,
 		"SmithingMag2", 1,
 		"SmithingMag3", 1,
@@ -10888,8 +10937,8 @@ VehicleDistributions.MobileLibraryTruckBed = {
 		"BookTrapping3", 8,
 		"BookTrapping4", 6,
 		"BookTrapping5", 4,
-    },
-    junk = ClutterTables.TrunkJunk,
+	},
+	junk = ClutterTables.TrunkJunk,
 }
 
 VehicleDistributions.MobileLibrary = {
@@ -10913,7 +10962,7 @@ VehicleDistributions.ButcherGloveBox = {
 		"MeatCleaver", 8,
 		"Whetstone", 50,
 		"Whetstone", 20,
-        "Fleshing_Tool", 20,
+		"Fleshing_Tool", 20,
 		-- Personal
 		"CigarettePack", 8,
 		"Flask", 0.5,
@@ -10943,7 +10992,7 @@ VehicleDistributions.ButcherTruckBed = {
 		"MeatCleaver", 8,
 		"Whetstone", 50,
 		"Whetstone", 20,
-        "Fleshing_Tool", 20,
+		"Fleshing_Tool", 20,
 		-- Materials
 		"Tarp", 20,
 		"HeavyChain", 10,
@@ -10963,7 +11012,7 @@ VehicleDistributions.ButcherSeatFront = {
 		"MeatCleaver", 8,
 		"Whetstone", 50,
 		"Whetstone", 20,
-        "Fleshing_Tool", 20,
+		"Fleshing_Tool", 20,
 		-- Materials
 		"Tarp", 20,
 		"HeavyChain", 10,
@@ -10995,7 +11044,7 @@ VehicleDistributions.LeatherGloveBox = {
 		"Awl", 10,
 		"Whetstone", 20,
 		"Whetstone", 10,
-        "Fleshing_Tool", 10,
+		"Fleshing_Tool", 10,
 		"SewingKit", 50,
 		-- Personal
 		"CigarettePack", 8,
@@ -11025,7 +11074,7 @@ VehicleDistributions.LeatherTruckBed = {
 		"Awl", 10,
 		"Whetstone", 20,
 		"Whetstone", 10,
-        "Fleshing_Tool", 10,
+		"Fleshing_Tool", 10,
 		"SewingKit", 20,
 		-- Materials
 		"Leather_Crude_Small_Tan", 50,
@@ -11049,7 +11098,7 @@ VehicleDistributions.LeatherSeatFront = {
 		"Awl", 10,
 		"Whetstone", 20,
 		"Whetstone", 10,
-        "Fleshing_Tool", 10,
+		"Fleshing_Tool", 10,
 		"SewingKit", 20,
 		-- Materials
 		"Leather_Crude_Small_Tan", 50,
@@ -11073,19 +11122,119 @@ VehicleDistributions.Leather = {
 	SeatFrontLeft = VehicleDistributions.LeatherSeatFront;
 }
 
+VehicleDistributions.GlassGloveBox = {
+	rolls = 1,
+	items = {
+		-- Keys/Keyrings
+		"KeyRing_EagleFlag", 0.1,
+		"KeyRing_EightBall", 0.1,
+		"KeyRing_Panther", 0.1,
+		"KeyRing_Sexy", 0.1,
+		-- Tools
+		"CeramicCrucibleSmall", 20,
+		"GlassBlowingPipe", 10,
+		"Pliers", 20,
+		"Tongs", 20,
+		-- Equipment
+		"Hat_BandanaTINT", 10,
+		"Glasses_SafetyGoggles", 10,
+		"Gloves_LeatherGloves", 10,
+		-- Personal
+		"Flask", 0.5,
+		"Lunchbag", 4,
+		"Lunchbox", 2,
+		"Lunchbox2", 0.01,
+		"Paperback", 4,
+		"TobaccoChewing", 1,
+		-- Misc.
+		"Clipboard", 10,
+		"MarkerBlack", 4,
+		"MeasuringTape", 10,
+		"Paperwork", 10,
+		"RippedSheets", 10,
+		"RippedSheetsDirty", 10,
+		-- Medical
+		"BookFirstAid1", 0.5,
+		"FirstAidKit", 1,
+	},
+	junk = ClutterTables.GloveBoxWorkJunk,
+}
+
+VehicleDistributions.GlassTruckBed = {
+	rolls = 4,
+	items = {
+		-- Tools
+		"CeramicCrucibleSmall", 20,
+		"GlassBlowingPipe", 10,
+		"Pliers", 20,
+		"Tongs", 20,
+		-- Equipment
+		"Hat_BandanaTINT", 10,
+		"Glasses_SafetyGoggles", 10,
+		"Gloves_LeatherGloves", 10,
+		-- Materials
+		"Charcoal", 50,
+		"Charcoal", 20,
+		-- Literature
+		"BookGlassmaking1", 2,
+		"BookGlassmaking2", 1,
+		"BookGlassmaking3", 0.5,
+		"BookGlassmaking4", 0.1,
+		"BookGlassmaking5", 0.05,
+		-- Windows
+		"Mov_WindowChrome", 10,
+		"Mov_WindowSlider", 10,
+		"Mov_WindowTiled", 10,
+		"Mov_WindowWhite", 10,
+		"Mov_WindowWhiteTiled", 10,
+		"Mov_WindowWooden", 10,
+		-- Misc.
+		"MarkerBlack", 4,
+		"MeasuringTape", 10,
+		"Mov_LightConstruction", 4,
+		"RippedSheets", 10,
+		"RippedSheetsDirty", 10,
+	},
+	junk = ClutterTables.TrunkJunk,
+}
+
+VehicleDistributions.GlassSeatFront = {
+	rolls = 1,
+	items = {
+		-- Tools
+		"CeramicCrucibleSmall", 50,
+		"GlassBlowingPipe", 20,
+		"Pliers", 50,
+		"Tongs", 50,
+		-- Materials
+		"Charcoal", 20,
+		-- Equipment
+		"Hat_BandanaTINT", 10,
+		"Glasses_SafetyGoggles", 10,
+		"Gloves_LeatherGloves", 10,
+		-- Literature
+		"BookGlassmaking1", 2,
+		"BookGlassmaking2", 1,
+		"BookGlassmaking3", 0.5,
+		"BookGlassmaking4", 0.1,
+		"BookGlassmaking5", 0.05,
+		-- Misc.
+		"MarkerBlack", 4,
+		"MeasuringTape", 10,
+		"RippedSheets", 10,
+		"RippedSheetsDirty", 10,
+	},
+	junk = ClutterTables.SeatFrontJunk,
+}
+
 VehicleDistributions.Glass = {
-	TruckBed = VehicleDistributions.TrunkHeavy;
-
-	TruckBedOpen = VehicleDistributions.TrunkHeavy;
-
-	TrailerTrunk = VehicleDistributions.TrunkHeavy;
-
-	GloveBox = VehicleDistributions.GloveBox;
-
+	
+	TruckBed = VehicleDistributions.GlassTruckBed;
+	
+	GloveBox = VehicleDistributions.GlassGloveBox;
+	
 	SeatFrontLeft = VehicleDistributions.DriverSeat;
-	SeatFrontLeft = VehicleDistributions.Seat;
-	SeatRearLeft = VehicleDistributions.SeatRear;
-	SeatRearRight = VehicleDistributions.SeatRear;
+	SeatFrontRight = VehicleDistributions.GlassSeatFront;
 }
 
 local distributionTable = {
@@ -11205,52 +11354,52 @@ local distributionTable = {
 		Specific = { VehicleDistributions.Hunter, VehicleDistributions.Fisherman,  VehicleDistributions.Survivalist, VehicleDistributions.Drinker },
 	},
 
-    StepVan_Cereal = {
-        Normal = VehicleDistributions.StepVan_Cereal,
-    },
+	StepVan_Cereal = {
+		Normal = VehicleDistributions.StepVan_Cereal,
+	},
 
-    StepVan_Masonry = {
-        Normal = VehicleDistributions.Mason,
-    },
+	StepVan_Masonry = {
+		Normal = VehicleDistributions.Mason,
+	},
 
-    Van_Masonry = {
-        Normal = VehicleDistributions.Mason,
-    },
+	Van_Masonry = {
+		Normal = VehicleDistributions.Mason,
+	},
 
 	VanSeats_Creature = {
-        Normal = VehicleDistributions.NormalHeavy,
-        Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
-    },
+		Normal = VehicleDistributions.NormalHeavy,
+		Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
+	},
 
 	-- TODO: Discuss unique loot for these with Blair.
 	VanSeats_LadyDelighter = {
-        Normal = VehicleDistributions.NormalHeavy,
-        Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
-    },
+		Normal = VehicleDistributions.NormalHeavy,
+		Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
+	},
 
 	VanSeats_Space = {
-        Normal = VehicleDistributions.NormalHeavy,
-        Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
-    },
+		Normal = VehicleDistributions.NormalHeavy,
+		Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
+	},
 
 	VanSeats_Trippy  = {
-        Normal = VehicleDistributions.NormalHeavy,
-        Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
-    },
+		Normal = VehicleDistributions.NormalHeavy,
+		Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
+	},
 
 	VanSeats_Valkyrie  = {
-        Normal = VehicleDistributions.NormalHeavy,
-        Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
-    },
+		Normal = VehicleDistributions.NormalHeavy,
+		Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
+	},
 
 	VanSeats_Mural  = {
-        Normal = VehicleDistributions.NormalHeavy,
-        Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
-    },
+		Normal = VehicleDistributions.NormalHeavy,
+		Specific = { VehicleDistributions.PackRat, VehicleDistributions.Drinker, VehicleDistributions.Camper, VehicleDistributions.BadTeens},
+	},
 
-    Van_Perfick_Potato = {
-        Normal = VehicleDistributions.StepVan_Chips,
-    },
+	Van_Perfick_Potato = {
+		Normal = VehicleDistributions.StepVan_Chips,
+	},
 
 	-- Specific cars like police, fire, ranger... We simply add their skin index to the loot table's name if they have one.
 
@@ -11307,7 +11456,7 @@ local distributionTable = {
 	-- KY Heralds
 	StepVan_Heralds = { Normal = VehicleDistributions.Heralds },
 
-    -- Plonkies
+	-- Plonkies
 	StepVan_Plonkies ={ Normal = VehicleDistributions.StepVan_Plonkies },
 
 	-- soft drinks/pop/soda
@@ -11396,8 +11545,8 @@ local distributionTable = {
 	StepVan_Butchers = { Normal = VehicleDistributions.Butcher },
 	Van_Leather = { Normal = VehicleDistributions.Leather },
 	StepVan_MobileLibrary = { Normal = VehicleDistributions.MobileLibrary },
-	StepVan_Glass = { Normal = VehicleDistributions.Glass },
 	Van_Glass = { Normal = VehicleDistributions.Glass },
+	StepVan_Glass = { Normal = VehicleDistributions.Glass },
 	-- new law enforcement vehicles
 	CarLightsBulletinSheriff = { Normal = VehicleDistributions.PoliceSheriff },
 	CarLightsKST = { Normal = VehicleDistributions.PoliceState },

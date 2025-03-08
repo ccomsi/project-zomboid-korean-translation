@@ -223,7 +223,7 @@ local TurnOnOff = {
 	},
 	ClothingWasher = {
 		isPowered = function(object)
-			if object:getWaterAmount() <= 0 then return false end
+			if object:getFluidAmount() <= 0 then return false end
 			return object:getContainer() and object:getContainer():isPowered() or false
 		end,
 		isActivated = function(object)
@@ -237,7 +237,7 @@ local TurnOnOff = {
 	},
 	CombinationWasherDryer = {
 		isPowered = function(object)
-			if object:isModeWasher() and (object:getWaterAmount() <= 0) then return false end
+			if object:isModeWasher() and (object:getFluidAmount() <= 0) then return false end
 			return object:getContainer() and object:getContainer():isPowered() or false
 		end,
 		isActivated = function(object)
@@ -373,9 +373,9 @@ function ISInventoryPage:update()
 
     if self.coloredInv and (self.inventory ~= self.coloredInv or self.isCollapsed) then
         if self.coloredInv:getParent() then
-            self.coloredInv:getParent():setHighlighted(false)
-            self.coloredInv:getParent():setOutlineHighlight(false);
-            self.coloredInv:getParent():setOutlineHlAttached(false);
+            self.coloredInv:getParent():setHighlighted(self.player, false)
+            self.coloredInv:getParent():setOutlineHighlight(self.player, false);
+            self.coloredInv:getParent():setOutlineHlAttached(self.player, false);
         end
         self.coloredInv = nil;
     end
@@ -383,10 +383,10 @@ function ISInventoryPage:update()
     if not self.isCollapsed then
 --        print(self.inventory:getParent());
         if self.inventory:getParent() and ((not instanceof(self.inventory:getParent(), "IsoPlayer")) or instanceof(self.inventory:getParent(), "IsoDeadBody")) then
-            self.inventory:getParent():setHighlighted(true, false);
+            self.inventory:getParent():setHighlighted(self.player, true, false);
 			if getCore():getOptionDoContainerOutline() then -- TODO RJ: this make the player blink, not sure what was wanted here?
-				self.inventory:getParent():setOutlineHighlight(true);
-				self.inventory:getParent():setOutlineHlAttached(true);
+				self.inventory:getParent():setOutlineHighlight(self.player, true);
+				self.inventory:getParent():setOutlineHlAttached(self.player, true);
 				self.inventory:getParent():setOutlineHighlightCol(getCore():getObjectHighlitedColor():getR(), getCore():getObjectHighlitedColor():getG(), getCore():getObjectHighlitedColor():getB(), 1);
 			end
             self.inventory:getParent():setHighlightColor(getCore():getObjectHighlitedColor());
@@ -1826,6 +1826,9 @@ function ISInventoryPage:new (x, y, width, height, inventory, onCharacter, zoom)
     o.visibleTarget = o;
     o.visibleFunction = ISInventoryPage.onToggleVisible;
 
+    -- The right shoulder button is used for navigation, and sometimes used for container switching.
+    o.disableJoypadNavigation = true
+
    return o
 end
 
@@ -1879,6 +1882,7 @@ function ISInventoryPage:canPutIn()
 end
 
 function ISInventoryPage:RestoreLayout(name, layout)
+    if getJoypadData(self.player) then return end
     ISLayoutManager.DefaultRestoreWindow(self, layout)
     if layout.pin == 'true' then
         self:setPinned()
@@ -1887,6 +1891,7 @@ function ISInventoryPage:RestoreLayout(name, layout)
 end
 
 function ISInventoryPage:SaveLayout(name, layout)
+    if getJoypadData(self.player) then return end
     ISLayoutManager.DefaultSaveWindow(self, layout)
     if self.pin then layout.pin = 'true' else layout.pin = 'false' end
     self.inventoryPane:SaveLayout(name, layout)
