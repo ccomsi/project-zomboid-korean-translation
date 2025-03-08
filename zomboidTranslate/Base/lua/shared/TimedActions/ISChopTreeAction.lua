@@ -1,14 +1,10 @@
---***********************************************************
---**                    THE INDIE STONE                    **
---***********************************************************
-
 require "TimedActions/ISBaseTimedAction"
 
 ISChopTreeAction = ISBaseTimedAction:derive("ISChopTreeAction")
 
 function ISChopTreeAction:isValid()
 	return self.tree ~= nil and self.tree:getObjectIndex() >= 0 and
-			self.character:CanAttack() and
+	        self.character:isEnduranceSufficientForAction() and
 			self.character:getPrimaryHandItem() ~= nil and
             self.character:getPrimaryHandItem():getScriptItem():getCategories():contains("Axe")
 end

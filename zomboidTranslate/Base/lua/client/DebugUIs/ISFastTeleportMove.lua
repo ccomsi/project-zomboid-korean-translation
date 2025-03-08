@@ -54,7 +54,7 @@ ISFastTeleportMove.OnKeyStartPressed = function(key)
 
     local player = getPlayer()
     if player ~= nil then
-        if key == 201 and player:getZ() < 7 then        -- PageUp
+        if key == 201 and player:getZ() < 31 then        -- PageUp
             ISFastTeleportMove.moveZ(player, 1)
         elseif key == 209 and player:getZ() > 0 then    -- PageDown
             ISFastTeleportMove.moveZ(player, -1)

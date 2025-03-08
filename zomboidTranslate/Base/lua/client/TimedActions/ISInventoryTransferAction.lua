@@ -128,7 +128,7 @@ function ISInventoryTransferAction:update()
 
 	-- reopen the correct container
 	if self.selectedContainer then
-		if self.selectedContainer:getParent() then
+		if self.selectedContainer:getParent() and not self.character:isSittingOnFurniture() then
 			self.character:faceThisObject(self.selectedContainer:getParent())
 		end
 		if self.character:shouldBeTurning() then

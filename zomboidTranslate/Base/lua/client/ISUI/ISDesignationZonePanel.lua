@@ -2,9 +2,9 @@
 --**              	  ROBERT JOHNSON                       **
 --***********************************************************
 
-require "ISUI/ISCollapsableWindow"
+require "ISUI/ISCollapsableWindowJoypad"
 
-ISDesignationZonePanel = ISCollapsableWindow:derive("ISDesignationZonePanel");
+ISDesignationZonePanel = ISCollapsableWindowJoypad:derive("ISDesignationZonePanel");
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.NewSmall)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.NewMedium)
@@ -17,7 +17,7 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 --************************************************************************--
 
 function ISDesignationZonePanel:initialise()
-    ISCollapsableWindow.initialise(self);
+    ISCollapsableWindowJoypad.initialise(self);
     local btnWid = 150
 
     local width = UI_BORDER_SPACING*2 + 2 + math.max(
@@ -85,6 +85,15 @@ function ISDesignationZonePanel:initialise()
 
     self:setHeight(self.closeButton:getBottom() + UI_BORDER_SPACING + 1)
 
+    if self.listTakesFocus then
+        self.joypadIndexY = 1
+        self.joypadIndex = 1
+        self.joypadButtonsY = {}
+        self.joypadButtons = {}
+        self:insertNewLineOfButtons(self.zoneList)
+        self:insertNewLineOfButtons(self.addZone, self.renameZone, self.removeZone)
+    end
+
     self:populateList();
 
 end
@@ -93,6 +102,9 @@ function ISDesignationZonePanel:close()
     self:setVisible(false);
     self:removeFromUIManager();
     self.player:setSeeDesignationZone(false);
+    if isJoypadFocusOnElementOrDescendant(self.playerNum, self) then
+        setJoypadFocus(self.playerNum, nil)
+    end
 end
 
 function ISDesignationZonePanel:populateList()
@@ -141,7 +153,7 @@ function ISDesignationZonePanel:drawList(y, item, alt)
 end
 
 function ISDesignationZonePanel:prerender()
-    ISCollapsableWindow.prerender(self)
+    ISCollapsableWindowJoypad.prerender(self)
 
     self:setInfo(getText("IGUI_DesignationZone_Info"));
 
@@ -157,7 +169,7 @@ function ISDesignationZonePanel:updateButtons()
 end
 
 function ISDesignationZonePanel:render()
-    ISCollapsableWindow.render(self);
+    ISCollapsableWindowJoypad.render(self);
 
     self:updateButtons();
 
@@ -178,6 +190,12 @@ function ISDesignationZonePanel:render()
         self.player:resetSelectedZonesForHighlight();
     end
 
+    if not self.zoneList.joypadFocused and self.joypadIndexY == 1 then
+		local x,y,w,h = self.zoneList.x, self.zoneList.y, self.zoneList.width, self.zoneList.height
+		self:drawRectBorderStatic(x, y, w, h, 1.0, 1.0, 1.0, 1.0)
+		self:drawRectBorderStatic(x+1, y+1, w-2, h-2, 1.0, 1.0, 1.0, 1.0)
+    end
+
 --    self.player:setSelectedZoneForHighlight(0);
     if self.selectedZone then
         local connectedZones = DesignationZoneAnimal.getAllDZones(nil, self.selectedZone, nil);
@@ -194,9 +212,7 @@ end
 
 function ISDesignationZonePanel:onClick(button)
     if button.internal == "OK" then
-        self:setVisible(false);
-        self:removeFromUIManager();
-        self.player:setSeeDesignationZone(false);
+        self:close();
     end
     if button.internal == "REMOVEZONE" then
         local modal = ISModalDialog:new(0,0, 350, 150, getText("IGUI_Designation_RemoveConfirm", self.selectedZone:getName()), true, nil, ISDesignationZonePanel.onRemoveZone);
@@ -205,22 +221,32 @@ function ISDesignationZonePanel:onClick(button)
         modal.ui = self;
         modal.selectedZone = self.selectedZone;
         modal.moveWithMouse = true;
+        if getJoypadData(self.playerNum) then
+            modal:centerOnScreen(self.playerNum)
+            modal.prevFocus = self
+            setJoypadFocus(self.playerNum, modal)
+        end
     end
     if button.internal == "RENAMEZONE" then
         local modal = ISTextBox:new(0, 0, 280, 180, getText("ContextMenu_RenameBag"), self.selectedZone:getName(), self, ISDesignationZonePanel.onRenameZoneClick);
         modal:initialise();
         modal:addToUIManager();
         modal.maxChars = 30;
-        if JoypadState.players[self.playerNum+1] then
+        if getJoypadData(self.playerNum) then
+            modal:centerOnScreen(self.playerNum)
+            modal.prevFocus = self
             setJoypadFocus(self.playerNum, modal)
         end
     end
     if button.internal == "ADDZONE" then
-        local ui = ISAddDesignationAnimalZoneUI:new(10,10, 320, FONT_HGT_MEDIUM*8, self.player);
+        local ui = ISAddDesignationAnimalZoneUI:new(getPlayerScreenLeft(self.playerNum)+10, getPlayerScreenTop(self.playerNum)+10, 320, FONT_HGT_MEDIUM*8, self.player);
         ui:initialise()
         ui:addToUIManager()
         ui.parentUI = self;
         self:setVisible(false);
+        if getJoypadData(self.playerNum) then
+            setJoypadFocus(self.playerNum, ui)
+        end
     end
 --    if button.internal == "SEEZONE" then
 --        self.player:setSeeDesignationZone(not self.player:setSeeDesignationZone());
@@ -243,8 +269,49 @@ function ISDesignationZonePanel:onRemoveZone(button)
     end
 end
 
-ISDesignationZonePanel.toggleZoneUI = function()
-    local ui = getPlayerZoneUI(0)
+function ISDesignationZonePanel:onGainJoypadFocus(joypadData)
+    ISCollapsableWindowJoypad.onGainJoypadFocus(self, joypadData)
+    if self.listTakesFocus then
+        if joypadData.switchingFocusFrom == self.zoneList then
+            self:setISButtonForB(self.closeButton)
+        else
+            self.joypadIndexY = 1
+            self.joypadIndex = 1
+            self.zoneList:setJoypadFocused(true, joypadData)
+            setJoypadFocus(self.playerNum, self.zoneList)
+        end
+    else
+        self:setISButtonForA(self.closeButton)
+        self:setISButtonForB(self.removeZone)
+        self:setISButtonForX(self.renameZone)
+        self:setISButtonForY(self.addZone)
+    end
+end
+
+function ISDesignationZonePanel:onLoseJoypadFocus(joypadData)
+    ISCollapsableWindowJoypad.onLoseJoypadFocus(self, joypadData)
+    self:clearISButtons()
+    self:clearJoypadFocus(joypadData)
+end
+
+function ISDesignationZonePanel:onJoypadDirUp(joypadData)
+    if not self.listTakesFocus then
+        self.zoneList:onJoypadDirUp(joypadData)
+        return
+    end
+    ISCollapsableWindowJoypad.onJoypadDirUp(self, joypadData)
+end
+
+function ISDesignationZonePanel:onJoypadDirDown(joypadData)
+    if not self.listTakesFocus then
+        self.zoneList:onJoypadDirDown(joypadData)
+        return
+    end
+    ISCollapsableWindowJoypad.onJoypadDirDown(self, joypadData)
+end
+
+ISDesignationZonePanel.toggleZoneUI = function(playerNum)
+    local ui = getPlayerZoneUI(playerNum)
     if ui then
         if ui:getIsVisible() then
             ui:setVisible(false)
@@ -252,8 +319,12 @@ ISDesignationZonePanel.toggleZoneUI = function()
             ui.player:setSeeDesignationZone(false)
         else
             ui:setVisible(true)
+            ui:centerOnScreen(playerNum)
             ui:addToUIManager()
             ui:populateList();
+            if getJoypadData(playerNum) then
+                setJoypadFocus(playerNum, ui)
+            end
         end
     end
 end
@@ -263,12 +334,9 @@ end
 --**
 --************************************************************************--
 function ISDesignationZonePanel:new(x, y, width, height, player)
-    local o = {}
     x = getCore():getScreenWidth() / 2 - (width / 2);
     y = getCore():getScreenHeight() / 2 - (height / 2);
-    o = ISCollapsableWindow:new(x, y, width, height);
-    setmetatable(o, self)
-    self.__index = self
+    local o = ISCollapsableWindowJoypad.new(self, x, y, width, height);
     o.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
     o.backgroundColor = {r=0, g=0, b=0, a=0.8};
     o.width = width;
@@ -280,6 +348,7 @@ function ISDesignationZonePanel:new(x, y, width, height, player)
     ISDesignationZonePanel.instance = o;
     o.player:setSeeDesignationZone(true)
     o.buttonBorderColor = {r=0.7, g=0.7, b=0.7, a=0.5};
+    o.listTakesFocus = false
     o:setTitle(getText("IGUI_DesignationZone_Title"));
     return o;
 end

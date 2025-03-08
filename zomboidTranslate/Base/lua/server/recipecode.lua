@@ -726,8 +726,9 @@ function Recipe.OnCreate.CreateLogStack(craftRecipeData, character)
     for i = 0, items:size() - 1 do
         item = items:get(i);
         if item then
-            itemType = item:getFullType();
-            if itemType ~= "Base.Log" then
+--             if itemType ~= "Base.Log" then
+            if item:hasTag("Rope") then
+                itemType = item:getFullType();
                 table.insert(ropeItems, itemType);
             end;
         end;
@@ -741,6 +742,19 @@ function Recipe.OnCreate.SplitLogStack(craftRecipeData, character)
     local ropeItems = items:get(0):getModData().ropeItems;
     if ropeItems == nil then
         character:getInventory():AddItem("Base.Rope");
+        character:getInventory():AddItem("Base.Rope");
+    else
+        for i = 1, #ropeItems do
+            character:getInventory():AddItem(ropeItems[i]);
+        end;
+    end
+end
+
+-- give back the single rope used
+function Recipe.OnCreate.SplitFirewoodBundle(craftRecipeData, character)
+	local items = craftRecipeData:getAllConsumedItems();
+    local ropeItems = items:get(0):getModData().ropeItems;
+    if ropeItems == nil then
         character:getInventory():AddItem("Base.Rope");
     else
         for i = 1, #ropeItems do
@@ -815,15 +829,30 @@ function Recipe.GetItemTypes.FishingLine(scriptItems)
 	scriptItems:addAll(getScriptManager():getItemsTag("FishingLine"))
 end
 
-
 function Recipe.OnCreate.OpenEggCarton(craftRecipeData, character)
-	local items = craftRecipeData:getAllConsumedItems();
-	local results = craftRecipeData:getAllCreatedItems();
-	
-	for i=0,results:size() - 1 do
+    local items = craftRecipeData:getAllConsumedItems();
+    local results = craftRecipeData:getAllCreatedItems();
+    local carton = items:get(0);
+    for i=0,results:size() - 1 do
         local result = results:get(i)
-		result:setAge(items:get(0):getAge());
-		result:setFrozen(items:get(0):isFrozen());
+        result:setAge(carton:getAge());
+        result:setFrozen(carton:isFrozen());
+        result:setFreezingTime(carton:getFreezingTime());
+    end
+end
+
+function Recipe.OnCreate.PutEggsInCarton(craftRecipeData, character)
+    local items = craftRecipeData:getAllConsumedItems()
+    local results = craftRecipeData:getAllCreatedItems()
+    local carton = results:get(0)
+    local freezingTime = 0.0
+    for i=1,items:size() do
+        local item = items:get(i-1)
+        freezingTime = freezingTime + item:getFreezingTime()
+    end
+    freezingTime = freezingTime / items:size()
+    if freezingTime > 0 then
+        carton:setFreezingTime(freezingTime)
     end
 end
 
@@ -1325,41 +1354,17 @@ function Recipe.OnCreate.PurifyWater(craftRecipeData, character)
 	end
 end
 
--- get the spear, lower its condition according to woodwork perk level
--- also lower the used knife condition
-function Recipe.OnCreate.CreateSpear(craftRecipeData, character)
-	local items = craftRecipeData:getAllConsumedItems();
+function Recipe.OnCreate.CarveSpear(craftRecipeData, character)
+-- 	local items = craftRecipeData:getAllConsumedItems();
 	local result = craftRecipeData:getAllCreatedItems():get(0);
-	-- removed this spear crafting nerf because is was misinterpreted as a bug; the spears now have a greater chance of being damaged on stiking
-	local skill = character:getPerkLevel(Perks.Woodwork)
+	local skill = character:getPerkLevel(Perks.Carving)
     local conditionMax = 2 + skill
     conditionMax = ZombRand(conditionMax, conditionMax + 2)
     conditionMax = math.min(conditionMax, result:getConditionMax())
     conditionMax = math.max(conditionMax, 2)
-    -- if conditionMax > result:getConditionMax() then
-        -- conditionMax = result:getConditionMax();
-    -- end
-    -- if conditionMax < 2 then
-        -- conditionMax = 2;
-    -- end
     result:setCondition(conditionMax)
-
-	local item, itemCategories;
-    for i=0,items:size() - 1 do
-		item = items:get(i);
-		if item then
-			itemCategories = item:getCategories();
-			if (instanceof(item, "HandWeapon") and (itemCategories:contains("SmallBlade") or itemCategories:contains("LongBlade") or itemCategories:contains("Axe") ) )
-			or item:hasTag("SharpKnife") then
-				item:damageCheck(skill, 1, false)
-	-- 		    if ZombRand(item:getConditionLowerChance() + skill) == 0 then items:get(i):setCondition(items:get(i):getCondition() - 1) end
-			end
-		end
---         if items:get(i):getType() == "SharpedStone" and ZombRand(3) == 0 then
---             player:getInventory():Remove(items:get(i))
---         end
-    end
 end
+
 function Recipe.OnCreate.FireHardenSpear(craftRecipeData, character)
 	local items = craftRecipeData:getAllConsumedItems();
 	local result = craftRecipeData:getAllCreatedItems():get(0);
@@ -2471,13 +2476,37 @@ function Recipe.OnCreate.OxygenTankAttach(craftRecipeData, character)
 	end
 end
 
+function Recipe.OnCreate.ScrapJewellery(craftRecipeData, character)
+    if not character then return end
+    local inv = character:getInventory()
+
+	local items = craftRecipeData:getAllConsumedItems()
+	for i=0, items:size()-1 do
+        local item = items:get(i)
+        if item then
+            if item:hasTag("DiamondJewellery") then
+                inv:AddItem("Base.Diamond")
+            end
+            if item:hasTag("EmeraldJewellery") then
+                inv:AddItem("Base.Emerald")
+            end
+            if item:hasTag("RubyJewellery") then
+                inv:AddItem("Base.Ruby")
+            end
+            if item:hasTag("SapphireJewellery") then
+                inv:AddItem("Base.Sapphire")
+            end
+        end
+	end
+end
+
 -- These functions are defined to avoid breaking mods.
 DefaultRecipe_OnGiveXP = Recipe.OnGiveXP.Default
 NoXP_OnGiveXP = Recipe.OnGiveXP.None
 CannedFood_OnCreate = Recipe.OnCreate.CannedFood
 CheckTaintedWater_OnTest = Recipe.OnTest.NotTaintedWater
 CloseUmbrella = Recipe.OnCreate.CloseUmbrella
-CreateSpear_OnCreate = Recipe.OnCreate.CreateSpear
+-- CreateSpear_OnCreate = Recipe.OnCreate.CreateSpear
 CutAnimal_OnCreate = Recipe.OnCreate.CutAnimal
 CutFillet_OnCreate = Recipe.OnCreate.CutFillet
 CutFillet_TestIsValid = Recipe.OnTest.CutFillet
@@ -2679,27 +2708,37 @@ function Recipe.OnCreate.ChangeSawblade(craftRecipeData, character)
 --         end
 end
 
-function Recipe.OnCreate.BasicCarveWood(craftRecipeData, character)
+function Recipe.OnCreate.BasicCarving(craftRecipeData, character)
     local carving = character:getPerkLevel(Perks.Carving)
-    Recipe.OnCreate.BasicCondition(craftRecipeData, carving)
+    Recipe.OnCreate.BasicCondition(craftRecipeData, character, carving)
 end
 
 function Recipe.OnCreate.MinorCarving(craftRecipeData, character)
     local carving = character:getPerkLevel(Perks.Carving)
-    Recipe.OnCreate.MinorCondition(craftRecipeData, carving)
+    Recipe.OnCreate.MinorCondition(craftRecipeData, character, carving)
 end
 
 function Recipe.OnCreate.BasicKnapping(craftRecipeData, character)
     local carving = character:getPerkLevel(Perks.FlintKnapping)
-    Recipe.OnCreate.BasicCondition(craftRecipeData, carving)
+    Recipe.OnCreate.BasicCondition(craftRecipeData, character, carving)
 end
 
 function Recipe.OnCreate.MinorKnapping(craftRecipeData, character)
     local carving = character:getPerkLevel(Perks.FlintKnapping)
-    Recipe.OnCreate.MinorCondition(craftRecipeData, carving)
+    Recipe.OnCreate.MinorCondition(craftRecipeData, character, carving)
 end
 
-function Recipe.OnCreate.BasicCondition(craftRecipeData, characterSkill)
+function Recipe.OnCreate.MinorMasonry(craftRecipeData, character)
+    local masonry = character:getPerkLevel(Perks.Masonry)
+    Recipe.OnCreate.MinorCondition(craftRecipeData, character, masonry)
+end
+
+function Recipe.OnCreate.BasicCondition(craftRecipeData, character, characterSkill)
+    if not character then character = craftRecipeData:getPlayer() end
+    if not characterSkill then
+        craftRecipeData:getRecipe():getHighestRelevantSkillLevel(character)
+    end
+
     local results = craftRecipeData:getAllCreatedItems()
     for i=0,results:size() - 1 do
         local result = results:get(i)
@@ -2707,6 +2746,7 @@ function Recipe.OnCreate.BasicCondition(craftRecipeData, characterSkill)
         condPerc = math.max(condPerc, 5)
         condPerc = math.min(condPerc, 100)
         local cond = math.max(result:getConditionMax() * (condPerc/100),1)
+        local cond = math.max(cond,1)
 
         if characterSkill >= 10 then cond = result:getConditionMax() end
 
@@ -2714,7 +2754,12 @@ function Recipe.OnCreate.BasicCondition(craftRecipeData, characterSkill)
     end
 end
 
-function Recipe.OnCreate.MinorCondition(craftRecipeData, characterSkill)
+function Recipe.OnCreate.MinorCondition(craftRecipeData, character, characterSkill)
+    if not character then character = craftRecipeData:getPlayer() end
+    if not characterSkill then
+        craftRecipeData:getRecipe():getHighestRelevantSkillLevel(character)
+    end
+
     local results = craftRecipeData:getAllCreatedItems()
     for i=0,results:size() - 1 do
         local result = results:get(i)
@@ -2784,19 +2829,20 @@ function Recipe.OnCreate.BasicSawMetal(craftRecipeData, character)
 end
 
 function Recipe.OnCreate.BasicGrindMetal(craftRecipeData, character)
-	local items = craftRecipeData:getAllConsumedItems();
-    local skill = math.max(character:getPerkLevel(Perks.MetalWelding),character:getPerkLevel(Perks.Smithing))
-    for i=0,items:size() - 1 do
-        local item = items:get(i)
-        -- chance to reduce condition of the cutting tool
-        if item:hasTag("MetalSaw") or item:hasTag("SmallSaw") or item:hasTag("MetalFile") or item:hasTag("Whetstone") or item:hasTag("File") then
-            item:damageCheck(skill)
-        end
-    end
+-- 	local items = craftRecipeData:getAllConsumedItems();
+--     local skill = math.max(character:getPerkLevel(Perks.MetalWelding),character:getPerkLevel(Perks.Smithing))
+--     for i=0,items:size() - 1 do
+--         local item = items:get(i)
+--         -- chance to reduce condition of the cutting tool
+--         if item:hasTag("MetalSaw") or item:hasTag("SmallSaw") or item:hasTag("MetalFile") or item:hasTag("Whetstone") or item:hasTag("File") then
+--             item:damageCheck(skill)
+--         end
+--     end
 end
 
 function Recipe.OnCreate.SharpenBlade(craftRecipeData, player)
     local item = craftRecipeData:getFirstInputItemWithFlag("IsSharpenable")
+    if not item then item = craftRecipeData:getFirstInputItemWithFlag("IsDamaged") end
     local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
 
     if not item:hasSharpness() and item:hasHeadCondition() then
@@ -2810,6 +2856,7 @@ end
 
 function Recipe.OnCreate.SharpenBladePoor(craftRecipeData, player)
     local item = craftRecipeData:getFirstInputItemWithFlag("IsSharpenable")
+    if not item then item = craftRecipeData:getFirstInputItemWithFlag("IsDamaged") end
     local skill  = math.max(craftRecipeData:getRecipe():getHighestRelevantSkillLevel(player), item:getMaintenanceMod(false, player)/2)
     skill = math.max(skill/2 - 1, 0)
     skill = math.floor(skill)

@@ -2241,15 +2241,11 @@ function ISInventoryPane:renderdetails(doDragged)
                         if instanceof(item, "Food") and(item:isTainted() and getSandboxOptions():getOptionByName("EnableTaintedWaterText"):getValue()) or player:isKnownPoison(item) or item:hasTag("ShowPoison") then
                             self:drawTexture(self.poisonIcon, texOffsetX+auxDXY, texOffsetY+auxDXY-1, 1, 1, 1, 1);
                         end
-                        if (instanceof(item,"Literature") and
-                                ((player:isLiteratureRead(item:getModData().literatureTitle)) or
-                                        (SkillBook[item:getSkillTrained()] ~= nil and item:getMaxLevelTrained() < player:getPerkLevel(SkillBook[item:getSkillTrained()].perk) + 1) or
-                                        (item:getNumberOfPages() > 0 and player:getAlreadyReadPages(item:getFullType()) == item:getNumberOfPages()) or
-                                        (item:getTeachedRecipes() ~= nil and player:getKnownRecipes():containsAll(item:getTeachedRecipes())) or
-                                        (item:getModData().teachedRecipe ~= nil and player:getKnownRecipes():contains(item:getModData().teachedRecipe)))) then
+                        if self:isLiteratureRead(player, item) then
                             self:drawTexture(getTexture("media/ui/Tick_Mark-10.png"), texOffsetX+auxDXY, texOffsetY+auxDXY-1, 1, 1, 1, 1);
                         end
-						if item:hasComponent(ComponentType.FluidContainer) and getSandboxOptions():getOptionByName("EnableTaintedWaterText"):getValue() and (not item:getFluidContainer():isEmpty()) and (item:getFluidContainer():contains(Fluid.Bleach) or (item:getFluidContainer():contains(Fluid.TaintedWater) and item:getFluidContainer():getPoisonRatio() > 0.1)) then
+                        local fluidContainer = item:getFluidContainer() or (item:getWorldItem() and item:getWorldItem():getFluidContainer());
+						if fluidContainer ~= nil and getSandboxOptions():getOptionByName("EnableTaintedWaterText"):getValue() and (not fluidContainer:isEmpty()) and (fluidContainer:contains(Fluid.Bleach) or (fluidContainer:contains(Fluid.TaintedWater) and fluidContainer:getPoisonRatio() > 0.1)) then
 							self:drawTexture(self.poisonIcon, (10+auxDXY+xoff), (y*self.itemHgt)+self.headerHgt+auxDXY-1+yoff, 1, 1, 1, 1);
 						end
                         if item:isFavorite() then
@@ -2528,6 +2524,22 @@ function ISInventoryPane:renderdetails(doDragged)
 		self:drawRectStatic(1, 0, self.width-2, self.headerHgt, 1, 0, 0, 0);
     end
 
+end
+
+function ISInventoryPane:isLiteratureRead(playerObj, item)
+    if not item then return false end
+    if not item:IsLiterature() then return false end
+    local modData = item:hasModData() and item:getModData() or nil
+    if modData ~= nil then
+        if (modData.literatureTitle) and playerObj:isLiteratureRead(modData.literatureTitle) then return true end
+        if (modData.printMedia ~= nil) and playerObj:isPrintMediaRead(modData.printMedia) then return true end
+        if (modData.teachedRecipe ~= nil) and playerObj:getKnownRecipes():contains(modData.teachedRecipe) then return true end
+    end
+    local skillBook = SkillBook[item:getSkillTrained()]
+    if (skillBook ~= nil) and (item:getMaxLevelTrained() < playerObj:getPerkLevel(skillBook.perk) + 1) then return true end
+    if (item:getNumberOfPages() > 0) and (playerObj:getAlreadyReadPages(item:getFullType()) == item:getNumberOfPages()) then return true end
+    if (item:getTeachedRecipes() ~= nil) and playerObj:getKnownRecipes():containsAll(item:getTeachedRecipes()) then return true end
+    return false
 end
 
 function ISInventoryPane:drawProgressBar(x, y, w, h, f, fg)

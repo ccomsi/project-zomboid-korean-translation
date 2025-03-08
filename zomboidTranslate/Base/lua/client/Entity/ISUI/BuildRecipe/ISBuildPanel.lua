@@ -458,12 +458,18 @@ function ISBuildPanel.SetDragItem(item, playerNum)
     if not ISEntityUI or not ISEntityUI.players[playerNum] or not ISEntityUI.players[playerNum].windows[windowKey] or not ISEntityUI.players[playerNum].windows[windowKey].instance then return; end
 
     if item then
+        if isJoypadFocusOnElementOrDescendant(playerNum, ISEntityUI.players[playerNum].windows[windowKey].instance) then
+            setJoypadFocus(playerNum, nil)
+        end
         ISEntityUI.players[playerNum].windows[windowKey].instance:setVisible(false)
         --ISEntityUI.players[0].windows[windowKey].instance.isCollapsed = true;
         --ISEntityUI.players[0].windows[windowKey].instance:setMaxDrawHeight(ISEntityUI.players[0].instance:titleBarHeight());
     else
         ISEntityUI.players[playerNum].windows[windowKey].instance:setVisible(true)
-        --ISEntityUI.players[0].windows[windowKey].instance:pin();
+       if JoypadState.players[playerNum+1] then
+            JoypadState.players[playerNum+1].focus = ISEntityUI.players[playerNum].windows[windowKey].instance
+        end
+         --ISEntityUI.players[0].windows[windowKey].instance:pin();
         --ISEntityUI.players[0].windows[windowKey].instance.pin = true;
         --ISEntityUI.players[0].windows[windowKey].instance.collapseButton:setVisible(true);
         --ISEntityUI.players[0].windows[windowKey].instance.pinButton:setVisible(false);

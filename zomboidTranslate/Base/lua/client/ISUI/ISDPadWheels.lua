@@ -76,6 +76,11 @@ function ISDPadWheels.showSurvGuide(playerIndex)
 	end
 end
 
+function ISDPadWheels.showAnimalZoneUI(playerNum)
+    ISDesignationZonePanel.toggleZoneUI(playerNum)
+    ISAnimalZoneFirstInfo.showUI(playerNum, false);
+end
+
 function ISDPadWheels.onDisplayRight(joypadData)
 	local isPaused = UIManager.getSpeedControls() and UIManager.getSpeedControls():getCurrentGameSpeed() == 0
 	if isPaused then return end
@@ -93,6 +98,7 @@ function ISDPadWheels.onDisplayRight(joypadData)
 		menu:addSlice(getText("IGUI_MiniMap_Toggle"), getTexture("media/textures/worldMap/Map_On.png"), ISMiniMap.ToggleMiniMap, playerIndex)
 		menu:addSlice(getText("IGUI_MiniMap_Focus"), getTexture("media/textures/worldMap/Map_On.png"), ISMiniMap.FocusMiniMap, playerIndex)
 	end
+	menu:addSlice(getText("IGUI_Zone_Name"), getTexture("media/ui/Sidebar/AnimalZoneNew_On.png"), ISDPadWheels.showAnimalZoneUI, playerIndex)
 	menu:addSlice(getText("UI_optionscreen_binding_Toggle Survival Guide"), getTexture("media/ui/emotes/shrug.png"), ISDPadWheels.showSurvGuide, playerIndex)
 
 	menu:setX(getPlayerScreenLeft(playerIndex) + getPlayerScreenWidth(playerIndex) / 2 - menu:getWidth() / 2)
@@ -104,7 +110,13 @@ function ISDPadWheels.onDisplayRight(joypadData)
 end
 
 function ISDPadWheels.onDisplayUp(joypadData)
-	ISVehicleMenu.showRadialMenu(getSpecificPlayer(joypadData.player))
+	local playerIndex = joypadData.player
+	local playerObj = getSpecificPlayer(playerIndex)
+	local menu = getPlayerRadialMenu(playerIndex)
+	menu:clear()
+	ISVehicleMenu.showRadialMenu(getSpecificPlayer(playerIndex))
+	if not playerObj or not menu:isEmpty() then return end
+	AnimalContextMenu.showRadialMenu(playerObj)
 end
 
 function ISDPadWheels.onDisplayDown(joypadData)

@@ -117,7 +117,10 @@ function ISWidgetTitleHeader:createChildren()
 
         if self.player then
             --local color = {r=0.5, g=0.5, b=0.5, a=1.0};
-            local time = round(self.recipe:getTime()/10,2);
+            -- modified to scale by player skill level
+            local time = round(self.recipe:getTime(self.player)/10,2);
+--             local time = round(self.recipe:getTime()/10,2);
+
             local timeText = getText("IGUI_CraftingWindow_CraftTime") .. " " .. tostring(time).." " .. getText("IGUI_CraftingWindow_Seconds");
             --self.timeLabel = ISXuiSkin.build(self.xuiSkin, "S_NeedsAStyle", ISLabel, 0, 0, fontHeight, getText("IGUI_CraftingWindow_CraftTime") .. " " .. timeText, color.r, color.g, color.b, color.a, UIFont.NewSmall, true);
             --self.timeLabel:initialise();
@@ -185,7 +188,7 @@ function ISWidgetTitleHeader:updateLabels()
             errorText = errorText .. getText("IGUI_CraftingWindow_Error_Moving");
         end
 
-        if self.needToBeLearn and not CraftRecipeManager.hasPlayerLearnedRecipe(self.recipe, self.player) then
+        if self.needToBeLearn and not self.player:isRecipeKnown(self.recipe, true) then
             if errorText ~= "" then errorText = errorText .. ", " end
             errorText = errorText .. getText("IGUI_CraftingWindow_Error_NotLearn");
         end

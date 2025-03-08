@@ -58,23 +58,24 @@ function ISResearchRecipe:complete()
     self.item:setJobDelta(0.0);
 -- learn all of the learnable recipes in the item
     if self.scriptItem then
-        local researchList = self.scriptItem:getResearchableRecipes(self.character, true)
-        if researchList:size() > 0 then
-            for i=0,researchList:size()-1 do
-                local recipe = researchList:get(i)
-                self.character:learnRecipe(recipe);
-                if ScriptManager.instance:getCraftRecipe(recipe) then
-                    local craftRecipe = ScriptManager.instance:getCraftRecipe(recipe)
-                    craftRecipe:addXP(self.character)
---                     if craftRecipe:getMetaRecipe() then
---                         self.character:learnRecipe(craftRecipe:getMetaRecipe())
---                     else
---                         self.character:learnRecipe(craftRecipe);
-                        HaloTextHelper.addGoodText(self.character, getText("IGUI_HaloNote_LearnedRecipe", getRecipeDisplayName(tostring(craftRecipe:getName()))))
---                     end
-                end
-            end
-        end
+        self.scriptItem:researchRecipes(self.character);
+--         local researchList = self.scriptItem:getResearchableRecipes(self.character, true)
+--         if researchList:size() > 0 then
+--             for i=0,researchList:size()-1 do
+--                 local recipe = researchList:get(i)
+--                 self.character:learnRecipe(recipe);
+--                 if ScriptManager.instance:getCraftRecipe(recipe) then
+--                     local craftRecipe = ScriptManager.instance:getCraftRecipe(recipe)
+--                     craftRecipe:addXP(self.character, false)
+-- --                     if craftRecipe:getMetaRecipe() then
+-- --                         self.character:learnRecipe(craftRecipe:getMetaRecipe())
+-- --                     else
+-- --                         self.character:learnRecipe(craftRecipe);
+--                         HaloTextHelper.addGoodText(self.character, getText("IGUI_HaloNote_LearnedRecipe", getRecipeDisplayName(tostring(craftRecipe:getName()))), "[br/]")
+-- --                     end
+--                 end
+--             end
+--         end
     end
     return true;
 end
@@ -89,7 +90,7 @@ function ISResearchRecipe:getDuration()
     end
 
     local time = 5
-    local otherTime =5
+    local otherTime = 5
     local timeMultiplier = 1
     if self.scriptItem and self.scriptItem:getResearchableRecipes(self.character) then
         local researchList = self.scriptItem:getResearchableRecipes(self.character)
@@ -125,12 +126,18 @@ function ISResearchRecipe:getDuration()
         time = time * 1.3;
     end
 
+    time = time / 2
+
     --reading glasses are a little faster
     local eyeItem = self.character:getWornItems():getItem("Eyes");
     if(eyeItem and eyeItem:getType() == "Glasses_Reading") then
         time = time * 0.9;
     end
-
+    -- using a loupe or magnifying glass also makes it a little faster
+    local magnifier = (self.character:getPrimaryHandItem() and self.character:getPrimaryHandItem():hasTag("Magnifier")) or (self.character:getSecondaryHandItem() and self.character:getSecondaryHandItem():hasTag("Magnifier"));
+    if magnifier then
+        time = time * 0.9;
+    end
     return time;
 end
 

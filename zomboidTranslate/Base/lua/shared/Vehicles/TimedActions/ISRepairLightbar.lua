@@ -74,6 +74,9 @@ function ISRepairLightbar:complete()
 end
 
 function ISRepairLightbar:getDuration()
+	if self.character:isTimedActionInstant() then
+		return 1;
+	end
 	return self.maxTime;
 end
 
@@ -82,7 +85,7 @@ function ISRepairLightbar:new(character, part, item, maxTime)
 	o.vehicle = part:getVehicle()
 	o.part = part
 	o.item = item
-	o.maxTime = maxTime
+	o.maxTime = o:getDuration(maxTime)
 	o.jobType = getText("ContextMenu_Repair")
 	return o
 end

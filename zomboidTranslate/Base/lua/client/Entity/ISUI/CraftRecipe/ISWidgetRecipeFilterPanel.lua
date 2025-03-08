@@ -3,21 +3,21 @@
 --**		           Author: spurcival	    	       **
 --***********************************************************
 
-require "ISUI/ISPanel"
+require "ISUI/ISPanelJoypad"
 
 local FONT_HGT_SEARCH = getTextManager():getFontHeight(UIFont.Medium);
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.NewSmall);
 local UI_BORDER_SPACING = 5
 local BUTTON_HGT_SEARCH = FONT_HGT_SEARCH + 6
 
-ISWidgetRecipeFilterPanel = ISPanel:derive("ISWidgetRecipeFilterPanel");
+ISWidgetRecipeFilterPanel = ISPanelJoypad:derive("ISWidgetRecipeFilterPanel");
 
 function ISWidgetRecipeFilterPanel:initialise()
-	ISPanel.initialise(self);
+	ISPanelJoypad.initialise(self);
 end
 
 function ISWidgetRecipeFilterPanel:createChildren()
-    ISPanel.createChildren(self);
+    ISPanelJoypad.createChildren(self);
 
     local fontHeight = -1; -- <=0 sets label initial height to font
 
@@ -79,6 +79,19 @@ function ISWidgetRecipeFilterPanel:createChildren()
         self.tickbox:addOption(getText("IGUI_CraftingUI_ShowAllVersion"));
         self.tickbox:setWidth(15 + getTextManager():MeasureStringX(UIFont.Small, "IGUI_CraftingUI_ShowAllVersion"));
         self:addChild(self.tickbox);
+    end
+
+    self.joypadButtonsY = {}
+    self.joypadButtons = {}
+    self.joypadIndexY = 1
+    self.joypadIndex = 1
+    if self.filterTypeCombo then
+        self:insertNewLineOfButtons(self.entryBox, self.filterTypeCombo, self.buttonGrid, self.buttonList)
+    else
+        self:insertNewLineOfButtons(self.entryBox, self.buttonGrid, self.buttonList)
+    end
+    if self.showAllVersionTickbox then
+        self:insertNewLineOfButtons(self.tickbox)
     end
 end
 
@@ -199,7 +212,7 @@ function ISWidgetRecipeFilterPanel:onResize()
 end
 
 function ISWidgetRecipeFilterPanel:prerender()
-    ISPanel.prerender(self);
+    ISPanelJoypad.prerender(self);
     
     if self.entryBox:isFocused() or (self.entryBox:getText() and #self.entryBox:getText()>0) then
         self.searchHackLabel:setVisible(false);
@@ -209,23 +222,34 @@ function ISWidgetRecipeFilterPanel:prerender()
 end
 
 function ISWidgetRecipeFilterPanel:render()
-    ISPanel.render(self);
+    ISPanelJoypad.render(self);
+    self:renderJoypadFocus()
 end
 
 function ISWidgetRecipeFilterPanel:update()
-    ISPanel.update(self);
+    ISPanelJoypad.update(self);
 end
 
+function ISWidgetRecipeFilterPanel:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData)
+    self.joypadIndexY = 1
+    self.joypadIndex = 1
+    self:restoreJoypadFocus(joypadData)
+end
+
+function ISWidgetRecipeFilterPanel:onLoseJoypadFocus(joypadData)
+    ISPanelJoypad.onLoseJoypadFocus(self, joypadData)
+    self.entryBox:unfocus()
+    self:clearJoypadFocus()
+end
 
 --************************************************************************--
 --** ISWidgetRecipeFilterPanel:new
 --**
 --************************************************************************--
 function ISWidgetRecipeFilterPanel:new(x, y, width, height, callbackTarget)
-	local o = ISPanel:new(x, y, width, height);
-    setmetatable(o, self)
-    self.__index = self
-    
+	local o = ISPanelJoypad.new(self, x, y, width, height);
+
     o.callbackTarget = callbackTarget;
     
     o.backgroundColor = {r=0, g=0, b=0, a=0};

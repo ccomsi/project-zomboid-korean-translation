@@ -91,6 +91,12 @@ function ISStatsAndBody:createChildren()
     op.title = getText("IGUI_StatsAndBody_FakeInfectionLevel");
     op = self:addSliderOption(body,"FoodSicknessLevel", 0, 100, 1);
     op.title = getText("IGUI_StatsAndBody_FoodSicknessLevel");
+	op = self:addSliderOption(nutrition,"Carbohydrates", -500, 1000, 1);
+    op.title = getText("Fluid_Prop_Carbohydrates");
+	op = self:addSliderOption(nutrition,"Lipids", -500, 1000, 1);
+    op.title = getText("Fluid_Prop_Lipids");
+	op = self:addSliderOption(nutrition,"Proteins", -500, 1000, 1);
+    op.title = getText("Fluid_Prop_Proteins");
     op = self:addSliderOption(nutrition,"Calories", -2200, 3700, 1);
     op.title = getText("IGUI_StatsAndBody_Calories");
     op = self:addSliderOption(nutrition, "Weight", 30, 130, 1);

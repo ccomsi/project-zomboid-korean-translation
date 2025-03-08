@@ -284,11 +284,13 @@ Commands.object.setWaterAmount = function(player, args)
 		print('invalid object')
 	end
 	local obj = gs:getObjects():get(args.index)
-	local amount = obj:getWaterAmount()
+	local amount = obj:getFluidAmount()
 	if amount == args.amount then
 		return
 	end
-	obj:setWaterAmount(args.amount, false)
+	
+	obj:emptyFluid();
+	obj:addFluid(FluidType.Water, args.amount);
 	obj:transmitModData()
 end
 

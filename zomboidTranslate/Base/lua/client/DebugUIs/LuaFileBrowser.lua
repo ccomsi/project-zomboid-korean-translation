@@ -2,6 +2,7 @@ require "ISUI/ISCollapsableWindow"
 
 LuaFileBrowser = ISCollapsableWindow:derive("LuaFileBrowser");
 
+local FONT_HGT_CODE = getTextManager():getFontHeight(getTextManager():getCurrentCodeFont())
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 
 -----
@@ -58,12 +59,12 @@ function LuaFileBrowserList:doDrawItem(y, item, alt)
     if y + item.height + self:getYScroll() <= 0 then return y + item.height end
 
     if self.selected == item.index then
-        self:drawRect(0, (y), self:getWidth(), self.itemheight-1, 0.3, 0.7, 0.35, 0.15);
+        self:drawRect(0, y, self:getWidth(), self.itemheight, 0.3, 0.7, 0.35, 0.15);
 
     end
-    self:drawRectBorder(0, (y), self:getWidth(), self.itemheight, 0.5, self.borderColor.r, self.borderColor.g, self.borderColor.b);
+    self:drawRectBorder(0, y, self:getWidth(), self.itemheight, 0.5, self.borderColor.r, self.borderColor.g, self.borderColor.b);
     
-    self:drawText(item.text, 15, y + (item.height - self.fontHgt) / 2, 0.9, 0.9, 0.9, 0.9, UIFont.Small);
+    self:drawText(item.text, 15, y + (item.height - self.fontHgt) / 2, 1.0, 1.0, 1.0, 1.0, self.font);
     y = y + self.itemheight;
     return y;
 
@@ -117,17 +118,18 @@ function LuaFileBrowser:createChildren()
     local th = self:titleBarHeight()
     local rh = self:resizeWidgetHeight()
 
-    local entryHgt = FONT_HGT_SMALL + 2 * 2
+    local entryHgt = FONT_HGT_CODE + 2 * 2
 
     self.fileList = LuaFileBrowserList:new(0, th + entryHgt, self.width, self.height-rh-entryHgt-th);
+    self.fileList:setFont(getTextManager():getCurrentCodeFont(), 0)
     self.fileList.anchorRight = true;
     self.fileList.anchorBottom = true;
     self.fileList:initialise();
     self.fileList:setOnMouseDoubleClick(self, LuaFileBrowser.onMouseDoubleClickFile);
-    self.fileList:setFont(UIFont.Small, 3)
     self:addChild(self.fileList);
 
     self.textEntry = ISTextEntryBox:new("", 0, th, self.width, entryHgt);
+    self.textEntry:setFont(getTextManager():getCurrentCodeFont())
     self.textEntry:initialise();
     self.textEntry:instantiate();
     self.textEntry:setAnchorRight(true);
@@ -163,6 +165,28 @@ function LuaFileBrowser:createChildren()
 --]]
 end
 
+function LuaFileBrowser:prerender()
+    ISCollapsableWindow.prerender(self)
+    self:checkFontSize()
+end
+
+function LuaFileBrowser:checkFontSize()
+    local font = getTextManager():getCurrentCodeFont()
+    if font == self.fileList.font then return end
+    local fontHeight = getTextManager():getFontHeight(font)
+    FONT_HGT_CODE = fontHeight
+    self.textEntry:setFont(font)
+    self.textEntry:setHeight(FONT_HGT_CODE + 2 * 2)
+    self.fileList:setY(self.textEntry:getBottom())
+    self.fileList:setFont(font, 0)
+    self:setListBoxItemHeight(self.fileList)
+end
+
+function LuaFileBrowser:setListBoxItemHeight(listBox)
+    for i=1,#listBox.items do
+        listBox.items[i].height = listBox.itemheight
+    end
+end
 
 function LuaFileBrowser:new (x, y, width, height)
     local o = {}

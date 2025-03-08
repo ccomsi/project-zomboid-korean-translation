@@ -36,6 +36,9 @@ local function DoSpecialTooltip1(tooltip, square)
 		end
 	end
 
+	if not luaObject then
+		return;
+	end
 	local trough = luaObject:getIsoObject();
 	if not trough then return; end
 

@@ -731,6 +731,13 @@ end
 
 function MapSpawnSelect:onResolutionChange(oldw, oldh, neww, newh)
 	self:recalculateMapSize()
+
+	local btnPadding = JOYPAD_TEX_SIZE + UI_BORDER_SPACING*2
+	local btnWidth = btnPadding + getTextManager():MeasureStringX(UIFont.Small, getText("UI_advWorld_random_btn"))
+	--if self.seedPanel then
+	--	self.randomButton:setX(self.seedPanel:getRight() - btnWidth - UI_BORDER_SPACING*2 - 2)
+	--	self.seedTextBox:setWidth(self.randomButton.x - self.seedLabel:getRight() - UI_BORDER_SPACING*2)
+	--end
 end
 
 function MapSpawnSelect:checkSeed()
@@ -814,8 +821,8 @@ function MapSpawnSelect:create()
 	self.listbox.drawBorder = true;
 	self.listbox.backgroundColor  = {r=0, g=0, b=0, a=0.5};
 
-    local advPanelHeight = UI_BORDER_SPACING * 2 + BUTTON_HGT
-	self.richText = MapSpawnSelectInfoPanel:new(self.listbox.x, self.listbox:getBottom() + UI_BORDER_SPACING, self.listbox.width, self.height - self.listbox:getBottom() - UI_BORDER_SPACING*3 - BUTTON_HGT - 1 - advPanelHeight);
+    local advPanelHeight = UI_BORDER_SPACING*2 + BUTTON_HGT + 2
+	self.richText = MapSpawnSelectInfoPanel:new(self.listbox.x, self.listbox:getBottom() + UI_BORDER_SPACING, self.listbox.width, self.height - self.listbox:getBottom() - UI_BORDER_SPACING*4 - BUTTON_HGT - 1 - advPanelHeight);
 	self.richText.marginRight = UI_BORDER_SPACING+1
 	self.richText.marginLeft = UI_BORDER_SPACING+1
 	self.richText.autosetheight = false;
@@ -829,38 +836,36 @@ function MapSpawnSelect:create()
 
 	local btnPadding = JOYPAD_TEX_SIZE + UI_BORDER_SPACING*2
     if not MainScreen.instance.inGame then -- don't show seed in splitscreen
+		--local advPanelHeight = UI_BORDER_SPACING*4 + BUTTON_HGT*3 + 2
+		self.seedPanel = ISPanel:new(self.listbox.x,self.richText:getBottom() + UI_BORDER_SPACING, self.listbox.width, advPanelHeight)
+		self.seedPanel:initialise()
+		self.seedPanel:instantiate()
+		self.seedPanel:setAnchorsTBLR(false, true, true, false)
+		self.seedPanel.backgroundColor  = {r=0, g=0, b=0, a=0.5};
+		self:addChild(self.seedPanel)
 
-    --local advPanelHeight = UI_BORDER_SPACING*4 + BUTTON_HGT*3 + 2
-    self.seedPanel = ISPanel:new(self.listbox.x,self.richText:getBottom() + UI_BORDER_SPACING, self.listbox.width, advPanelHeight - UI_BORDER_SPACING)
-    self.seedPanel:initialise()
-    self.seedPanel:instantiate()
-    self.seedPanel:setAnchorsTBLR(false, true, true, false)
-    self.seedPanel.backgroundColor  = {r=0, g=0, b=0, a=0.5};
-    self:addChild(self.seedPanel)
+		self.seedLabel = ISLabel:new(UI_BORDER_SPACING+1, UI_BORDER_SPACING+1, BUTTON_HGT, getText("UI_advWorld_seed_label") .. ":", 1.0, 1.0, 1.0, 1.0, UIFont.Medium, true)
+		self.seedLabel:initialise()
+		self.seedLabel:instantiate()
+		self.seedLabel:setAnchorsTBLR(true, false, true, false)
+		self.seedPanel:addChild(self.seedLabel)
 
-	self.seedLabel = ISLabel:new(UI_BORDER_SPACING+1, UI_BORDER_SPACING / 2, BUTTON_HGT, getText("UI_advWorld_seed_label") .. ":", 1.0, 1.0, 1.0, 1.0, UIFont.Medium, true)
-	self.seedLabel:initialise()
-	self.seedLabel:instantiate()
-	self.seedLabel:setAnchorsTBLR(true, false, true, false)
-	self.seedPanel:addChild(self.seedLabel)
+		local btnWidth = btnPadding + getTextManager():MeasureStringX(UIFont.Small, getText("UI_advWorld_random_btn"))
+		self.randomButton = ISButton:new(self.seedPanel:getRight() - btnWidth - UI_BORDER_SPACING*2 - 2, self.seedLabel.y, btnWidth, BUTTON_HGT, getText("UI_advWorld_random_btn"), self, self.generateNewSeed)
+		self.randomButton:initialise()
+		self.randomButton:instantiate()
+		self.randomButton:setAnchorsTBLR(true, false, false, true)
+		self.randomButton:setEnable(true) -- sets the hard-coded border color
+		self.seedPanel:addChild(self.randomButton)
 
-	self.seedTextBox = ISTextEntryBox:new("", self.seedLabel:getWidth() + UI_BORDER_SPACING * 2, self.seedLabel.y, 150, BUTTON_HGT)
-	self.seedTextBox.font = UIFont.Small
-	self.seedTextBox:initialise()
-	self.seedTextBox:instantiate()
-	self.seedTextBox:setOnlyText(true)
-	self.seedTextBox:setMaxTextLength(16)
-	self.seedTextBox:setAnchorsTBLR(true, false, true, false)
-	self.seedPanel:addChild(self.seedTextBox)
-
-    local btnWidth = btnPadding + getTextManager():MeasureStringX(UIFont.Small, getText("UI_advWorld_random_btn"))
-    self.randomButton = ISButton:new(self.seedTextBox:getRight() + UI_BORDER_SPACING, self.seedLabel.y, btnWidth, BUTTON_HGT, getText("UI_advWorld_random_btn"), self, self.generateNewSeed)
-    self.randomButton:initialise()
-    self.randomButton:instantiate()
-    self.randomButton:setAnchorsTBLR(true, false, true, false)
-    self.randomButton:setEnable(true) -- sets the hard-coded border color
-    self.seedPanel:addChild(self.randomButton)
-
+		self.seedTextBox = ISTextEntryBox:new("", self.seedLabel:getRight() + UI_BORDER_SPACING, self.seedLabel.y, self.randomButton.x - self.seedLabel:getRight() - UI_BORDER_SPACING*2, BUTTON_HGT)
+		self.seedTextBox.font = UIFont.Small
+		self.seedTextBox:initialise()
+		self.seedTextBox:instantiate()
+		self.seedTextBox:setOnlyText(true)
+		self.seedTextBox:setMaxTextLength(16)
+		self.seedTextBox:setAnchorsTBLR(true, true, true, true)
+		self.seedPanel:addChild(self.seedTextBox)
     end -- not MainScreen.instance.inGame
 
 	local btnWidth = btnPadding + getTextManager():MeasureStringX(UIFont.Small, getText("UI_btn_back"))

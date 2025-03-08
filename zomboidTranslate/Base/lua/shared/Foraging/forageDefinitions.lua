@@ -18,7 +18,6 @@ require "Foraging/forageSystem";
 ]]--
 
 forageDefaultDefs = {
-	--- default values (applied if missing from item definition)
 	defaultItemDef = {
 		type                    = "Base.MissingItemType",                       --item type including module
 		minCount                = 1,                                            --minimum amount of items to pick up
@@ -46,6 +45,7 @@ forageDefaultDefs = {
 			Farm                = 1,
 			TrailerPark         = 1,
 			TownZone            = 1,
+			Nav         		= 1,
 			ForagingNav         = 1,
 		},
 		--
@@ -77,6 +77,7 @@ forageDefaultDefs = {
 		densityMax              = 1,                                            --zone maximum icon density
 		refillPercent           = 1,                                            --percent of icons refilled per game day
 		abundanceSetting        = "NatureAbundance",                            --sandbox setting used for icon density multiplier - see forageSystem.abundanceSettings
+		containsBiomes			= {},				                            --loot tables contained within this zone. must be a valid loot table from another zone
 	},
 	--- default values (applied if missing from category definition)
 	defaultCatDef   = {
@@ -103,6 +104,10 @@ forageDefaultDefs = {
 			TrailerPark         = 1,
 			TownZone            = 1,
 			ForagingNav         = 1,
+			PHForest     		= 1,
+			PRForest     		= 1,
+			OrganicForest  		= 1,
+			BirchForest  		= 1,
 		},
 		spriteAffinities        = {},                                           --sprite affinities for this item - see Stones/Twigs category for example
 		chanceToMoveIcon        = 0.0,                                          --percent chance to move a nearby icon to the sprite detected
@@ -145,29 +150,6 @@ forageDefs = {
 	--(added via generateAnimalsDefs)
 	--======== INSECTS ========--
 	--(added via generateInsectsDefs)
-	SawflyLarva = {
-		type = "Base.SawflyLarva",
-		skill = 0,
-		xp = 5,
-		rainChance = 10,
-		snowChance = -20,
-		nightChance = 100,
-		categories = { "Insects", "FishBait" },
-		zones = {
-			Forest      = 3,
-			DeepForest  = 3,
-			Vegitation  = 3,
-			FarmLand    = 3,
-			Farm        = 3,
-			TrailerPark = 3,
-			TownZone    = 3,
-			ForagingNav = 3,
-		},
-		months = { 3, 4, 5, 6, 7, 8, 9, 10, 11 },
-		malusMonths = { 3, 4 },
-		forceOutside = false,
-		canBeAboveFloor = true,
-	},
 	--======== FOREST GOODS ========--
 	--(added via generateForestGoodsDefs)
 	--======== STONES ========--

@@ -272,6 +272,38 @@ function ISTiledIconPanel:setSelectedData(_data)
     end
 end
 
+function ISTiledIconPanel:onJoypadButtonReleased(button, joypadData)
+    if button == Joypad.LBumper then
+        local currentPage = self.tiledIconListBox:getCurrentPage()
+        self.buttonPrev:forceClick()
+        if currentPage ~= self.tiledIconListBox:getCurrentPage() then
+            self.tiledIconListBox:trySelectDataElement(self.tiledIconListBox.currentPage * self.tiledIconListBox.tileCount)
+        end
+    end
+    if button == Joypad.RBumper then
+        local currentPage = self.tiledIconListBox:getCurrentPage()
+        self.buttonNext:forceClick()
+        if currentPage ~= self.tiledIconListBox:getCurrentPage() then
+            self.tiledIconListBox:trySelectDataElement(self.tiledIconListBox.currentPage * self.tiledIconListBox.tileCount)
+        end
+    end
+end
+
+function ISTiledIconPanel:onJoypadDirLeft(joypadData)
+    self.tiledIconListBox:onJoypadDirLeft(joypadData)
+end
+
+function ISTiledIconPanel:onJoypadDirRight(joypadData)
+    self.tiledIconListBox:onJoypadDirRight(joypadData)
+end
+
+function ISTiledIconPanel:onJoypadDirUp(joypadData)
+    self.tiledIconListBox:onJoypadDirUp(joypadData)
+end
+
+function ISTiledIconPanel:onJoypadDirDown(joypadData)
+    self.tiledIconListBox:onJoypadDirDown(joypadData)
+end
 
 --************************************************************************--
 --** ISTiledIconPanel:new

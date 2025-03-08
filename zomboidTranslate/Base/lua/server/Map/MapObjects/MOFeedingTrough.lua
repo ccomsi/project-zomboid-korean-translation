@@ -68,7 +68,8 @@ end
 -- Generate some food inside new feeding trough
 MOFeedingTrough.generateContainer = function(trough)
 	if ZombRand(6) == 0 then
-		trough:setWater(ZombRand(40, trough:getMaxWater()))
+		--trough:setWater(ZombRand(40, trough:getMaxWater()))
+		trough:addWater(FluidType.TaintedWater, ZombRand(30, trough:getMaxWater()));
 		return;
 	end
 	if ZombRand(4) == 0 then

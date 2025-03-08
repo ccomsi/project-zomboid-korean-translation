@@ -1003,7 +1003,7 @@ local function OnRainBarrelSetWater2(target, button, obj)
 		local playerObj = getSpecificPlayer(0)
 		local text = button.parent.entry:getText()
 		if tonumber(text) then
-			local waterAmt = math.min(tonumber(text), obj:getWaterMax())
+			local waterAmt = math.min(tonumber(text), obj:getFluidCapacity())
 			waterAmt = math.max(waterAmt, 0.0)
 			local args = { x = obj:getX(), y = obj:getY(), z = obj:getZ(), index = obj:getObjectIndex(), amount = waterAmt }
 			sendClientCommand(playerObj, 'object', 'setWaterAmount', args)
@@ -1014,7 +1014,7 @@ end
 function DebugContextMenu.OnRainBarrelSetWater(obj)
 	local luaObject = CRainBarrelSystem.instance:getLuaObjectOnSquare(obj:getSquare())
 	if not luaObject then return end
-	local modal = ISTextBox:new(0, 0, 280, 180, string.format("Water (0-%d):", obj:getWaterMax()), tostring(obj:getWaterAmount()), nil, OnRainBarrelSetWater2, nil, obj)
+	local modal = ISTextBox:new(0, 0, 280, 180, string.format("Water (0-%d):", obj:getFluidCapacity()), tostring(obj:getFluidAmount()), nil, OnRainBarrelSetWater2, nil, obj)
 	modal:initialise()
 	modal:addToUIManager()
 end

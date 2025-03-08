@@ -97,8 +97,10 @@ function ISShovelGroundCursor.GetEmptyItem(playerObj, groundType)
 end
 
 function ISShovelGroundCursor.GetDirtGravelSand(square)
-	for i=1,square:getObjects():size() do
-		local obj = square:getObjects():get(i-1)
+	local index = square:getNextNonItemObjectIndex(0)
+	while index >= 0 and index < square:getObjects():size() do
+		local obj = square:getObjects():get(index)
+		index = square:getNextNonItemObjectIndex(index + 1)
 		if obj:hasModData() and obj:getModData().shovelled then
 			-- skip already-shovelled squares
 		elseif not isServer() and CFarmingSystem.instance and CFarmingSystem.instance:getLuaObjectOnSquare(square) then
@@ -122,7 +124,7 @@ function ISShovelGroundCursor.GetDirtGravelSand(square)
 			if spriteName == "blends_natural_01_96" or
 						spriteName == "blends_natural_01_101" or
             			spriteName == "blends_natural_01_102" or
-            			spriteName == "floors_exterior_natural_01_103" then
+            			spriteName == "blends_natural_01_103" then
             	return "clay",obj
             end
 			if luautils.stringStarts(spriteName, "blends_natural_01_") or

@@ -524,6 +524,7 @@ function ISBaseIcon:getItemList()
 			ISSearchManager.iconItems[self.iconID] = self.itemList;
 		end;
 		--
+		self.isKnownPoison = false
 		for item in iterList(self.itemList) do
 			if self.character:isKnownPoison(item) then
 				self.isKnownPoison = true;

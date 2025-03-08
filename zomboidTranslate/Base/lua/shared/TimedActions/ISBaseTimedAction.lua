@@ -89,10 +89,10 @@ end
 function ISBaseTimedAction:adjustMaxTime(maxTime)
 	if maxTime > 1 then
 		-- add a slight maxtime if the character is unhappy
-		maxTime = maxTime * (1 + (self.character:getMoodles():getMoodleLevel(MoodleType.Unhappy) / 50))
+		maxTime = maxTime * (1 + (self.character:getMoodles():getMoodleLevel(MoodleType.Unhappy) / 4))
 
 		-- add time if the character is drunk
-		maxTime = maxTime * (1 + (self.character:getMoodles():getMoodleLevel(MoodleType.Drunk) / 50))
+		maxTime = maxTime * (1 + (self.character:getMoodles():getMoodleLevel(MoodleType.Drunk) / 4))
 
 		-- add more time if the character have his hands wounded
 		local maxPain = 0;

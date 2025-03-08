@@ -7,9 +7,9 @@
     UI that can handle transferring fluids between items/objects that have FluidContainers.
 --]]
 
-require "ISUI/ISPanel"
+require "ISUI/ISPanelJoypad"
 
-ISFluidInfoUI = ISPanel:derive("ISFluidInfoUI");
+ISFluidInfoUI = ISPanelJoypad:derive("ISFluidInfoUI");
 ISFluidInfoUI.players = {};
 ISFluidInfoUI.cheatSkill = false;
 ISFluidInfoUI.cheatTransfer = false;
@@ -65,23 +65,24 @@ function ISFluidInfoUI.OpenPanel(_player, _container)
     ISFluidInfoUI.players[playerNum].instance = ui;
 
     --first time open panel and isoobject then middle of screen.
-    if adjustPos and ui.isIsoPanel then
-        local x = (getCore():getScreenWidth()/2) - (ui:getWidth()/2);
-        local y = (getCore():getScreenHeight()/2) - (ui:getHeight()/2);
-        ui:setX(x);
-        ui:setY(y);
-        ISFluidInfoUI.players[playerNum].x = x;
-        ISFluidInfoUI.players[playerNum].y = y;
+    if getJoypadData(playerNum) or (adjustPos and ui.isIsoPanel) then
+        ui:centerOnScreen(playerNum)
+        ISFluidInfoUI.players[playerNum].x = ui.x;
+        ISFluidInfoUI.players[playerNum].y = ui.y;
+    end
+
+    if getJoypadData(playerNum) then
+        setJoypadFocus(playerNum, ui);
     end
 end
 
 -- INIT --
 function ISFluidInfoUI:initialise()
-    ISPanel.initialise(self);
+    ISPanelJoypad.initialise(self);
 end
 
 function ISFluidInfoUI:createChildren()
-    ISPanel.createChildren(self);
+    ISPanelJoypad.createChildren(self);
 
     self.panelText = getText("Fluid_Info_Panel");
     self.panel = ISFluidContainerPanel:new(UI_BORDER_SPACING+1, UI_BORDER_SPACING+1, self.player, self.container, true, true, self.isIsoPanel);
@@ -118,10 +119,11 @@ function ISFluidInfoUI:createChildren()
 end
 
 function ISFluidInfoUI:prerender()
-    ISPanel.prerender(self);
+    ISPanelJoypad.prerender(self);
 end
 
 function ISFluidInfoUI:render()
+    self:renderJoypadFocus()
 end
 
 function ISFluidInfoUI:update()
@@ -150,6 +152,9 @@ function ISFluidInfoUI:close()
             ISFluidInfoUI.players[playerNum].x = self:getX();
             ISFluidInfoUI.players[playerNum].y = self:getY();
         end
+        if JoypadState.players[playerNum+1] then
+            setJoypadFocus(playerNum, nil)
+        end
     end
     self:setVisible(false);
     self:removeFromUIManager();
@@ -161,11 +166,13 @@ function ISFluidInfoUI:onButton(_btn)
     end
 end
 
+function ISFluidInfoUI:onGainJoypadFocus(joypadData)
+    ISPanelJoypad.onGainJoypadFocus(self, joypadData)
+    self:setISButtonForB(self.btnClose)
+end
+
 function ISFluidInfoUI:new(x, y, width, height, _player, _container)
-    local o = {};
-    o = ISPanel:new(x, y, 400, height);
-    setmetatable(o, self);
-    self.__index = self;
+    local o = ISPanelJoypad.new(self, x, y, 400, height);
     o.variableColor={r=0.9, g=0.55, b=0.1, a=1};
     o.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
     o.backgroundColor = {r=0, g=0, b=0, a=0.8};

@@ -293,6 +293,17 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
 		elseif testItem:getFluidContainer() then
             tests.fluidContainer = testItem;		
         end
+
+        -- IsoWorldInventoryObject
+        local worldItem = testItem:getWorldItem()
+        if worldItem ~= nil then
+            if (worldItem:getFluidContainer() and worldItem:getFluidContainer():getPrimaryFluid() and (worldItem:getFluidContainer():getPrimaryFluid():getFluidTypeString() == "Water" or worldItem:getFluidContainer():getPrimaryFluid():getFluidTypeString() == "CarbonatedWater")) then
+                tests.waterContainer = worldItem;
+            elseif worldItem:getFluidContainer() then
+                tests.fluidContainer = worldItem;
+            end
+        end
+        
         if testItem:hasTag("FishingRod") then
             tests.fishingRod = testItem
             tests.haveLure = tests.fishingRod:getModData().fishing_Lure ~= nil
@@ -472,9 +483,11 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
 
     if tests.inPlayerInv then
        if tests.inPlayerInv:isFavorite() then
-           context:addOption(getText("ContextMenu_Unfavorite"), moveItems, ISInventoryPaneContextMenu.onFavorite, tests.inPlayerInv, false)
+           local option = context:addOption(getText("ContextMenu_Unfavorite"), moveItems, ISInventoryPaneContextMenu.onFavorite, tests.inPlayerInv, false)
+           option.iconTexture = getTexture("media/ui/FavoriteStarUnchecked.png")
        else
-           context:addOption(getText("IGUI_CraftUI_Favorite"), moveItems, ISInventoryPaneContextMenu.onFavorite, tests.inPlayerInv, true)
+           local option = context:addOption(getText("IGUI_CraftUI_Favorite"), moveItems, ISInventoryPaneContextMenu.onFavorite, tests.inPlayerInv, true)
+           option.iconTexture = getTexture("media/ui/FavoriteStarChecked.png")
        end
     end
 
@@ -524,6 +537,9 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
         if cmdCount == 1 then
             if hungerNotZero > 0 then
                 local eatOption = context:addOption(cmd, items, nil)
+                if #foodItems == 1 then
+                    eatOption.itemForTexture = foodItems[1]
+                end
 --                 if playerObj:getMoodles():getMoodleLevel(MoodleType.FoodEaten) >= 3 or playerObj:getNutrition():getCalories() >= 1000 then
                 if playerObj:getMoodles():getMoodleLevel(MoodleType.FoodEaten) >= 3 then
                     local tooltip = ISInventoryPaneContextMenu.addToolTip();
@@ -610,7 +626,7 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
             local alreadyDoneList = {};
             for i=0, weaponParts:size() - 1 do
                 local part = weaponParts:get(i);
-                if not alreadyDoneList[part:getName()] and part:canAttach(getSpecificPlayer(player), isWeapon) and not isWeapon:getWeaponPart(part:getPartType()) then
+                if not part:isBroken() and not alreadyDoneList[part:getName()] and part:canAttach(getSpecificPlayer(player), isWeapon) and not isWeapon:getWeaponPart(part:getPartType()) then
                     subMenuUp:addOption(weaponParts:get(i):getName(), isWeapon, ISInventoryPaneContextMenu.onUpgradeWeapon, part, getSpecificPlayer(player));
                     alreadyDoneList[part:getName()] = true;
                     doIt = true;
@@ -703,11 +719,13 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
 	        ISInventoryPaneContextMenu.doDrinkFluidMenu(playerObj, tests.fluidContainer, context)	
 		end
     end
-	if tests.waterContainer and getCore():getOptionAutoDrink() and getSpecificPlayer(player):getInventory():contains(tests.waterContainer) then
-		context:addOption(getText("ContextMenu_DisableAutodrink") , tests.waterContainer, ISInventoryPaneContextMenu.AutoDrinkOff );
-	elseif tests.waterContainer  and getSpecificPlayer(player):getInventory():contains(tests.waterContainer) then
-		context:addOption(getText("ContextMenu_EnableAutodrink") , tests.waterContainer, ISInventoryPaneContextMenu.AutoDrinkOn );
-	end
+    if not instanceof(tests.waterContainer, "IsoWorldInventoryObject") then
+		if tests.waterContainer and getCore():getOptionAutoDrink() and getSpecificPlayer(player):getInventory():contains(tests.waterContainer) then
+			context:addOption(getText("ContextMenu_DisableAutodrink") , tests.waterContainer, ISInventoryPaneContextMenu.AutoDrinkOff );
+		elseif tests.waterContainer and getSpecificPlayer(player):getInventory():contains(tests.waterContainer) then
+			context:addOption(getText("ContextMenu_EnableAutodrink") , tests.waterContainer, ISInventoryPaneContextMenu.AutoDrinkOn );
+		end
+    end
 
 	local pourInto = {}
 	--[[
@@ -883,6 +901,8 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
 		else
 			note = context:addOption(getText("ContextMenu_Write_Note", tests.canBeWrite:getName()), tests.canBeWrite, ISInventoryPaneContextMenu.onWriteSomething, true, player);
 		end
+        note.itemForTexture = tests.canBeWrite
+
 		-- if it's too dark you can't read or write notes
 
 		if playerObj:tooDarkToRead() then
@@ -955,7 +975,7 @@ ISInventoryPaneContextMenu.createMenu = function(player, isInPlayerInventory, it
                 if canLearn then text = text .. getText("(Can Learn)") end
                 local postText = ""
                 if craftRecipe:getResearchSkillLevel() > 0 then
-                    postText = craftRecipe:generateDebugText()
+                    postText = craftRecipe:generateDebugText(playerObj)
                 end
                 context:addDebugOption(text .. ": " .. tostring(recipe) .. postText)
             end
@@ -1110,6 +1130,9 @@ function ISInventoryPaneContextMenu.doLiteratureMenu(context, items, player)
         readOption.toolTip = tooltip;
     else
         readOption = context:addOption(getText("ContextMenu_Read"), items, ISInventoryPaneContextMenu.onLiteratureItems, player);
+        if #actualItems == 1 then
+            readOption.itemForTexture = actualItems[1]
+        end
         if uninteresting then
             local tooltip = ISInventoryPaneContextMenu.addToolTip();
             tooltip.description = getText("ContextMenu_EmptyNotebook");
@@ -1729,11 +1752,18 @@ ISInventoryPaneContextMenu.doReloadMenuForWeapon = function(playerObj, weapon, c
     end
 end
 
-function ISInventoryPaneContextMenu.transferIfNeeded(playerObj, item)
+function ISInventoryPaneContextMenu.transferIfNeeded(playerObj, item, preventTransferWorldObjects)
 	if instanceof(item, "InventoryItem") then
 		if luautils.haveToBeTransfered(playerObj, item) then
 			ISTimedActionQueue.add(ISInventoryTransferAction:new(playerObj, item, item:getContainer(), playerObj:getInventory()))
 		end
+    elseif instanceof(item, "IsoWorldInventoryObject") then
+        if luautils.walkAdj(playerObj, item:getSquare()) then
+            if not preventTransferWorldObjects then
+                local playerInv = getPlayerInventory(playerObj:getIndex()).inventory;
+                ISInventoryPaneContextMenu.transferItems({item:getItem()}, playerInv, playerObj:getIndex())
+            end
+        end
 	elseif instanceof(item, "ArrayList") then
 		local items = item
 		for i=1,items:size() do
@@ -2096,7 +2126,7 @@ ISInventoryPaneContextMenu.doDrinkFluidMenu = function(playerObj, fluidContainer
 		eatOption.notAvailable = true;
 		tooltip.description = getText("Tooltip_item_sealed");
 		eatOption.toolTip = tooltip;	
-	elseif playerObj:getMoodles():getMoodleLevel(MoodleType.FoodEaten) >= 3 and playerObj:getNutrition():getCalories() >= 1000 then
+	elseif playerObj:getMoodles():getMoodleLevel(MoodleType.FoodEaten) >= 3 then
 		local tooltip = ISInventoryPaneContextMenu.addToolTip();
 		eatOption.notAvailable = true;
 		tooltip.description = getText("Tooltip_CantEatMore");
@@ -4473,6 +4503,7 @@ end
 
 ISInventoryPaneContextMenu.onResearchRecipe = function(item, playerObj)
     local recipes = item:getScriptItem():getResearchableRecipes(playerObj, true)
+    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, item)
     if recipes then ISTimedActionQueue.add(ISResearchRecipe:new(playerObj, item)) end -- the player will research all researchble recipes in one-go
 end
 

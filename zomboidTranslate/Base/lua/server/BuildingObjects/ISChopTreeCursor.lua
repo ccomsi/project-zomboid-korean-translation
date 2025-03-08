@@ -14,6 +14,10 @@ function ISChopTreeCursor:isValid(square)
 end
 
 function ISChopTreeCursor:render(x, y, z, square)
+    if self.character:getVehicle() then
+        getCell():setDrag(nil, self.player)
+    end
+
 	local hc = getCore():getBadHighlitedColor()
 	if self:isValid(square) then
 		hc = getCore():getGoodHighlitedColor()
@@ -21,6 +25,13 @@ function ISChopTreeCursor:render(x, y, z, square)
 	end
 	self:getFloorCursorSprite():RenderGhostTileColor(x, y, z, hc:getR(), hc:getG(), hc:getB(), 0.8)
 	IsoTree.setChopTreeCursorLocation(self.player, x, y, z)
+end
+
+function ISChopTreeCursor:getAPrompt()
+	if self.canBeBuild then
+		return getText("ContextMenu_Chop_Tree")
+	end
+	return nil
 end
 
 function ISChopTreeCursor:new(sprite, northSprite, character)

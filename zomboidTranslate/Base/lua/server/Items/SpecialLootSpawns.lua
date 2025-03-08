@@ -1395,6 +1395,9 @@ end
 SpecialLootSpawns.OnCreateCookwareSchematic = function(item)
     SpecialLootSpawns.CreateSchematic(item, SpecialLootSpawns.CookwareSchematic, 40);
 end
+SpecialLootSpawns.OnCreateSurvivalSchematic = function(item)
+    SpecialLootSpawns.CreateSchematic(item, SpecialLootSpawns.SurvivalSchematics, 40);
+end
 SpecialLootSpawns.OnCreatePhotoBook = function(item)
     if not item then return end
     SpecialLootSpawns.OnCreateSpecialBook(item, "Photo_Special")

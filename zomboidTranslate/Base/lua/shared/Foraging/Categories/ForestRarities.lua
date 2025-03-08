@@ -98,7 +98,12 @@ local function generateForestRaritiesDefs()
 				xp = spawnTable.xp,
 				categories = { "ForestRarities" },
 				zones = {
-					DeepForest  = 1,
+					BirchForest  	= 1,
+					DeepForest  	= 1,
+					Forest		  	= 1,
+					OrganicForest  	= 1,
+					PHForest  		= 1,
+					PRForest  		= 1,
 				},
 			};
 		end;
