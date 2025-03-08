@@ -1,0 +1,13 @@
+BodyParts_KO = {
+    BODYPART_PELVIS = "허리",
+    BODYPART_SPINE = "등",
+    BODYPART_HEAD = "머리",
+    BODYPART_LEFT_UPPER_LEG = "왼쪽 허벅지",
+    BODYPART_LEFT_LOWER_LEG = "왼쪽 종아리",
+    BODYPART_RIGHT_UPPER_LEG = "오른쪽 허벅지",
+    BODYPART_RIGHT_LOWER_LEG = "오른쪽 종아리",
+    BODYPART_LEFT_UPPER_ARM = "왼쪽 어깨",
+    BODYPART_LEFT_LOWER_ARM = "왼쪽 팔뚝",
+    BODYPART_RIGHT_UPPER_ARM = "오른쪽 어깨",
+    BODYPART_RIGHT_LOWER_ARM = "오른쪽 팔뚝",
+}
