@@ -15,6 +15,7 @@ local function predicateEnoughPaste(item)
 end
 
 function ISPaperCursor:create(x, y, z, north, sprite)
+    showDebugInfoInChat("Cursor Create \'ISPaperCursor\' "..tostring(x)..", "..tostring(y)..", "..tostring(z)..", "..tostring(north)..", "..tostring(sprite))
 	local sq = getWorld():getCell():getGridSquare(x, y, z)
 	local playerObj = self.character
 	local playerInv = playerObj:getInventory()
@@ -266,6 +267,7 @@ function ISPaperCursor:new(character, paperType, newSprite)
 	o.renderX = -1
 	o.renderY = -1
 	o.renderZ = -1
+	showDebugInfoInChat("Cursor New \'ISPaperCursor\'")
 	return o
 end
 

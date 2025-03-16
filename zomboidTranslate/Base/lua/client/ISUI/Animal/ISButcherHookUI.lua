@@ -307,7 +307,7 @@ function ISButcherHookUI:updateCorpseDatas()
 
     self.leather = modData["leather"];
     self.blood = tonumber(modData["BloodQty"]);
-    self.head = modData["head"];
+    self.head = not modData["headless"];
     self.meat = modData["parts"];
     self.animalSize = modData["animalSize"];
 

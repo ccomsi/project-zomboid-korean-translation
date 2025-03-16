@@ -337,12 +337,7 @@ function ISRemoveItemTool.removeItem(item, player)
     local playerObj = getSpecificPlayer(player)
 
     srcContainer:DoRemoveItem(item);
-    if isServer() then
-        sendRemoveItemFromContainer(srcContainer, item)
-    end
-    if isClient() then
-        SendCommandToServer("/removeitem " .. item:getFullType() .. " " .. 1)
-    end
+    sendRemoveItemFromContainer(srcContainer, item);
 
     if srcContainer:getType() == "floor" and item:getWorldItem() ~= nil then
         DesignationZoneAnimal.removeItemFromGround(item:getWorldItem())

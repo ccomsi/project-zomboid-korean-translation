@@ -735,6 +735,7 @@ function CharacterCreationMain:createBodyTypeBtn()
 
 	local tickBox = ISTickBox:new(0, self.yOffset, 0, BUTTON_HGT, "", self, CharacterCreationMain.onChestHairSelected)
 	tickBox:initialise()
+	tickBox.autoWidth = true
 	self.characterPanel:addChild(tickBox)
 	tickBox:addOption("")
 	self.chestHairLbl:setHeight(tickBox.height)
@@ -829,6 +830,7 @@ function CharacterCreationMain:createHairTypeBtn()
 	
 	self.hairStubbleTickBox = ISTickBox:new(0, self.yOffset, 0, BUTTON_HGT, "", self, CharacterCreationMain.onShavedHairSelected);
 	self.hairStubbleTickBox:initialise();
+	self.hairStubbleTickBox.autoWidth = true
 	self.characterPanel:addChild(self.hairStubbleTickBox)
 	self.hairStubbleTickBox:addOption("")
 	self.hairStubbleLbl:setHeight(self.hairStubbleTickBox.height)
@@ -960,6 +962,7 @@ function CharacterCreationMain:createBeardTypeBtn()
 	
 	self.beardStubbleTickBox = ISTickBox:new(0, self.yOffset, 0, BUTTON_HGT, "", self, CharacterCreationMain.onBeardStubbleSelected);
 	self.beardStubbleTickBox:initialise();
+	self.beardStubbleTickBox.autoWidth = true;
 	self.characterPanel:addChild(self.beardStubbleTickBox)
 	self.beardStubbleTickBox:addOption("")
 	self.beardStubbleLbl:setHeight(self.beardStubbleTickBox.height)

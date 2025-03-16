@@ -159,13 +159,13 @@ BaseGameCharacterDetails.DoTraits = function()
     TraitFactory.addTrait("Cowardly", getText("UI_trait_cowardly"), -2, getText("UI_trait_cowardlydesc"), false);
     TraitFactory.addTrait("Clumsy", getText("UI_trait_clumsy"), -2, getText("UI_trait_clumsydesc"), false);
     TraitFactory.addTrait("Graceful", getText("UI_trait_graceful"), 4, getText("UI_trait_gracefuldesc"), false);
-  --  TraitFactory.addTrait("Hypercondriac", getText("UI_trait_hypochon"), -4, getText("UI_trait_hypochondesc"), false);
+  --  TraitFactory.addTrait("Hypochondriac", getText("UI_trait_hypochon"), -4, getText("UI_trait_hypochondesc"), false);
     TraitFactory.addTrait("ShortSighted", getText("UI_trait_shortsigh"), -2, getText("UI_trait_shortsighdesc"), false);
 	TraitFactory.addTrait("HardOfHearing", getText("UI_trait_hardhear"), -4, getText("UI_trait_hardheardesc"), false);
 	TraitFactory.addTrait("Deaf", getText("UI_trait_deaf"), -12, getText("UI_trait_deafdesc"), false);
     TraitFactory.addTrait("KeenHearing", getText("UI_trait_keenhearing"), 6, getText("UI_trait_keenhearingdesc"), false);
     TraitFactory.addTrait("EagleEyed", getText("UI_trait_eagleeyed"), 4, getText("UI_trait_eagleeyeddesc"), false);
-    TraitFactory.addTrait("HeartyAppitite", getText("UI_trait_heartyappetite"), -4, getText("UI_trait_heartyappetitedesc"), false);
+    TraitFactory.addTrait("HeartyAppetite", getText("UI_trait_heartyappetite"), -4, getText("UI_trait_heartyappetitedesc"), false);
     TraitFactory.addTrait("LightEater", getText("UI_trait_lighteater"), 2, getText("UI_trait_lighteaterdesc"), false);
     TraitFactory.addTrait("ThickSkinned", getText("UI_trait_thickskinned"), 8, getText("UI_trait_thickskinneddesc"), false);
     local unfit = TraitFactory.addTrait("Unfit", getText("UI_trait_unfit"), -10, getText("UI_trait_unfitdesc"), false);
@@ -178,9 +178,9 @@ BaseGameCharacterDetails.DoTraits = function()
     ath:addXPBoost(Perks.Fitness, 4)
     TraitFactory.addTrait("Nutritionist", getText("UI_trait_nutritionist"), 4, getText("UI_trait_nutritionistdesc"), false);
     TraitFactory.addTrait("Nutritionist2", getText("UI_trait_nutritionist"), 0, getText("UI_trait_nutritionistdesc"), true);
-	local weightgain = TraitFactory.addTrait("Weight Gain", getText("UI_trait_weightgain"), -2, getText("UI_trait_weightgaindesc"), false);
+	local weightgain = TraitFactory.addTrait("WeightGain", getText("UI_trait_weightgain"), -2, getText("UI_trait_weightgaindesc"), false);
 	weightgain:addFreeTrait("Overweight");
-	local weightloss = TraitFactory.addTrait("Weight Loss", getText("UI_trait_weightloss"), -2, getText("UI_trait_weightlossdesc"), false);
+	local weightloss = TraitFactory.addTrait("WeightLoss", getText("UI_trait_weightloss"), -2, getText("UI_trait_weightlossdesc"), false);
 	weightloss:addFreeTrait("Underweight");
 	TraitFactory.addTrait("Emaciated", getText("UI_trait_emaciated"), -10, getText("UI_trait_emaciateddesc"), true);
 	local veryUnderweight = TraitFactory.addTrait("Very Underweight", getText("UI_trait_veryunderweight"), 0, getText("UI_trait_veryunderweightdesc"), true);
@@ -204,7 +204,7 @@ BaseGameCharacterDetails.DoTraits = function()
     --TraitFactory.addTrait("LightDrinker", getText("UI_trait_lightdrink"), -2, getText("UI_trait_lightdrinkdesc"), false);
    -- TraitFactory.addTrait("HeavyDrinker", getText("UI_trait_harddrink"), 3, getText("UI_trait_harddrinkdesc"), false);
     TraitFactory.addTrait("Agoraphobic", getText("UI_trait_agoraphobic"), -4, getText("UI_trait_agoraphobicdesc"), false);
-    TraitFactory.addTrait("Claustophobic", getText("UI_trait_claustro"), -4, getText("UI_trait_claustrodesc"), false);
+    TraitFactory.addTrait("Claustrophobic", getText("UI_trait_claustro"), -4, getText("UI_trait_claustrodesc"), false);
     -- TraitFactory.addTrait("Lucky", getText("UI_trait_lucky"), 4, getText("UI_trait_luckydesc"), false, true);
     -- TraitFactory.addTrait("Unlucky", getText("UI_trait_unlucky"), -4, getText("UI_trait_unluckydesc"), false, true);
     TraitFactory.addTrait("Marksman", getText("UI_trait_marksman"), 0, getText("UI_trait_marksmandesc"), true);
@@ -330,7 +330,7 @@ BaseGameCharacterDetails.DoTraits = function()
 	TraitFactory.addTrait("Illiterate", getText("UI_trait_Illiterate"), -8, getText("UI_trait_IlliterateDesc"), false);
 	TraitFactory.addTrait("Insomniac", getText("UI_trait_Insomniac"), -6, getText("UI_trait_InsomniacDesc"), false, sleepOK);
 	TraitFactory.addTrait("Pacifist", getText("UI_trait_Pacifist"), -4, getText("UI_trait_PacifistDesc"), false);
-	TraitFactory.addTrait("Thinskinned", getText("UI_trait_ThinSkinned"), -8, getText("UI_trait_ThinSkinnedDesc"), false);
+	TraitFactory.addTrait("ThinSkinned", getText("UI_trait_ThinSkinned"), -8, getText("UI_trait_ThinSkinnedDesc"), false);
     TraitFactory.addTrait("Smoker", getText("UI_trait_Smoker"), -2, getText("UI_trait_SmokerDesc"), false);
 	local tailoring = TraitFactory.addTrait("Tailor", getText("UI_trait_Tailor"), 4, getText("UI_trait_TailorDesc"), false);
 	tailoring:addXPBoost(Perks.Tailoring, 1)
@@ -552,7 +552,7 @@ BaseGameCharacterDetails.DoTraits = function()
     TraitFactory.setMutualExclusive("Illiterate", "SlowReader");
     TraitFactory.setMutualExclusive("Illiterate", "FastReader");
 	TraitFactory.setMutualExclusive("NeedsLessSleep", "NeedsMoreSleep");
-	TraitFactory.setMutualExclusive("ThickSkinned", "Thinskinned");
+	TraitFactory.setMutualExclusive("ThickSkinned", "ThinSkinned");
 	TraitFactory.setMutualExclusive("LowThirst", "HighThirst");
 
 	--   TraitFactory.setMutualExclusive("ShortTemper", "Patient");
@@ -563,11 +563,11 @@ BaseGameCharacterDetails.DoTraits = function()
 	TraitFactory.setMutualExclusive("Stout", "Feeble");
 	TraitFactory.setMutualExclusive("Strong", "Feeble");
     TraitFactory.setMutualExclusive("Strong", "Stout");
-	TraitFactory.setMutualExclusive("Weight Gain", "Weight Loss");
+	TraitFactory.setMutualExclusive("WeightGain", "WeightLoss");
     TraitFactory.setMutualExclusive("Overweight", "Obese");
     TraitFactory.setMutualExclusive("Overweight", "Underweight");
     TraitFactory.setMutualExclusive("Very Underweight", "Underweight");
-    TraitFactory.setMutualExclusive("Very Underweight", "HeartyAppitite");
+    TraitFactory.setMutualExclusive("Very Underweight", "HeartyAppetite");
     TraitFactory.setMutualExclusive("Overweight", "Very Underweight");
     TraitFactory.setMutualExclusive("Overweight", "Emaciated");
     TraitFactory.setMutualExclusive("Obese", "Underweight");
@@ -590,11 +590,11 @@ BaseGameCharacterDetails.DoTraits = function()
     TraitFactory.setMutualExclusive("Resilient", "ProneToIllness");
    -- TraitFactory.setMutualExclusive("LightDrinker", "HeavyDrinker");
     TraitFactory.setMutualExclusive("HardOfHearing", "KeenHearing");
-    TraitFactory.setMutualExclusive("HeartyAppitite", "LightEater");
+    TraitFactory.setMutualExclusive("HeartyAppetite", "LightEater");
     TraitFactory.setMutualExclusive("Clumsy", "Graceful");
     TraitFactory.setMutualExclusive("Brave", "Cowardly");
     TraitFactory.setMutualExclusive("Brave", "Agoraphobic");
-    TraitFactory.setMutualExclusive("Brave", "Claustophobic");
+    TraitFactory.setMutualExclusive("Brave", "Claustrophobic");
     TraitFactory.setMutualExclusive("ShortSighted", "EagleEyed");
     --TraitFactory.setMutualExclusive("Lucky", "Unlucky");
     TraitFactory.setMutualExclusive("Deaf", "HardOfHearing");
@@ -603,11 +603,11 @@ BaseGameCharacterDetails.DoTraits = function()
     TraitFactory.setMutualExclusive("Desensitized", "Cowardly");
     TraitFactory.setMutualExclusive("Desensitized", "Brave");
     TraitFactory.setMutualExclusive("Desensitized", "Agoraphobic");
-	TraitFactory.setMutualExclusive("Claustophobic", "Agoraphobic");
-	TraitFactory.setMutualExclusive("Claustophobic", "AdrenalineJunkie");
+	TraitFactory.setMutualExclusive("Claustrophobic", "Agoraphobic");
+	TraitFactory.setMutualExclusive("Claustrophobic", "AdrenalineJunkie");
 	TraitFactory.setMutualExclusive("Agoraphobic", "AdrenalineJunkie");
 	TraitFactory.setMutualExclusive("Cowardly", "AdrenalineJunkie");
-    TraitFactory.setMutualExclusive("Desensitized", "Claustophobic");
+    TraitFactory.setMutualExclusive("Desensitized", "Claustrophobic");
     TraitFactory.setMutualExclusive("Desensitized", "AdrenalineJunkie");
     TraitFactory.setMutualExclusive("IronGut", "WeakStomach");
 

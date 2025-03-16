@@ -134,7 +134,9 @@ local function OnGameStart()
         end
     end
 end
+
 Events.OnGameStart.Add(OnGameStart)
+Events.OnServerStarted.Add(OnGameStart)
 
 
 local function OnKeyPressed(key)

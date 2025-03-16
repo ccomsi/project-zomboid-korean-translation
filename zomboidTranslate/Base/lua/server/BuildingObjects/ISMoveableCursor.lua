@@ -182,6 +182,7 @@ function ISMoveableCursor:setMoveableMode( _mode )
 end
 
 function ISMoveableCursor:create(_x, _y, _z, _north, _sprite)
+    showDebugInfoInChat("Cursor Create \'ISMoveableCursor\' "..tostring(x)..", "..tostring(y)..", "..tostring(z)..", "..tostring(north)..", "..tostring(sprite))
     local square = getCell():getGridSquare(_x, _y, _z);
     if square ~= null then
         if not self:isValid(square) then
@@ -1000,5 +1001,6 @@ function ISMoveableCursor:new(_character)
     o.yOffset = 0;
     o:setMoveableMode(ISMoveableCursor.mode[o.player] or "pickup");
     ISMoveableCursor.cursors[o.player] = o;
+    showDebugInfoInChat("Cursor New \'ISMoveableCursor\'")
     return o;
 end

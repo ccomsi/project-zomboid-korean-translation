@@ -126,7 +126,8 @@ local function getTool(_info, _inventory)   -- takes: InputScript, ItemContainer
 end
 
 function ISEntityBuildMenu.onBuildEntity(_player, _info)
-    local buildEntity = ISBuildIsoEntity:new(_player, _info);
+    local containers = ISInventoryPaneContextMenu.getContainers(_player)
+    local buildEntity = ISBuildIsoEntity:new(_player, _info, 1, containers);
 
     local inventory = _player:getInventory();
     local items = ISEntityBuildMenu.items;

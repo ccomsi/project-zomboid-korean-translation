@@ -147,6 +147,7 @@ function ISHealthPanel:createChildren()
     self.listbox.drawBorder = false
     self.listbox.backgroundColor.a = 0
     self.listbox.drawText = ISHealthPanel.drawText;
+    self.listbox.textRight = 0
     self:addChild(self.listbox)
 
     self.bodyPartPanel = ISHealthBodyPartPanel:new(self.character, UI_BORDER_SPACING+1-7, UI_BORDER_SPACING+1-13);

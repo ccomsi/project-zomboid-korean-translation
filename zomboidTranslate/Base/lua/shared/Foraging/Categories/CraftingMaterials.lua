@@ -12,11 +12,25 @@ require "Foraging/forageDefinitions";
 
 local function generateCraftingMaterialDefs()
 	-- "Bottleneck" and tool type items for crafting
-	-- These are dual category items to allow for higher spawn rates
-	local craftingTools = {
-		--crafting tools which can be found anywhere, mostly in towns
-		generic = {
-			chance = 10,
+	-- These are multiple category items to allow for higher spawn rates
+	local craftingMaterials = {
+		materials = {
+			minCount = 1,
+			maxCount = 3,
+			chance = 20,
+			xp = 20,
+			categories = { "Junk", "Trash", "CraftingMaterials" },
+			items = {
+				AluminumScrap			= "Base.AluminumScrap",
+				CopperScrap				= "Base.CopperScrap",
+				IronScrap				= "Base.IronScrap",
+				SteelScrap				= "Base.SteelScrap",
+			},
+		},
+		tools = {
+			minCount = 1,
+			maxCount = 1,
+			chance = 5,
 			xp = 20,
 			categories = { "Junk", "CraftingMaterials" },
 			items = {
@@ -46,10 +60,12 @@ local function generateCraftingMaterialDefs()
 			},
 		},
 	};
-	for _, spawnTable in pairs(craftingTools) do
+	for _, spawnTable in pairs(craftingMaterials) do
 		for itemName, itemFullName in pairs(spawnTable.items) do
 			forageDefs[itemName] = {
 				type = itemFullName,
+				minCount = spawnTable.minCount,
+				maxCount = spawnTable.maxCount,
 				skill = 0,
 				xp = spawnTable.xp,
 				categories = spawnTable.categories,

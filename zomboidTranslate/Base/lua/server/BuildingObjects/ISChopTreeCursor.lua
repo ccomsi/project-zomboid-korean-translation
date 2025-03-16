@@ -5,6 +5,7 @@
 ISChopTreeCursor = ISBuildingObject:derive("ISChopTreeCursor")
 
 function ISChopTreeCursor:create(x, y, z, north, sprite)
+    showDebugInfoInChat("Cursor Create \'ISChopTreeCursor\' "..tostring(x)..", "..tostring(y)..", "..tostring(z)..", "..tostring(north)..", "..tostring(sprite))
 	local square = getWorld():getCell():getGridSquare(x, y, z)
 	ISWorldObjectContextMenu.doChopTree(self.character, square:getTree())
 end
@@ -45,6 +46,7 @@ function ISChopTreeCursor:new(sprite, northSprite, character)
 	o.player = character:getPlayerNum()
 	o.noNeedHammer = true
 	o.skipBuildAction = true
+	showDebugInfoInChat("Cursor New \'ISChopTreeCursor\'")
 	return o
 end
 

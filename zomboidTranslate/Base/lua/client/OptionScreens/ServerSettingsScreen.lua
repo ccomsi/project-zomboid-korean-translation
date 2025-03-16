@@ -4996,6 +4996,8 @@ SettingsTable = {
 					{ name = "EnableTaintedWaterText"},
 					{ name = "MaximumRatIndex" },
 					{ name = "DaysUntilMaximumRatIndex" },
+                    { name = "ClayLakeChance" },
+                    { name = "ClayRiverChance" },
 				},
 			},
 			{

@@ -2962,15 +2962,63 @@ ISWorldObjectContextMenu.onSleep = function(bed, player)
     end
 end
 
+local function tryAddLocationAdjacentToBed(bedSquare, direction, added, locations)
+    local adjacent = bedSquare:getAdjacentSquare(direction)
+    if adjacent == nil then return end
+    if luautils.tableContains(added, adjacent) then
+        return
+    end
+    table.insert(added, adjacent)
+    if AdjacentFreeTileFinder.isTileOrAdjacent(bedSquare, adjacent) then
+        table.insert(locations, adjacent:getX() + 0.5)
+        table.insert(locations, adjacent:getY() + 0.5)
+        table.insert(locations, adjacent:getZ())
+    end
+end
+
+local function tryAddLocationsAdjacentToBed(bedSquare, added, locations)
+    tryAddLocationAdjacentToBed(bedSquare, IsoDirections.N, added, locations)
+    tryAddLocationAdjacentToBed(bedSquare, IsoDirections.S, added, locations)
+    tryAddLocationAdjacentToBed(bedSquare, IsoDirections.W, added, locations)
+    tryAddLocationAdjacentToBed(bedSquare, IsoDirections.E, added, locations)
+end
+
+local function isSquareOnDiagonal(square, adjacent)
+    if square == nil or adjacent == nil then return false end
+    return (square:getX() - adjacent:getX() ~= 0) and (square:getY() - adjacent:getY() ~= 0)
+end
+
 function ISWorldObjectContextMenu.onConfirmSleep(this, button, player, bed)
 	ISWorldObjectContextMenu.sleepDialog = nil;
 	if button.internal == "YES" then
-	
 		local playerObj = getSpecificPlayer(player)
 		playerObj:setVariable("ExerciseStarted", false);
 		playerObj:setVariable("ExerciseEnded", true);
 		ISTimedActionQueue.clear(playerObj)
 		if bed then
+			if bed:hasSpriteGrid() then
+				local objects = ArrayList.new()
+				bed:getSpriteGridObjectsIncludingSelf(objects)
+				if playerObj:isSittingOnFurniture() and objects:contains(playerObj:getSitOnFurnitureObject()) then
+					ISWorldObjectContextMenu.onSleepWalkToComplete(player, playerObj:getSitOnFurnitureObject())
+					return
+				end
+				local added = {}
+				local locations = {}
+				for i=1,objects:size() do
+					local object = objects:get(i-1)
+					if not isSquareOnDiagonal(object:getSquare(), playerObj:getCurrentSquare()) and AdjacentFreeTileFinder.isTileOrAdjacent(object:getSquare(), playerObj:getCurrentSquare()) then
+						ISWorldObjectContextMenu.onSleepWalkToComplete(player, object)
+						return
+					end
+					tryAddLocationsAdjacentToBed(object:getSquare(), added, locations)
+				end
+				local action = ISPathFindAction:pathToNearest(playerObj, locations)
+				-- NOTE: 'bed' may not be the nearest IsoSpriteGrid object the player ends up adjacent to.
+				action:setOnComplete(ISWorldObjectContextMenu.onSleepWalkToComplete, player, bed)
+				ISTimedActionQueue.add(action)
+				return
+			end
 			if AdjacentFreeTileFinder.isTileOrAdjacent(playerObj:getCurrentSquare(), bed:getSquare()) then
 				ISWorldObjectContextMenu.onSleepWalkToComplete(player, bed)
 			else
@@ -3039,15 +3087,26 @@ function ISWorldObjectContextMenu.onSleepWalkToComplete(player, bed)
         end
     end
     if (not bedType:contains("Pillow")) and bed and bed:getSquare() then
-        local square = bed:getSquare()
-        local worldObjects = square:getWorldObjects()
-		for i=0, worldObjects:size()-1 do
-			item = worldObjects:get(i):getItem();
-			if item and item:hasTag("Pillow") then
-                bedType = (bedType .. "Pillow")
+        local objects = ArrayList.new()
+        bed:getSpriteGridObjectsIncludingSelf(objects)
+        local hasPillow = false
+        for n=1,objects:size() do
+            local square = objects:get(n-1):getSquare()
+            local worldObjects = square:getWorldObjects()
+            for i=0, worldObjects:size()-1 do
+                item = worldObjects:get(i):getItem();
+                if item and item:hasTag("Pillow") then
+                    hasPillow = true
+                    break
+                end
+            end
+            if hasPillow then
                 break
-			end
-		end
+            end
+        end
+        if hasPillow then
+            bedType = (bedType .. "Pillow")
+        end
     end
     if (not bedType:contains("Pillow")) and bedType == "floor" then
         local square = playerObj:getSquare()
@@ -3893,7 +3952,7 @@ ISWorldObjectContextMenu.doFillFluidMenu = function(sink, playerNum, context)
 	local allContainerTypes = {}
 	local allContainersOfType = {}
 	local pourInto = playerInv:getAllEvalRecurse(function(item)
-		if item:getFluidContainer() and (not item:getFluidContainer():isFull()) then
+		if item:getFluidContainer() and (not item:getFluidContainer():isFull()) and item:getFluidContainer():canAddFluid(Fluid.Water) then
 			return true;
 		end
 		return false
@@ -3913,7 +3972,7 @@ ISWorldObjectContextMenu.doFillFluidMenu = function(sink, playerNum, context)
 	--make a table of all containers
 	for i=0, pourInto:size() - 1 do
 		local container = pourInto:get(i)
-		if (sink:hasWater() and container:getFluidContainer():canAddFluid(Fluid.Water)) or
+		if sink:hasWater() or
 		(sink:getFluidContainer() ~= nil and FluidContainer.CanTransfer(sink:getFluidContainer(), container:getFluidContainer())) then
 			table.insert(allContainers, container)
 		end
@@ -5242,8 +5301,12 @@ ISWorldObjectContextMenu.doSleepOption = function(context, bed, player, playerOb
             end
         end
     end
-
-	local isOnBed = playerObj:getSitOnFurnitureObject() == bed
+    local isOnBed = playerObj:getSitOnFurnitureObject() == bed
+    if bed ~= nil and not isOnBed then
+        local objects = ArrayList.new()
+        bed:getSpriteGridObjectsIncludingSelf(objects)
+        isOnBed = objects:contains(playerObj:getSitOnFurnitureObject())
+    end
     local sleepOption = isOnBed and context:addOption(text, bed, ISWorldObjectContextMenu.onSleep, player) or context:addGetUpOption(text, bed, ISWorldObjectContextMenu.onSleep, player);
     local tooltipText = nil
     -- Not tired enough
@@ -5787,7 +5850,7 @@ function ISWorldObjectContextMenu.doFluidContainerMenu(context, object, player)
 		ISWorldObjectContextMenu.doWashClothingMenu(object, player, mainSubMenu);
 	end
 
-	if object:hasFluid() then
+	if object:hasFluid() and object:getFluidCapacity() < 9999 then	-- capacity >= 9999 means infinite water.
 		mainSubMenu:addOption(getText("Fluid_Empty"), player, ISWorldObjectContextMenu.onFluidEmpty, object:getFluidContainer());
 	end
 

@@ -108,10 +108,12 @@ end
 -------------------------------------------------
 -------------------------------------------------
 function ISAddSafeZoneUI:updateButtons()
+    local p = getPlayerFromUsername(self.ownerEntry:getInternalText())
 	self.ok.enable = self.size > 1
 					and string.trim(self.ownerEntry:getInternalText()) ~= ""
 					and string.trim(self.titleEntry:getInternalText()) ~= ""
-					and self.notIntersecting;
+					and self.notIntersecting
+					and p ~= nil;
 end
 
 function ISAddSafeZoneUI:prerender()

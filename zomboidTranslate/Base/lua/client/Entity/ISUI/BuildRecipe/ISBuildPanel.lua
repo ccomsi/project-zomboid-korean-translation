@@ -370,7 +370,8 @@ function ISBuildPanel:createBuildIsoEntity(dontSetDrag)
     
     if _info ~= nil and _recipe ~= nil then
         if self.buildEntity == nil or self.buildEntity.objectInfo ~= _info then
-            self.buildEntity = ISBuildIsoEntity:new(_player, _info, self.logic);
+            local containers = ISInventoryPaneContextMenu.getContainers(self.player)
+            self.buildEntity = ISBuildIsoEntity:new(_player, _info, 1, containers, self.logic);
             self.buildEntity.dragNilAfterPlace = false;
             self.buildEntity.blockAfterPlace = true;
     
@@ -389,6 +390,11 @@ function ISBuildPanel:createBuildIsoEntity(dontSetDrag)
         
         if self.logic:isCraftActionInProgress() then
             canBuild = false;
+        end
+
+        if isClient() then
+            self.buildEntity.modData = { }
+            self.buildEntity:updateModData()
         end
 
         self.buildEntity.blockBuild = not canBuild;

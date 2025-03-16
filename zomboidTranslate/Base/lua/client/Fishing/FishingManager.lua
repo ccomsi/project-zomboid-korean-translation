@@ -68,11 +68,11 @@ end
 
 function FishingManager:update()
     if self.state == self.states["None"] and not Fishing.Utils.isPlayerAimOnWater(self.player, true) then
-        self.player:setVariable("FishingFinished", "true")
+        self.player:setVariable("FishingFinished", true)
     end
     if self.state ~= self.states["None"] and (Fishing.Utils.isStopFishingButtonPressed(self.joypad)) then
         self:changeState("None")
-        self.player:setVariable("FishingFinished", "true")
+        self.player:setVariable("FishingFinished", true)
     else
         self.state:update()
     end
@@ -85,7 +85,7 @@ function FishingManager:changeState(stateName)
 end
 
 function FishingManager:disable()
-    self.player:setVariable("FishingFinished", "true")
+    self.player:setVariable("FishingFinished", true)
 
     if self.fishingRod ~= nil then
         if self.fishingRod.bobber ~= nil and self.fishingRod.bobber.fish ~= nil and self.fishingRod.rodItem ~= nil then

@@ -124,9 +124,11 @@ end
 
 function ISAdminTicketsUI:update()
     self.answerTicketBtn.enable = false;
+    self.removeBtn.enable = false;
     if self.selectedTicket then
         if not self.selectedTicket:getAnswer() then
             self.answerTicketBtn.enable = true;
+            self.removeBtn.enable = false;
         end
     end
 end

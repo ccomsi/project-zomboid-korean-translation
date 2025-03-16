@@ -163,28 +163,6 @@ function MultiplayerScreen:create()
     self.backButton.borderColor = {r=0.8, g=0.5, b=0.5, a=1.0};
     self:addChild(self.backButton);
 
-    self.choiceBackgroundNext = ISButton:new(0, 0, 40, 40,">", self, MultiplayerScreen.onOptionMouseDown);
-    self.choiceBackgroundNext.internal = "BACKGROUND_NEXT";
-    self.choiceBackgroundNext:initialise();
-    self.choiceBackgroundNext:instantiate();
-    self.choiceBackgroundNext.font = UIFont.Large;
-    self.choiceBackgroundNext.backgroundColor = {r=0.3, g=0.3, b=0.3, a=0.5};
-    self.choiceBackgroundNext.backgroundColorMouseOver = {r=0.3, g=0.3, b=0.3, a=0.9}
-    self.choiceBackgroundNext.borderColor = {r=0.5, g=0.5, b=0.5, a=1.0};
-    self.choiceBackgroundNext:setVisible(false)
-    self:addChild(self.choiceBackgroundNext);
-
-    self.choiceBackgroundPrevious = ISButton:new(0, 0, 40, 40,"<", self, MultiplayerScreen.onOptionMouseDown);
-    self.choiceBackgroundPrevious.internal = "BACKGROUND_PREVIOUS";
-    self.choiceBackgroundPrevious:initialise();
-    self.choiceBackgroundPrevious:instantiate();
-    self.choiceBackgroundPrevious.font = UIFont.Large;
-    self.choiceBackgroundPrevious.backgroundColor = {r=0.3, g=0.3, b=0.3, a=0.5};
-    self.choiceBackgroundPrevious.backgroundColorMouseOver = {r=0.3, g=0.3, b=0.3, a=0.9}
-    self.choiceBackgroundPrevious.borderColor = {r=0.5, g=0.5, b=0.5, a=1.0};
-    self.choiceBackgroundPrevious:setVisible(false)
-    self:addChild(self.choiceBackgroundPrevious);
-
     self.listbox = ISScrollingListBox:new(0, 0, 500, 400);
     self.listbox:initialise();
     self.listbox:instantiate();
@@ -224,10 +202,6 @@ function MultiplayerScreen:onResolutionChange(oldw, oldh, neww, newh)
     self.listbox:setHeight(self.height - math.max(200, self.width*0.18))
     self.listbox.vscroll:setX(self.listbox:getWidth()-self.listbox.vscroll:getWidth());
     self.listbox.vscroll:setHeight(self.listbox:getHeight());
-    self.choiceBackgroundNext:setX(self.width - 70)
-    self.choiceBackgroundNext:setY(self.height - 70)
-    self.choiceBackgroundPrevious:setX(self.width - 120)
-    self.choiceBackgroundPrevious:setY(self.height - 70)
     if self.width < 1100 then
         self.backButton:setX((self.width - self.backButton:getWidth()) / 2.0)
         self.backButton:setY(self.height-70)
@@ -235,8 +209,6 @@ function MultiplayerScreen:onResolutionChange(oldw, oldh, neww, newh)
         self.authPanel:setX((self.width - self.authPanel:getWidth()) / 2.0)
         self.authPanel:setY(self.height-600)
         self.authPanel:setHeight(500)
-        self.choiceBackgroundNext:setVisible(false)
-        self.choiceBackgroundPrevious:setVisible(false)
     else
         self.backButton:setX(100)
         self.backButton:setY(self.height-70)
@@ -244,8 +216,6 @@ function MultiplayerScreen:onResolutionChange(oldw, oldh, neww, newh)
         self.authPanel:setX((self.width - self.authPanel:getWidth()) / 2.0)
         self.authPanel:setY(self.height-530)
         self.authPanel:setHeight(500)
-        self.choiceBackgroundNext:setVisible(true)
-        self.choiceBackgroundPrevious:setVisible(true)
     end
 
     local authPanelWidth = math.max(350, self.width*0.182)
@@ -434,18 +404,6 @@ function MultiplayerScreen:onOptionMouseDown(button, x, y)
         end
         MainScreen.resetLuaIfNeeded()
 	end
-    if button.internal == "BACKGROUND_NEXT" then
-        local server = self.selectedServer
-        server:setLoginScreenId(server:getLoginScreenId() + 1)
-        self:saveServer(server)
-        self.loginBackground = getClientLoadingScreen(server:getLoginScreenId())
-    end
-    if button.internal == "BACKGROUND_PREVIOUS" then
-        local server = self.selectedServer
-        server:setLoginScreenId(server:getLoginScreenId() - 1)
-        self:saveServer(server)
-        self.loginBackground = getClientLoadingScreen(server:getLoginScreenId())
-    end
 end
 
 function MultiplayerScreen:getServer()
@@ -462,7 +420,6 @@ function MultiplayerScreen:getServer()
         newServer:setPwd(self.passwordEntry:getInternalText(), true);
         newServer:setSavePwd(self.rememberPasswordTickBox:isSelected(1));
         newServer:setAuthType(self.authType:getSelected())
-        newServer:setLoginScreenId(self.selectedServer:getLoginScreenId())
         if getSteamModeActive() then
             newServer:setUseSteamRelay(false);
         end
@@ -623,7 +580,7 @@ end
 
 function MultiplayerScreen:fillFields(item)
     if item == nil then
-        self.loginBackground = getClientLoadingScreen(ZombRand(100));
+        self.loginBackground = nil;
         self.serverIconTexture = nil;
         self.serverName:setName("???");
         self.usernameEntry:setText("");
@@ -636,12 +593,6 @@ function MultiplayerScreen:fillFields(item)
         self.rememberPasswordTickBox:setSelected(1, false)
     else
         self.loginBackground = item:getServerLoginScreen();
-        if self.loginBackground == nil then
-            if item:getLoginScreenId() == -1 then
-                item:setLoginScreenId(ZombRand(100))
-            end
-            self.loginBackground = getClientLoadingScreen(item:getLoginScreenId())
-        end
         if item:getServerIcon() ~= nil then
             self.serverIconTexture = item:getServerIcon();
         else

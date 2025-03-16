@@ -39,15 +39,30 @@ function ISModalEditRole:initialise()
     self:addChild(self.valueDescriptionLabel);
     y = y + elementHeight;
 
-    self.valueDescription = ISTextEntryBox:new("", UI_BORDER_SPACING, y, self.width - UI_BORDER_SPACING * 2 - elementWidth, elementHeight);
+    local numLines = 3
+    self.valueDescription = ISTextEntryBox:new("", UI_BORDER_SPACING, y, self.width - UI_BORDER_SPACING * 2, elementHeight*numLines);
     self.valueDescription.font = UIFont.Medium;
     self.valueDescription:initialise();
     self.valueDescription:instantiate();
     self.valueDescription.background = false;
     self.valueDescription:setText(self.role:getDescription());
+    self.valueDescription:setMultipleLine(true);
     self.valueDescription:setEditable(not self.role:isReadOnly());
+    self.valueDescription.onTextChange = function() self:doSearch() end
+    self.valueDescription.setText = function(_self, str)
+        if not str then
+            str = "";
+        end
+        _self.javaObject:SetText(str);
+        _self.title = str;
+
+        if OnScreenKeyboard.IsVisible() then
+            _self:onTextChange()
+        end
+    end
+    self.valueDescription:addScrollBars();
     self:addChild(self.valueDescription)
-    y = y + elementHeight + UI_BORDER_SPACING;
+    y = y + elementHeight*numLines + UI_BORDER_SPACING;
 
     self.buttonColorLabel = ISLabel:new(UI_BORDER_SPACING, y, elementHeight, getText("IGUI_AdminPanel_Color"), 1, 1, 1, 1, UIFont.Medium, true);
     self.buttonColorLabel:initialise();
@@ -59,7 +74,7 @@ function ISModalEditRole:initialise()
     self:addChild(self.buttonColorLabel);
     y = y + elementHeight;
 
-    self.buttonColor = ISButton:new(UI_BORDER_SPACING, y, self.width - UI_BORDER_SPACING * 2 - elementWidth, elementHeight, "", self, ISModalEditRole.onColor);
+    self.buttonColor = ISButton:new(UI_BORDER_SPACING, y, self.width - UI_BORDER_SPACING * 2, elementHeight, "", self, ISModalEditRole.onColor);
     self.buttonColor:initialise();
     self.buttonColor.backgroundColor = { r=self.color.r, g=self.color.g, b=self.color.b, a=self.color.a }
     self.buttonColor:setEnable(not self.role:isReadOnly());
@@ -82,7 +97,7 @@ function ISModalEditRole:initialise()
     self:addChild(self.tickBoxCapabilityLabel);
     y = y + elementHeight;
 
-    self.filter = ISTextEntryBox:new("", UI_BORDER_SPACING, y, self.width - UI_BORDER_SPACING * 2 - elementWidth, elementHeight);
+    self.filter = ISTextEntryBox:new("", UI_BORDER_SPACING, y, self.width - UI_BORDER_SPACING * 2, elementHeight);
     self.filter.font = UIFont.Medium;
     self.filter:initialise();
     self.filter:instantiate();
@@ -131,7 +146,9 @@ function ISModalEditRole:initialise()
     self.tickBoxCapability.vscroll:setVisible(true);
     self.tickBoxCapability.vscroll:setAnchorRight(false); -- <- fix for issue of scroll not aligning properly.
     self.tickBoxCapability:setScrollChildren(true);
-    self.tickBoxCapability:setEnabled(not self.role:isReadOnly());
+    if self.role:isReadOnly() then
+        self.tickBoxCapability.enable = false;
+    end
     self.scrollPanel:addChild(self.tickBoxCapability);
 
     --y2 = y2 + self.tickBoxCapability:getHeight() + UI_BORDER_SPACING;
@@ -162,6 +179,12 @@ function ISModalEditRole:initialise()
     end
 end
 
+function ISModalEditRole:doSearch()
+    if string.len(self.valueDescription:getText()) > 150 then
+        self.valueDescription:setText(self.valueDescription:getText():sub(1,150))
+    end
+end
+
 function ISModalEditRole:onTickBox(index, selected)
     local option = self.tickBoxCapability:getOptionData(index)
     self.capabilities[option] = selected
@@ -189,9 +212,11 @@ function ISModalEditRole:populateList()
     self.tickBoxCapability:clearOptions()
     for k,v in pairs(self.capabilities) do
         if filterText == nil or filterText == '' or string.contains(string.lower(k:name()), filterText) then
-            local index = self.tickBoxCapability:addOption(k:name(), k)
-            self.tickBoxCapability:setSelected(index, v)
-            scrollHeight = scrollHeight + 1
+            if (k:name() ~= "None") then
+                local index = self.tickBoxCapability:addOption(k:name(), k)
+                self.tickBoxCapability:setSelected(index, v)
+                scrollHeight = scrollHeight + 1
+            end
         end
     end
     self.tickBoxCapability:setWidthToFit()
@@ -237,6 +262,11 @@ function ISModalEditRole:prerender()
     self:drawRect(0, 0, self.width, self.height, self.backgroundColor.a, self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b);
     self:drawRectBorder(0, 0, self.width, self.height, self.borderColor.a, self.borderColor.r, self.borderColor.g, self.borderColor.b);
     self:populateList();
+    if self.tickBoxCapability:isMouseOver() and self.tickBoxCapability.optionsIndex[self.tickBoxCapability.mouseOverOption] ~= nil then
+        local text = self.tickBoxCapability.optionsIndex[self.tickBoxCapability.mouseOverOption];
+        local tooltipText = "IGUI_CapabilitiesTooltips_"..text;
+        self.tickBoxCapability.tooltip = getText(tooltipText);
+    end
 end
 
 function ISModalEditRole:onClick(button)

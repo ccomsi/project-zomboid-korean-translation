@@ -860,11 +860,11 @@ function forageSystem.recreateIcons()
 	forageSystem.lootTableUpdate();
 	--
 	if forageSystem.checkIfRecreateIcons() then
-		local icon;
+		local icon, removeIcon;
 		for zoneID, zoneData in pairs(forageData) do
 			if (not zoneData.forageIcons) then zoneData.forageIcons = {}; end;
-			for iconID in pairs(zoneData.forageIcons) do
-				local removeIcon = true;
+			for iconID, iconData in pairs(zoneData.forageIcons) do
+				removeIcon = true;
 				for character, manager in pairs(ISSearchManager.players) do
 					if manager and manager.isSearchMode then
 						icon = manager.forageIcons[iconID];
@@ -2218,19 +2218,24 @@ function forageSystem.isItemScriptValid(_character, _itemDef, _zoneDef)
 	--
 	local scriptItem = (_itemDef and _itemDef.type) and ScriptManager.instance:FindItem(_itemDef.type);
 	--
-	if scriptItem then
-		if (not scriptItem:getObsolete()) then
-			local iconsForTexture = scriptItem:getIconsForTexture();
-			if (scriptItem:getIcon() ~= "None") or (iconsForTexture and (not iconsForTexture:isEmpty())) then
-				isValid = true;
+	--item type may only contain a-z, 0-9, underscore, period
+	if _itemDef.type:match('^[a-zA-Z0-9._]+$') ~= nil then
+		if scriptItem then
+			if (not scriptItem:getObsolete()) then
+				local iconsForTexture = scriptItem:getIconsForTexture();
+				if (scriptItem:getIcon() ~= "None") or (iconsForTexture and (not iconsForTexture:isEmpty())) then
+					isValid = true;
+				else
+					log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item script failed test [getIcon] or [getIconsForTexture], ignoring definition for ".._itemDef.type);
+				end;
 			else
-				log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item script failed test [getIcon] or [getIconsForTexture], ignoring definition for ".._itemDef.type);
+				log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item failed test [getObsolete], ignoring definition for ".._itemDef.type);
 			end;
 		else
-			log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item failed test [getObsolete], ignoring definition for ".._itemDef.type);
+			log(DebugType.Foraging, "[forageSystem][isItemScriptValid] could not find an item script, ignoring definition for ".._itemDef.type);
 		end;
 	else
-		log(DebugType.Foraging, "[forageSystem][isItemScriptValid] could not find an item script, ignoring definition for ".._itemDef.type);
+		log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item type contains illegal characters, ignoring definition for ".._itemDef.type);
 	end;
 	--
 	return isValid;
@@ -2475,7 +2480,7 @@ function forageSystem.doWildCropSpawn(_character, _inventory, _itemDef, _items)
 		["Base.LemonGrass"] = "Base.LemonGrassSeed",
 		["Base.Lettuce"] = "Base.LettuceSeed",
 		["Base.Marigold"] = "Base.MarigoldSeed",
-		["Base.Marigold"] = "Base.MintSeed",
+		["Base.MintHerb"] = "Base.MintSeed",
 		["Base.Onion"] = "Base.OnionSeed",
 		["Base.Oregano"] = "Base.OreganoSeed",
 		["Base.Parsley"] = "Base.ParsleySeed",

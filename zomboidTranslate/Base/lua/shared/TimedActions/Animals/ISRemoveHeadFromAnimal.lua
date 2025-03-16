@@ -7,7 +7,7 @@ require "TimedActions/ISBaseTimedAction"
 ISRemoveHeadFromAnimal = ISBaseTimedAction:derive("ISRemoveHeadFromAnimal");
 
 function ISRemoveHeadFromAnimal:isValid()
-	return self.body ~= nil and self.body:getModData()["head"];
+	return self.body ~= nil and not self.body:getModData()["headless"];
 end
 
 function ISRemoveHeadFromAnimal:waitToStart()
@@ -74,9 +74,17 @@ function ISRemoveHeadFromAnimal:complete()
 		addBloodSplat(self.hook:getSquare(), 2, ZombRandFloat(-0.3, 0.3), ZombRandFloat(-0.3, 0.3))
 	end
 
+	-- if the animal is rotten you don't get a head but a skull
 	local head = ButcheringUtil.getHead(self.body:getTypeAndBreed());
-	if head then
-		local headItem = self.character:getInventory():AddItem(head);
+	local skull = ButcheringUtil.getSkull(self.body:getTypeAndBreed());
+	if head and self.body:getModData()["head"] then
+		local headItem = instanceItem(head);
+		if self.body:getModData()["animalRotStage"] > 0 then
+			headItem:setAge(ZombRand(headItem:getOffAgeMax() + 3, headItem:getOffAgeMax() * 1.5));
+		end
+		self.character:getInventory():AddItem(headItem);
+	elseif skull then
+		local skullItem = self.character:getInventory():AddItem(skull);
 	end
 
 	addXp(self.character, Perks.Butchering, self.xp);

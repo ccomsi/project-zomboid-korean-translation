@@ -66,6 +66,26 @@ function ISSafehouseUI:initialise()
     self.pos:instantiate()
     self:addChild(self.pos)
 
+    local dateCreatedLbl = ISLabel:new(self:getWidth()/2+UI_BORDER_SPACING+1, nameLbl:getBottom() + UI_BORDER_SPACING, FONT_HGT_SMALL, getText("IGUI_SafehouseUI_DateCreated"), 1, 1, 1, 1, UIFont.Small, true)
+    dateCreatedLbl:initialise()
+    dateCreatedLbl:instantiate()
+    self:addChild(dateCreatedLbl)
+
+    self.dateCreated = ISLabel:new(dateCreatedLbl:getRight() + UI_BORDER_SPACING, dateCreatedLbl.y, FONT_HGT_SMALL, self.safehouse:getDatetimeCreatedStr(), 0.6, 0.6, 0.8, 1.0, UIFont.Small, true)
+    self.dateCreated:initialise()
+    self.dateCreated:instantiate()
+    self:addChild(self.dateCreated)
+
+    local locationLbl = ISLabel:new(self:getWidth()/2+UI_BORDER_SPACING+1, dateCreatedLbl:getBottom() + UI_BORDER_SPACING, FONT_HGT_SMALL, getText("IGUI_SafehouseUI_Location"), 1, 1, 1, 1, UIFont.Small, true)
+    locationLbl:initialise()
+    locationLbl:instantiate()
+    self:addChild(locationLbl)
+
+    self.location = ISLabel:new(locationLbl:getRight() + UI_BORDER_SPACING, locationLbl.y, FONT_HGT_SMALL, self.safehouse:getLocation(), 0.6, 0.6, 0.8, 1.0, UIFont.Small, true)
+    self.location:initialise()
+    self.location:instantiate()
+    self:addChild(self.location)
+
     local pointsLabel = ISLabel:new(UI_BORDER_SPACING+1, posLbl:getBottom() + UI_BORDER_SPACING, FONT_HGT_SMALL, getText("IGUI_SafehouseUI_HitPoints"), 1, 1, 1, 1, UIFont.Small, true)
     pointsLabel:initialise()
     pointsLabel:instantiate()
@@ -345,7 +365,7 @@ end
 
 function ISSafehouseUI:onRemovePlayerFromSafehouse(button, player)
     if button.internal == "YES" then
-        sendSafehouseChangeMember(button.parent.ui.safehouse, button.parent.ui.selectedPlayer, true)
+        sendSafehouseChangeMember(button.parent.ui.safehouse, button.parent.ui.selectedPlayer)
         button.parent.ui:populateList();
     end
 end

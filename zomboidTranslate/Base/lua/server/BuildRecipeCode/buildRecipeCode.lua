@@ -256,21 +256,25 @@ function BuildRecipeCode.butcheringHook.OnCreate(thumpable)
 	local javaObject = IsoButcherHook.new(sq);
 	sq:AddTileObject(javaObject)
 
-	sq:transmitRemoveItemFromSquare(thumpable);
+	return { replaceObject = true, object = javaObject };
 end
 
 function BuildRecipeCode.chickenHutch.OnCreate(thumpable)
 	local sprite = thumpable:getSprite():getName();
-
+	local hutch = nil;
 	for i,v in pairs(HutchDefinitions.hutchs) do
 		if sprite == v.baseSprite then
-			local hutch = IsoHutch.new(thumpable:getSquare(), thumpable:getNorth(), sprite, v, nil)
-			hutch:transmitCompleteItemToClients()
-			break;
+			hutch = IsoHutch.new(thumpable:getSquare(), thumpable:getNorth(), sprite, v, nil);
 		end
 	end
 
-	thumpable:getSquare():transmitRemoveItemFromSquare(thumpable);
+	if thumpable:getSquare() ~= nil then
+		thumpable:removeFromWorld();
+		thumpable:removeFromSquare();
+		thumpable:setSquare(nil);
+	end
+
+	return { replaceObject = true, object = hutch };
 end
 
 function BuildRecipeCode.feedingTrough.OnCreate(thumpable)
@@ -314,11 +318,10 @@ function BuildRecipeCode.campfire.OnCreate(thumpable)
 	luaObject:initNew()
 	luaObject:addObject()
 	luaObject:addContainer()
-	luaObject:getIsoObject():transmitCompleteItemToClients()
-
+	--luaObject:getIsoObject():transmitCompleteItemToClients()
 	-- 	self:noise("#campfires="..self:getLuaObjectCount())
 	luaObject:saveData()
-	return luaObject;
+	--return luaObject;
 end
 
 function BuildRecipeCode.composter.OnCreate(thumpable)
@@ -326,16 +329,6 @@ function BuildRecipeCode.composter.OnCreate(thumpable)
 	thumpable:getSquare():AddSpecialObject(javaObject)
 	javaObject:syncCompost()
 	javaObject:setMovedThumpable(true)
-
-	thumpable:getSquare():transmitRemoveItemFromSquare(thumpable);
-end
-
-function BuildRecipeCode.windowGlass.OnCreate(thumpable)
-	local sprite = thumpable:getSprite():getName();
-
-	local window = IsoWindow.new(getCell(), thumpable:getSquare(), thumpable:getSprite(), thumpable:getNorth());
-	window:setIsLocked(false);
-	thumpable:getSquare():AddSpecialObject(window);
 
 	thumpable:getSquare():transmitRemoveItemFromSquare(thumpable);
 end

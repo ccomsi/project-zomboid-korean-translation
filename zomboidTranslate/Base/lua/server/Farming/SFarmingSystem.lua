@@ -367,7 +367,7 @@ function SFarmingSystem:harvest(luaObject, player)
 
 	if luaObject.hasSeed and player then
 	    local seedPerVeg = props.seedPerVeg or 0.5
-	    local number = math.min(tonumber(math.floor(numberOfVeg * seedPerVeg)), 1)
+	    local number = math.max(tonumber(math.floor(numberOfVeg * seedPerVeg)), 1)
 		local items = player:getInventory():AddItems(props.seedName, number);
 		sendAddItemsToContainer(player:getInventory(), items);
 	end

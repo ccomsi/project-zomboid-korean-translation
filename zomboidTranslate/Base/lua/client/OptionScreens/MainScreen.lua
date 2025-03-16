@@ -716,6 +716,13 @@ function MainScreen:instantiate()
 	self.versionLabel:initialise();
 	self.versionDetail:addChild(self.versionLabel);
 
+    if self.inGame then
+        local seed = getText("UI_mainscreen_seed", WGParams.instance:getSeedString())
+        self.seedLabel = ISLabel:new(-12, -20, FONT_HGT_SMALL, seed , 1, 1, 1, 0.7, UIFont.Small);
+        self.seedLabel:initialise();
+        self.versionDetail:addChild(self.seedLabel);
+    end
+
     self.mainOptions:create();
 
     for _,child in pairs(self.bottomPanel:getChildren()) do

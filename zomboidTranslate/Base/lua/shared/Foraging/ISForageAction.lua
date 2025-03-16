@@ -86,7 +86,7 @@ function ISForageAction:forage()
 			itemTexture = ""
 		end
 		if not self.discardItems then
-			table.insert(self.manager.haloNotes,itemTexture.."    "..self.itemCount.. " "..item:getDisplayName());
+			HaloTextHelper.addText(self.character,itemTexture.."    "..self.itemCount.. " "..item:getDisplayName());
 		end;
 	end;
 end
@@ -125,18 +125,18 @@ function ISForageAction:getDuration()
 	end
 end
 
-function ISForageAction:new(character, iconID, targetContainer, discardItems, itemType, isPoison)
+function ISForageAction:new(character, icon, targetContainer, discardItems, itemType, isPoison)
 	local o = ISBaseTimedAction.new(self, character)
 	o.targetContainer = targetContainer;
 	o.discardItems = discardItems;
-	o.iconID = iconID;
+	o.iconID = icon.iconID;
 	o.itemType = itemType;
 	o.isPoison = isPoison
 	--
 	if not isServer() then
 		o.manager = ISSearchManager.getManager(character);
-		o.forageIcon = o.manager.forageIcons[iconID];
-		o.zoneData = o.forageIcon.zoneData;
+		o.forageIcon = icon;
+		o.zoneData = icon.zoneData;
 	end;
 	o.itemDef = forageSystem.itemDefs[o.itemType];
 	--

@@ -19,6 +19,7 @@ ISPlace3DItemCursor = ISBuildingObject:derive("ISPlace3DItemCursor");
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 
 function ISPlace3DItemCursor:create(x, y, z, north, sprite)
+    showDebugInfoInChat("Cursor Create \'ISPlace3DItemCursor\' "..tostring(x)..", "..tostring(y)..", "..tostring(z)..", "..tostring(north)..", "..tostring(sprite))
     local drop = self.itemSq == nil; -- nil when the item is in a vehicle
     if self.itemSq and luautils.walkAdj(self.chr, self.itemSq, true) then
         drop = true;
@@ -470,6 +471,7 @@ function ISPlace3DItemCursor:new(character, items)
     o.joypadPositionActive = false;
     o.joypadPositionX = 0.5;
     o.joypadPositionY = 0.5;
+    showDebugInfoInChat("Cursor New \'ISPlace3DItemCursor\'")
     return o
 end
 

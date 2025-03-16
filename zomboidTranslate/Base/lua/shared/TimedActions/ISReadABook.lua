@@ -359,15 +359,17 @@ function ISReadABook:animEvent(event, parameter)
     end
     if event == "ReadAPage" then
         if isServer() then
-            if self.item:getLvlSkillTrained() > self.character:getPerkLevel(SkillBook[self.item:getSkillTrained()].perk) + 1 or self.character:HasTrait("Illiterate") then
-                if self.item:getNumberOfPages() > 0 then
-                    self.character:setAlreadyReadPages(self.item:getFullType(), 0)
-                    self.item:setAlreadyReadPages(0);
-                    syncItemFields(self.character, self.item)
-                    self.netAction:forceComplete()
+            if SkillBook[self.item:getSkillTrained()] then
+                if self.item:getLvlSkillTrained() > self.character:getPerkLevel(SkillBook[self.item:getSkillTrained()].perk) + 1 or self.character:HasTrait("Illiterate") then
+                    if self.item:getNumberOfPages() > 0 then
+                        self.character:setAlreadyReadPages(self.item:getFullType(), 0)
+                        self.item:setAlreadyReadPages(0);
+                        syncItemFields(self.character, self.item)
+                        self.netAction:forceComplete()
+                    end
+                elseif self.item:getMaxLevelTrained() >= self.character:getPerkLevel(SkillBook[self.item:getSkillTrained()].perk) + 1 then
+                    ISReadABook.checkMultiplier(self);
                 end
-            elseif self.item:getMaxLevelTrained() >= self.character:getPerkLevel(SkillBook[self.item:getSkillTrained()].perk) + 1 then
-                ISReadABook.checkMultiplier(self);
             end
             if self.item:getNumberOfPages() > 0 and self.startPage then
                 local pagesRead = math.floor(self.item:getNumberOfPages() * self.netAction:getProgress()) + self.startPage;

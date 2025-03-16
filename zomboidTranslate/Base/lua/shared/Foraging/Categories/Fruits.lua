@@ -325,7 +325,7 @@ local function generateFruitsDefs()
 			skill = 7,
 			xp = 15,
 			snowChance = -30,
-			categories = { "Vegetables" },
+			categories = { "Fruits" },
 			zones = {
 				Forest      	= 3,
 				PHForest      	= 5,

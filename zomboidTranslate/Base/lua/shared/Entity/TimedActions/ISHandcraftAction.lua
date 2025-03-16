@@ -48,6 +48,20 @@ function ISHandcraftAction:update()
     end
 end
 
+function ISHandcraftAction:clearItemsProgressBar(bSetJobType)
+	if self.items then
+		for i=0,self.items:size()-1 do
+			local item = self.items:get(i)
+			if item then
+				item:setJobDelta(0.0);
+				if bSetJobType then
+					item:setJobType(self.craftRecipe:getTranslationName())
+				end
+			end
+		end
+	end
+end
+
 function ISHandcraftAction:serverStart()
 	self.logic = HandcraftLogic.new(self.character, self.craftBench, self.isoObject);
 	self.logic:setContainers(self.containers);
@@ -56,12 +70,14 @@ end
 
 function ISHandcraftAction:start()
 	--log(DebugType.CraftLogic, "ISHandcraftAction.start")
+	if self.craftRecipe then showDebugInfoInChat("CRAFT \'"..self.craftRecipe:getName().."\'") end
 	self.logic = HandcraftLogic.new(self.character, self.craftBench, self.isoObject);
 	self.logic:setContainers(self.containers);
 	self.logic:setRecipe(self.craftRecipe);
 	if self.manualInputs then
 		self.logic:setManualSelectInputs(true);
-
+		self.logic:clearManualInputs();
+		
 		--log(DebugType.CraftLogic, "-= reading manual inputs =-")
 		for inputIndex, items in pairs(self.manualInputs) do
 			local inputScript = self.craftRecipe:getIOForIndex(inputIndex);
@@ -84,15 +100,7 @@ function ISHandcraftAction:start()
 		end
 	end
 	
-	if self.items then
-		for i=0,self.items:size()-1 do
-			local item = self.items:get(i)
-			if item then
-				item:setJobDelta(0.0);
-				item:setJobType(self.craftRecipe:getTranslationName())
-			end
-		end
-	end
+	self:clearItemsProgressBar(true);
 	
     if self.actionScript then
         self:setActionAnim(self.actionScript:getActionAnim());
@@ -119,14 +127,7 @@ end
 function ISHandcraftAction:stop()
 	--log(DebugType.CraftLogic, "ISHandcraftAction.stop")
 
-    if self.items then
-		for i=0,self.items:size()-1 do
-		    local item = self.items:get(i)
-	        if item then
-	            item:setJobDelta(0.0);
-            end
-        end
-    end
+	self:clearItemsProgressBar(false);
     ISBaseTimedAction.stop(self);
 	
 	if self.sound and self.character:getEmitter():isPlaying(self.sound) then
@@ -144,48 +145,8 @@ end
 
 function ISHandcraftAction:perform()
 	--log(DebugType.CraftLogic, "ISHandcraftAction.perform")
-	-- spurcival - moved here as subsequent crafts were starting before this craft was finalised
-	if not isClient() then
-		if self.items then
-			for i=0,self.items:size()-1 do
-				local item = self.items:get(i)
-				if item then
-					item:setJobDelta(0.0);
-				end
-			end
-		end
-		if self.logic then
-			if self.logic:performCurrentRecipe() then
-				-- perform succeeded
-				local items = ArrayList.new();
-				self.logic:getCreatedOutputItems(items);
 
-				for i=0,items:size()-1 do
-					local item = items:get(i);
-					Actions.addOrDropItem(self.character, item)
-				end
-				if items:size() == 1 then
-					local resItem = items:get(0)
-					local modData = resItem:getModData()
-					local usedItems = self.logic:getRecipeData():getAllConsumedItems()
-					for i=0, usedItems:size()-1 do
-						local item = usedItems:get(i)
-						if modData[item:getFullType()] == nil then
-							modData[item:getFullType()] = 0
-						end
-						modData[item:getFullType()] = modData[item:getFullType()] + 1
-					end
-				end
-			end
-		end
-
-		if self.onCompleteFunc then
-			self.onCompleteFunc(self.onCompleteTarget);
-		end
-	end
-	-- /spurcival
-
-	ISBaseTimedAction.perform(self);
+	self:clearItemsProgressBar(false);
 	
 	if self.sound and self.character:getEmitter():isPlaying(self.sound) then
 		self.character:stopOrTriggerSound(self.sound);
@@ -193,20 +154,31 @@ function ISHandcraftAction:perform()
 
 	ISInventoryPage.dirtyUI();
 
+	if not isClient() then
+		self:performRecipe();
+	end
+	
+	-- spurcival: super.perform() must happen AFTER performRecipe() as super.perform() kicks off the next multicraft.
+	ISBaseTimedAction.perform(self);
+
 	if isClient() and self.onCompleteFunc then
 		self.onCompleteFunc(self.onCompleteTarget);
 	end
 end
---[[ -- spurcival - this code has been moved to perform()
+
 function ISHandcraftAction:complete()
-    if self.items then
-		for i=0,self.items:size()-1 do
-		    local item = self.items:get(i)
-	        if item then
-	            item:setJobDelta(0.0);
-            end
-        end
-    end
+	self:clearItemsProgressBar(false);
+
+	-- spurcival : this has to be completed in perform, or at that same point in time. complete() is too late.
+	--self:performRecipe();
+
+	if self.onCompleteFunc then
+		self.onCompleteFunc(self.onCompleteTarget);
+	end
+	return true
+end
+
+function ISHandcraftAction:performRecipe()
 	if self.logic then
 		if self.logic:performCurrentRecipe() then
 			-- perform succeeded
@@ -217,15 +189,22 @@ function ISHandcraftAction:complete()
 				local item = items:get(i);
 				Actions.addOrDropItem(self.character, item)
 			end
+			if items:size() == 1 then
+				local resItem = items:get(0)
+				local modData = resItem:getModData()
+				local usedItems = self.logic:getRecipeData():getAllConsumedItems()
+				for i=0, usedItems:size()-1 do
+					local item = usedItems:get(i)
+					if modData[item:getFullType()] == nil then
+						modData[item:getFullType()] = 0
+					end
+					modData[item:getFullType()] = modData[item:getFullType()] + 1
+				end
+			end
 		end
 	end
-
-	if self.onCompleteFunc then
-		self.onCompleteFunc(self.onCompleteTarget);
-	end
-	return true
 end
-]]--
+
 --ADDED A MULTIPLIER TO THE BASE TIME VALUE
 function ISHandcraftAction:getDuration()
 	if self.character:isTimedActionInstant() then

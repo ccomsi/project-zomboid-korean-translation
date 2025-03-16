@@ -665,7 +665,7 @@ ISFarmingMenu.plantInfo = function(prop)
 				text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.bestMonth and ", ") or "")
 			end
 		else
-			text = text .. " <LINE> " .. getText("Farming_Tooltip_BestMonth2") .. ": ---";
+			text = text .. " <LINE> " .. getText("Farming_Tooltip_BestMonth2") .. ": " .. getText("Farming_Tooltip_None");
 		end
 		if prop.riskMonth then
 			text = text .. " <LINE> " .. getText("Farming_Tooltip_RiskMonth2") .. ": "
@@ -673,7 +673,7 @@ ISFarmingMenu.plantInfo = function(prop)
 				text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.riskMonth and ", ") or "")
 			end
 		else
-			text = text .. " <LINE> " .. getText("Farming_Tooltip_RiskMonth2") .. ": ---";
+			text = text .. " <LINE> " .. getText("Farming_Tooltip_RiskMonth2") .. ": " .. getText("Farming_Tooltip_None");
 		end
 	end
 	return text

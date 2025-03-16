@@ -22,7 +22,7 @@ function ISForageIcon:onClickDiscard(_x, _y, _contextOption)
 	local targetSquare = getCell():getGridSquare(self.xCoord, self.yCoord, self.zCoord);
 	if not targetSquare then return; end;
 	--
-	ISTimedActionQueue.add(ISForageAction:new(self.character, self.iconID, self.character:getInventory(), true, self.itemType));
+	ISTimedActionQueue.add(ISForageAction:new(self.character, self, self.character:getInventory(), true, self.itemType));
 end
 
 function ISForageIcon:doForage(_x, _y, _contextOption, _targetContainer)
@@ -34,7 +34,7 @@ function ISForageIcon:doForage(_x, _y, _contextOption, _targetContainer)
 	local targetContainer = _targetContainer or getPlayerInventory(self.player).inventory or self.character:getInventory();
 	if targetContainer:isItemAllowed(self.itemObj) then
 		if targetContainer and targetSquare and luautils.walkAdj(self.character, targetSquare) then
-			ISTimedActionQueue.add(ISForageAction:new(self.character, self.iconID, targetContainer, false, self.itemType, self.isKnownPoison));
+			ISTimedActionQueue.add(ISForageAction:new(self.character, self, targetContainer, false, self.itemType, self.isKnownPoison));
 		end;
 	end;
 end

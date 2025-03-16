@@ -115,7 +115,12 @@ function SafehouseConfirm:prerender()
 end
 
 function SafehouseConfirm:updateButtons()
-	self.yes:setEnable(true)
+	local p = getPlayerFromUsername(self.entryOwner:getInternalText())
+	if p == nil then
+		self.yes:setEnable(false)
+	else
+		self.yes:setEnable(true)
+	end
 	self.yes.tooltip = nil
 --	local text = self.entryTitle:getText()
 	if self.joyfocus and self.entry.joypadFocused then
@@ -514,14 +519,14 @@ end
 
 function DetailsPanel:onQuitSafehouse(button)
 	if button.internal == "YES" then
-		sendSafehouseChangeMember(button.parent.ui.safehouse, button.parent.ui.player, true)
+		sendSafehouseChangeMember(button.parent.ui.safehouse, button.parent.ui.selectedPlayer)
 	end
 --	button.parent.ui:close()
 end
 
 function DetailsPanel:onRemovePlayerFromSafehouse(button, player)
 	if button.internal == "YES" then
-		sendSafehouseChangeMember(button.parent.ui.safehouse, button.parent.ui.player, true)
+		sendSafehouseChangeMember(button.parent.ui.safehouse, button.parent.ui.selectedPlayer)
 		button.parent.ui:populateList()
 	end
 end
@@ -697,6 +702,9 @@ end
 
 function MultiplayerZoneEditorMode_Safehouse:fillList()
 	local selectedZone = self:getSelectedZone()
+	if self:getSelectedZone() == nil then
+		self.detailsPanel:setVisible(false);
+	end
 	local selectedTitle = selectedZone and selectedZone:getTitle() or nil
 	if self.delaySelectTitle then
 		selectedTitle = self.delaySelectTitle

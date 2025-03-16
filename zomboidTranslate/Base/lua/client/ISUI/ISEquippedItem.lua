@@ -12,6 +12,26 @@ local UI_BORDER_SPACING = 10
 local TEXTURE_WIDTH = 0
 local TEXTURE_HEIGHT = 0
 
+function setTextureWidth()
+    local size = getCore():getOptionSidebarSize()
+    if size == 6 then
+        size = getCore():getOptionFontSizeReal() - 1
+    end
+        TEXTURE_WIDTH = 48
+    if size == 2  then
+        TEXTURE_WIDTH = 64
+    elseif size == 3  then
+        TEXTURE_WIDTH = 80
+    elseif size == 4  then
+        TEXTURE_WIDTH = 96
+    elseif size == 5 then
+        TEXTURE_WIDTH = 128
+    end
+
+    TEXTURE_HEIGHT = TEXTURE_WIDTH * 0.75
+end
+
+
 function ISEquippedItem:prerender()
 --	self:drawTexture(self.HandSecondaryTexture, -1, 50, 1, 1, 1, 1);
 
@@ -69,7 +89,7 @@ function ISEquippedItem:prerender()
         self.movablePopup:setVisible(false);
     else
         self.movableTooltip:setVisible(false);
-        self.movableBtn:setImage(self.movableIcon);
+        self.movableBtn:setImage(self.movableIconOff);
         self.movableBtn:setVisible(true);
         self.movablePopup:setVisible(false);
     end
@@ -589,6 +609,7 @@ function ISEquippedItem:checkBounds( _boundsItem, _x, _y)
 end
 
 function ISEquippedItem:new (x, y, width, height, chr)
+    setTextureWidth()
 	local o = {}
 	--o.data = {}
 	o = ISPanel:new(x, y, width, height);
@@ -609,40 +630,40 @@ function ISEquippedItem:new (x, y, width, height, chr)
 	o.anchorRight = false;
 	o.anchorTop = true;
 	o.anchorBottom = false;
-	o.handMainTexture = getTexture("media/ui/Sidebar/HandMainNew_Off.png");
-	o.HandSecondaryTexture = getTexture("media/ui/Sidebar/HandSecondaryNew_Off.png");
+	o.handMainTexture = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/HandMain_Off_" .. TEXTURE_WIDTH .. ".png");
+	o.HandSecondaryTexture = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/HandSecondary_Off_" .. TEXTURE_WIDTH .. ".png");
     --inventory
-	o.inventoryTexture = getTexture("media/ui/Sidebar/InventoryNew_Off.png");
-	o.inventoryTextureOn = getTexture("media/ui/Sidebar/InventoryNew_On.png");
+	o.inventoryTexture = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Inventory_Off_" .. TEXTURE_WIDTH .. ".png");
+	o.inventoryTextureOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Inventory_On_" .. TEXTURE_WIDTH .. ".png");
     --health
-    o.heartIcon = getTexture("media/ui/Sidebar/HeartNew_Off.png");
-    o.heartIconOn = getTexture("media/ui/Sidebar/HeartNew_On.png");
+    o.heartIcon = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Heart_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.heartIconOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Heart_On_" .. TEXTURE_WIDTH .. ".png");
     --crafting
-    o.craftingIcon = getTexture("media/ui/Sidebar/CarpentryNew_Off.png");
-    o.craftingIconOn = getTexture("media/ui/Sidebar/CarpentryNew_On.png");
+    o.craftingIcon = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Carpentry_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.craftingIconOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Carpentry_On_" .. TEXTURE_WIDTH .. ".png");
     --building
-    o.moveableIconBuild = getTexture("media/ui/Sidebar/BuildNew_Off.png");
-    o.moveableIconBuildOn = getTexture("media/ui/Sidebar/BuildNew_On.png");
+    o.moveableIconBuild = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Build_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.moveableIconBuildOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Build_On_" .. TEXTURE_WIDTH .. ".png");
     --move furniture
-    o.movableIcon = getTexture("media/ui/Sidebar/FurnitureNew.png");
-    o.movableIconOff = getTexture("media/ui/Sidebar/FurnitureNew_Off.png");
-    o.movableIconPickup = getTexture("media/ui/Sidebar/FurnitureNew_Pickup.png");
-    o.movableIconPlace = getTexture("media/ui/Sidebar/FurnitureNew_Place.png");
-    o.movableIconRotate = getTexture("media/ui/Sidebar/FurnitureNew_Rotate.png");
-    o.movableIconScrap = getTexture("media/ui/Sidebar/FurnitureNew_Disassemble.png");
-    o.moveableIconRepair = getTexture("media/ui/Sidebar/FurnitureNew_Repair.png");
+    o.movableIcon = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Furniture_On_" .. TEXTURE_WIDTH .. ".png");
+    o.movableIconOff = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Furniture_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.movableIconPickup = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Furniture_Pickup_" .. TEXTURE_WIDTH .. ".png");
+    o.movableIconPlace = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Furniture_Place_" .. TEXTURE_WIDTH .. ".png");
+    o.movableIconRotate = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Furniture_Rotate_" .. TEXTURE_WIDTH .. ".png");
+    o.movableIconScrap = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Furniture_Disassemble_" .. TEXTURE_WIDTH .. ".png");
+    o.moveableIconRepair = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Furniture_Repair_" .. TEXTURE_WIDTH .. ".png");
     --investigate area
-    o.searchIcon = getTexture("media/ui/Sidebar/SearchNew_Off.png");
-    o.searchIconOn = getTexture("media/ui/Sidebar/SearchNew_On.png");
+    o.searchIcon = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Search_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.searchIconOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Search_On_" .. TEXTURE_WIDTH .. ".png");
     --designated zones
-    o.zoneIcon = getTexture("media/ui/Sidebar/AnimalZoneNew_Off.png");
-    o.zoneIconOn = getTexture("media/ui/Sidebar/AnimalZoneNew_On.png");
+    o.zoneIcon = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/AnimalZone_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.zoneIconOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/AnimalZone_On_" .. TEXTURE_WIDTH .. ".png");
     --map
-    o.mapIconOff = getTexture("media/ui/Sidebar/MapNew_Off.png");
-    o.mapIconOn = getTexture("media/ui/Sidebar/MapNew_On.png");
+    o.mapIconOff = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Map_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.mapIconOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Map_On_" .. TEXTURE_WIDTH .. ".png");
     --debug
-    o.debugIcon = getTexture("media/ui/Sidebar/DebugNew_Off.png");
-    o.debugIconOn = getTexture("media/ui/Sidebar/DebugNew_On.png");
+    o.debugIcon = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Debug_Off_" .. TEXTURE_WIDTH .. ".png");
+    o.debugIconOn = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Debug_On_" .. TEXTURE_WIDTH .. ".png");
 
     o.clientIcon = getTexture("media/ui/Client_Icon_Off.png");
     o.clientIconOn = getTexture("media/ui/Client_Icon_On.png");
@@ -690,31 +711,11 @@ function ISEquippedItem:addMouseOverToolTipItem( _object, _displayString )
     end
 end
 
-function ISEquippedItem:getSidebarSize()
-    local sidebarSize = getCore():getOptionSidebarSize()
-    local fontSize = 0
-    if sidebarSize == 6 then
-        fontSize = getCore():getOptionFontSizeReal()
-    end
 
-    if sidebarSize == 2 or fontSize == 3 then
-        return 64
-    elseif sidebarSize == 3 or fontSize == 4 then
-        return 80
-    elseif sidebarSize == 4 or fontSize == 5 then
-        return 96
-    elseif sidebarSize == 5 then
-        return 128
-    end
-    return 48
-end
 
 function ISEquippedItem:initialise()
-
+    setTextureWidth()
 	ISPanel.initialise(self);
-
-    TEXTURE_WIDTH = self:getSidebarSize()
-    TEXTURE_HEIGHT = TEXTURE_WIDTH * 0.75
 
     self.mainHand = ISImage:new(0, 0, TEXTURE_WIDTH, TEXTURE_WIDTH, self.handMainTexture);
     self.mainHand.scaledWidth = TEXTURE_WIDTH;
@@ -1099,38 +1100,38 @@ function ISMoveablesIconPopup:render()
 
     local x = 0
     local y = 0
-    local tex = self.owner.movableIconOff
-    self:drawTextureScaled(tex, x, y, TEXTURE_WIDTH, TEXTURE_WIDTH, 1, 1, 1, 1)
+    local tex = self.owner.movableIcon
+    self:drawTexture(tex, x, y+((TEXTURE_WIDTH-TEXTURE_HEIGHT)/2), 1, 1, 1, 1)
 
     if mode == "pickup" then
         self:drawRectBorder(x + TEXTURE_WIDTH, 0, TEXTURE_WIDTH, self.height, 0.5, 1, 1, 1)
     end
     tex = self.owner.movableIconPickup
-    self:drawTextureScaled(tex, x + TEXTURE_WIDTH, y, TEXTURE_WIDTH, TEXTURE_WIDTH, 1, 1, 1, 1)
+    self:drawTexture(tex, x + TEXTURE_WIDTH, y, 1, 1, 1, 1)
 
     if mode == "place" then
         self:drawRectBorder(x + TEXTURE_WIDTH * 2, 0, TEXTURE_WIDTH, self.height, 0.5, 1, 1, 1)
     end
     tex = self.owner.movableIconPlace
-    self:drawTextureScaled(tex, x + TEXTURE_WIDTH * 2, y, TEXTURE_WIDTH, TEXTURE_WIDTH, 1, 1, 1, 1)
+    self:drawTexture(tex, x + TEXTURE_WIDTH * 2, y, 1, 1, 1, 1)
 
     if mode == "rotate" then
         self:drawRectBorder(x + TEXTURE_WIDTH * 3, 0, TEXTURE_WIDTH, self.height, 0.5, 1, 1, 1)
     end
     tex = self.owner.movableIconRotate
-    self:drawTextureScaled(tex, x + TEXTURE_WIDTH * 3, y, TEXTURE_WIDTH, TEXTURE_WIDTH, 1, 1, 1, 1)
+    self:drawTexture(tex, x + TEXTURE_WIDTH * 3, y, 1, 1, 1, 1)
 
     if mode == "scrap" then
         self:drawRectBorder(x + TEXTURE_WIDTH * 4, 0, TEXTURE_WIDTH, self.height, 0.5, 1, 1, 1)
     end
     tex = self.owner.movableIconScrap
-    self:drawTextureScaled(tex, x + TEXTURE_WIDTH * 4, y, TEXTURE_WIDTH, TEXTURE_WIDTH, 1, 1, 1, 1)
+    self:drawTexture(tex, x + TEXTURE_WIDTH * 4, y, 1, 1, 1, 1)
 
     if mode == "repair" then
         self:drawRectBorder(x + TEXTURE_WIDTH * 5, 0, TEXTURE_WIDTH, self.height, 0.5, 1, 1, 1)
     end
     tex = self.owner.moveableIconRepair
-    self:drawTextureScaled(tex, x + TEXTURE_WIDTH * 5, y, TEXTURE_WIDTH, TEXTURE_WIDTH, 1, 1, 1, 1)
+    self:drawTexture(tex, x + TEXTURE_WIDTH * 5, y, 1, 1, 1, 1)
 end
 
 function ISMoveablesIconPopup:onMouseDown(x, y)
@@ -1172,6 +1173,7 @@ function ISMoveablesIconPopup:onMouseUp(x, y)
 end
 
 function ISMoveablesIconPopup:new (x, y, width, height)
+    setTextureWidth()
     local o = ISPanel:new(x, y, width, height);
     setmetatable(o, self)
     self.__index = self
@@ -1234,9 +1236,11 @@ function ISMapPopup:onMouseUp(x, y)
 end
 
 function ISMapPopup:new(x, y, width, height)
+    setTextureWidth()
+
     local o = ISPanel.new(self, x, y, width, height)
-    o.texMap = getTexture("media/ui/Sidebar/MapNew_On.png")
-    o.texMiniMap = getTexture("media/ui/Sidebar/MapNew_On.png")
+    o.texMap = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Map_On_" .. TEXTURE_WIDTH .. ".png")
+    o.texMiniMap = getTexture("media/ui/Sidebar/" .. TEXTURE_WIDTH .."/Map_On_" .. TEXTURE_WIDTH .. ".png")
 
     return o
 end

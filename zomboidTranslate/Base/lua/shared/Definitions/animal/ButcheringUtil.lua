@@ -113,11 +113,19 @@ function ButcheringUtil.butcherAnimalFromGround(carcass, player, keepCorpse)
     end
 
     -- head
-    local head = ButcheringUtil.getHead(ButcheringUtil.getCarcassName(carcass));
-    if head and carcass:getModData()["head"] then
-        local headItem = player:getInventory():AddItem(head);
-        text = text .. headItem:getDisplayName() .. "\r\n";
-    end
+    --if carcass:getModData()["animalRotStage"] == 0 then -- corpse is not rotten, otherwise we don't give a head (you'll get a skull from gathering bones)
+        local head = ButcheringUtil.getHead(ButcheringUtil.getCarcassName(carcass));
+        if head and carcass:getModData()["head"] then
+            carcass:getModData()["head"] = nil;
+            carcass:getModData()["headless"] = true;
+            local headItem = instanceItem(head);
+            if carcass:getModData()["animalRotStage"] > 0 then
+                headItem:setAge(ZombRand(headItem:getOffAgeMax() + 3, headItem:getOffAgeMax() * 1.5));
+            end
+            local headItem = player:getInventory():AddItem(headItem);
+            text = text .. headItem:getDisplayName() .. "\r\n";
+        end
+    --end
 
     -- feather
     if breed:getFeatherItem() then
@@ -142,9 +150,7 @@ function ButcheringUtil.butcherAnimalFromGround(carcass, player, keepCorpse)
     if not keepCorpse and not partDef.noSkeleton then
         carcass:getModData()["skeleton"] = "true";
         carcass:getModData()["parts"] =  null;
-        carcass:getModData()["head"] = nil;
-        carcass:getModData()["headless"] = true;
-        carcass:changeRotStage(2); -- switch to a bloody skeleton
+        carcass:changeRotStage(2 - carcass:getModData()["animalRotStage"]); -- switch to a bloody skeleton, if we were rotten we remove one stage, otherwise update will put it to stage 4
         carcass:invalidateCorpse();
     end
 
@@ -193,6 +199,16 @@ function ButcheringUtil.getHead(name)
     end
 
     return def.head;
+end
+
+function ButcheringUtil.getSkull(name)
+    local def = ButcheringUtil.getAnimalDef(name);
+
+    if def == nil then
+        log(DebugType.Animal, "Couldn't find animal parts def for " .. name);
+    end
+
+    return def.skull;
 end
 
 -- Add an animal part in the player's inventory
@@ -442,6 +458,16 @@ function ButcheringUtil.getAnimalBones(carcass, player)
     local parts = ButcheringUtil.getAllBonesDef(ButcheringUtil.getCarcassName(carcass));
     for i,v in pairs(parts) do
         ButcheringUtil.addAnimalPart(v, player, carcass);
+    end
+
+    print("get animal bones", carcass:getModData()["headless"])
+    if not carcass:getModData()["headless"] then -- we might still have a skull to get
+        local skull = ButcheringUtil.getSkull(ButcheringUtil.getCarcassName(carcass));
+        if skull then
+            carcass:getModData()["head"] = nil;
+            carcass:getModData()["headless"] = true;
+            local skullItem = player:getInventory():AddItem(skull);
+        end
     end
 
     player:getInventory():setDrawDirty(true);

@@ -61,6 +61,12 @@ function ISAdminPowerUI:addAdminPowerOptions()
         end);
         ISAdminPowerUI.cheatTooltips[getText("IGUI_AdminPanel_Invisible")] = getText("IGUI_AdminPanel_Tooltip_Capability", Capability.ToggleInvisibleHimself:name())
     end
+    if self.player:getRole():haveCapability(Capability.ToggleInvincibleHimself) then
+        self:addOption(getText("IGUI_AdminPanel_Invincible"), self.player:isInvincible(), function(self, selected)
+            self.player:setInvincible(selected);
+        end);
+        ISAdminPowerUI.cheatTooltips[getText("IGUI_AdminPanel_Invincible")] = getText("IGUI_AdminPanel_Tooltip_Capability", Capability.ToggleInvincibleHimself:name())
+    end
     if self.player:getRole():haveCapability(Capability.ToggleGodModHimself) then
         self:addOption(getText("IGUI_AdminPanel_GodMode"), self.player:isGodMod(), function(self, selected)
             self.player:setGodMod(selected);

@@ -1053,7 +1053,6 @@ function ServerList:writeServerOnFile(server, append)
     fileOutput:write("user=" .. server:getUserName() .. "\r\n");
     fileOutput:write("remember=" .. tostring(server:isSavePwd()) .. "\r\n");
     fileOutput:write("authType=" .. tostring(server:getAuthType()) .. "\r\n");
-    fileOutput:write("loginScreenId=" .. tostring(server:getLoginScreenId()) .. "\r\n");
     fileOutput:write("serverCustomizationLastUpdate=" .. tostring(server:getServerCustomizationLastUpdate()) .. "\r\n");
     if server:isSavePwd() then
         fileOutput:write("password=" .. server:getPwd() .. "\r\n");

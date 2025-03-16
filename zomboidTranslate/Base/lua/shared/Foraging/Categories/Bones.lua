@@ -19,8 +19,7 @@ local function generateBonesDefs()
 			categories = { "Bones", "Junk", "CraftingMaterials" },
 			items = {
 				AnimalBone              = "Base.AnimalBone",
-				--this item is a movable and has no icon, we don't support this yet.
-				--Antlers_Wall	        = "Base.Antlers_Wall",
+				Antlers_Wall	        = "Base.Antlers_Wall",
 				Bull_Skull         		= "Base.Bull_Skull",
 				Calf_Skull         		= "Base.Calf_Skull",
 				Cow_Skull         		= "Base.Cow_Skull",

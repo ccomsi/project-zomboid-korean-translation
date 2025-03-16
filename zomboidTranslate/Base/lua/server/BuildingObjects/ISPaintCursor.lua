@@ -27,6 +27,7 @@ local PaintColor = {
 }
 
 function ISPaintCursor:create(x, y, z, north, sprite)
+    showDebugInfoInChat("Cursor Create \'ISPaintCursor\' "..tostring(x)..", "..tostring(y)..", "..tostring(z)..", "..tostring(north)..", "..tostring(sprite))
 	local sq = getWorld():getCell():getGridSquare(x, y, z)
 	local playerObj = self.character
 	local playerInv = playerObj:getInventory()
@@ -276,6 +277,7 @@ function ISPaintCursor:new(character, action, args)
 	o.renderX = -1
 	o.renderY = -1
 	o.renderZ = -1
+	showDebugInfoInChat("Cursor New \'ISPaintCursor\'")
 	return o
 end
 

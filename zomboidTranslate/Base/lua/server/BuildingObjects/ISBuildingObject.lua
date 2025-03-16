@@ -203,7 +203,8 @@ function ISBuildingObject:tryBuild(x, y, z)
 		-- before the action completes, such as rotating it with the 'Rotate Building' key.
 		local selfCopy = copyTable(self)
 		setmetatable(selfCopy, getmetatable(self, true))
-		buildAction = ISBuildAction:new(playerObj, selfCopy, x, y, z, self.north, self:getSprite(), maxTime);
+		local containers = ISInventoryPaneContextMenu.getContainers(playerObj);
+		buildAction = ISBuildAction:new(playerObj, selfCopy, x, y, z, self.north, self:getSprite(), maxTime, containers);
 	end
 		
 	if self.buildPanelLogic then
@@ -215,7 +216,7 @@ function ISBuildingObject:tryBuild(x, y, z)
 	if ISBuildMenu.cheat or self:walkTo(x, y, z) or ((self.Type == "fishingNet") and (self:isValid(square, true))) then
 		if self.dragNilAfterPlace then
 			getCell():setDrag(nil, self.player)
-		elseif self.blockAfterPlace then
+		elseif self.blockAfterPlace and not ISBuildMenu.cheat then
 			self.blockBuild = true;
 		end
 
@@ -286,6 +287,11 @@ function ISBuildingObject:onActionComplete()
 	if self.buildPanelLogic ~= nil then
 		print("ISBuildingObject -> onActionComplete - refresh BuildPanel")
 		self.buildPanelLogic:stopCraftAction();
+
+		-- Additional update to actualize the available items
+		if isClient() and ISBuildWindow.instance then
+			ISBuildWindow.instance:updateContainers();
+		end
 	end
 end
 
@@ -338,6 +344,24 @@ end
 
 -- Called in ISBuildAction:stop().
 function ISBuildingObject:onTimedActionStop(action)
+end
+
+
+function ISBuildingObject:updateModData()
+	local items = self.buildPanelLogic:getRecipeData():getAllConsumedItems();
+	for i=0, items:size()-1 do
+		local usedItem = items:get(i)
+		local key = "need:" .. usedItem:getFullType()
+
+		if self.modData[key] == nil then
+			self.modData[key] = 0
+		end
+		self.modData[key] = self.modData[key] + 1
+
+		if usedItem:getFullType() == "Base.Doorknob" and usedItem:getKeyId() ~= -1 then
+			self.modData["keyId"] = usedItem:getKeyId()
+		end
+	end
 end
 
 function ISBuildingObject:haveMaterial(square)

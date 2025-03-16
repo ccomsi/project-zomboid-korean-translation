@@ -25,6 +25,7 @@ local function comparatorMostFull(item1, item2)
 end
 
 function ISShovelGroundCursor:create(x, y, z, north, sprite)
+    showDebugInfoInChat("Cursor Create \'ISShovelGroundCursor\' "..tostring(x)..", "..tostring(y)..", "..tostring(z)..", "..tostring(north)..", "..tostring(sprite))
 	local playerObj = self.character
 	local square = getWorld():getCell():getGridSquare(x, y, z)
 	local groundType,object = self:getDirtGravelSand(square)
@@ -48,6 +49,7 @@ function ISShovelGroundCursor:new(sprite, northSprite, character, groundType)
 	o.player = character:getPlayerNum()
 	o.noNeedHammer = true
 	o.skipBuildAction = true
+	showDebugInfoInChat("Cursor New \'ISShovelGroundCursor\'")
 	return o
 end
 

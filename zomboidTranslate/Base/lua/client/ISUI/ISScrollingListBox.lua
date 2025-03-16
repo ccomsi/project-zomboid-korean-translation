@@ -381,6 +381,20 @@ function ISScrollingListBox:updateSmoothScrolling()
 	end
 end
 
+function ISScrollingListBox:parentsHaveScrollChildren()
+	local obj = self
+	for i = 1, 100 do
+		if not obj.parent then
+			return false
+		end
+		if obj.parent:getScrollChildren() then
+			return true
+		end
+		obj = obj.parent
+	end
+	return false
+end
+
 function ISScrollingListBox:prerender()
 	if self.items == nil then
 		return;
@@ -405,7 +419,7 @@ function ISScrollingListBox:prerender()
 	end
 
 	-- This is to handle this listbox being inside a scrolling parent.
-	if self.parent and self.parent:getScrollChildren() then
+	if self:parentsHaveScrollChildren() then
 		stencilX = self.javaObject:clampToParentX(self:getAbsoluteX() + stencilX) - self:getAbsoluteX()
 		stencilX2 = self.javaObject:clampToParentX(self:getAbsoluteX() + stencilX2) - self:getAbsoluteX()
 		stencilY = self.javaObject:clampToParentY(self:getAbsoluteY() + stencilY) - self:getAbsoluteY()

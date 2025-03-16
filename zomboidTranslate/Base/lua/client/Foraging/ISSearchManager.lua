@@ -275,20 +275,6 @@ function ISSearchManager:isIconOnSquare(_square, _iconList)
 end
 -------------------------------------------------
 -------------------------------------------------
-function ISSearchManager:addHaloNote(_text)
-	table.insert(self.haloNotes, _text);
-end
-
-function ISSearchManager:displayHaloNotes()
-	if #self.haloNotes > 0 then
-		if self.character:getHaloTimerCount() == 0 then
-			self.character:setHaloNote(table.remove(self.haloNotes), 220, 220, 220, 100);
-			self.triggerHalo = false;
-		end;
-	end;
-end
--------------------------------------------------
--------------------------------------------------
 function ISSearchManager:clearSpriteCheckedSquares()
 	table.wipe(self.spriteCheckedSquares);
 end
@@ -308,10 +294,6 @@ function ISSearchManager:clearQueue()
 	self.iconQueue = 0;
 end
 
-function ISSearchManager:clearHaloNotes()
-	table.wipe(self.haloNotes);
-end
-
 function ISSearchManager:reset()
 	self:resetForceFindSystem();
 	self:clearZoneData();
@@ -319,7 +301,6 @@ function ISSearchManager:reset()
 	self:clearQueue();
 	self:clearCheckedSquares();
 	self:clearMovedIconsSquares();
-	self:clearHaloNotes();
 	self:resetVisionBonuses();
 	self:checkMarkers();
 end
@@ -1241,7 +1222,6 @@ function ISSearchManager:doUpdateEvents(_force)
 end
 
 function ISSearchManager:update()
-	self:displayHaloNotes();
 	self:updateAlpha();
 	self:updateVisionBonuses();
 	self:updateOverlay();
@@ -1309,8 +1289,6 @@ function ISSearchManager:new(_character)
 	o.isSearchMode    		= false;
 	o.isEffectOverlay   	= false;
 	o.isSpotting      		= false;
-
-	o.haloNotes       		= {};
 
 	o.iconCategories		= {
 		forageIcons			= "forageIcons",

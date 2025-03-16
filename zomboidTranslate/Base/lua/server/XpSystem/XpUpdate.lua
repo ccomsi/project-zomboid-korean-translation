@@ -181,9 +181,8 @@ xpUpdate.addXp = function(owner, type, amount)
 	end
 
 	if type == Perks.PlantScavenging and amount > 0 then
-        local manager = ISSearchManager.getManager(owner);
         local amount2 = round(amount, 2)
-        table.insert(manager.haloNotes, "[col=137,232,148]"..type:getName().." "..getText("Challenge_Challenge2_CurrentXp", amount2) .. "[/] [img=media/ui/ArrowUp.png]");
+		HaloTextHelper.addTextWithArrow(owner, type:getName().." "..getText("Challenge_Challenge2_CurrentXp", amount2), "[br/]", true, HaloTextHelper.getGoodColor());
     end
 end
 

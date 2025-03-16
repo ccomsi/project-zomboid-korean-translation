@@ -244,6 +244,44 @@ Commands.ui.DirtyUI = function(args)
     ISInventoryPage.dirtyUI();
 end
 -- -- -- -- --
+Commands.recipe = {}
+Commands.recipe.OpenMysteryCan = function(args)
+    local item = getPlayer():getInventory():getItemWithID(args.itemId)
+    if item ~= nil then
+        item:setTexture(getTexture("Item_CannedUnlabeled_Open"))
+        item:setWorldStaticModel("TinCanEmpty_Ground")
+        item:setStaticModel("MysteryCan_Open")
+        item:getModData().NoLabel = "true"
+    end
+end
+
+Commands.recipe.OpenDentedCan = function(args)
+    local item = getPlayer():getInventory():getItemWithID(args.itemId)
+    if item ~= nil then
+        item:setTexture(getTexture("Item_CannedUnlabeled_Gross"))
+        item:setWorldStaticModel(args.modelName)
+        item:setStaticModel(args.modelName)
+    end
+end
+
+Commands.recipe.SayText = function(args)
+    local player = getPlayerByOnlineID(args.onlineID)
+    if player ~= nil then
+        local text = ""
+        if args.type == 0 then -- RollOneDice
+            text = "* " .. player:getUsername().. " " .. getText("IGUI_Rolls") .. " " .. args.rollText .. " " .. getText("IGUI_With") .. " " .. getText("IGUI_One") .. " " .. args.dieNameText .. " *"
+        elseif args.type == 1 or args.type == 2 then -- RollDice or Roll3d6
+            text = "* " .. player:getUsername().. " " .. getText("IGUI_Rolls") .. " " .. args.rollText .. " " .. args.dieNameText .. " *"
+        elseif args.type == 3 then -- Rolld100
+            text = "* " .. player:getUsername().. " " .. getText("IGUI_Rolls") .. " " .. args.rollText .. " " .. getText("IGUI_With") .. " " .. getText("IGUI_PercentileDice") .. " *"
+        elseif args.type == 4 then --DrawRandomCard
+            text = "* " .. player:getUsername().. " " .. getText("IGUI_Draws") .." " .. args.text .. " *"
+        end
+
+        player:Say(text);
+    end
+end
+-- -- -- -- --
 
 ServerCommands.OnServerCommand = function(module, command, args)
     if Commands[module] and Commands[module][command] then

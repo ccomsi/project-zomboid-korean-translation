@@ -70,6 +70,7 @@ function ISRolesList:initialise()
     self.datas.onmousedown = self.onSelectRole
     self.datas.onRightMouseUp = ISRolesList.onRightMouse;
     self.datas.drawBorder = true;
+    self.datas.parent = self;
     self:addChild(self.datas);
 
     self:populateList();
@@ -105,6 +106,28 @@ function ISRolesList:drawDatas(y, item, alt)
     end
     local color = item.item:getColor()
     self:drawText(item.item:getName(), 10, y + 2, color:getR(), color:getG(), color:getB(), a, UIFont.Medium);
+
+    if (Mouse.getYA() < self.y+self.parent.y+self.height) and
+        (Mouse.getXA() > self.parent.x+self.x) and
+        (Mouse.getXA() < self.parent.x+self.x+self.width) and
+        (Mouse.getYA() > self.parent.y+self.y+y) and
+        (Mouse.getYA() < self.parent.y+self.y+self.itemheight+y) then
+            if not self.parent.tooltipUI then
+                self.parent.tooltipUI = ISToolTip:new()
+                self.parent.tooltipUI:setOwner(self)
+                self.parent.tooltipUI:setVisible(false)
+                self.parent.tooltipUI:setAlwaysOnTop(true)
+            end
+            if not self.parent.tooltipUI:getIsVisible() then
+                self.parent.tooltipUI:addToUIManager()
+                self.parent.tooltipUI:setVisible(true)
+            end
+
+            self.parent.tooltipUI.description = item.item:getDescription()
+            self.parent.tooltipUI:setX(Mouse.getXA())
+            self.parent.tooltipUI:setY(Mouse.getYA())
+    end
+
     self:drawText(item.item:getDescription(), 10, y + 2 + (FONT_HGT_SMALL + 3), 1, 1, 1, a, self.font);
     self:drawText(readOnlyTxt .. " " .. defaultsTxt, 10, y + 2 + (FONT_HGT_SMALL + 3) * 2, 1, 1, 1, a, self.font);
 
@@ -121,6 +144,13 @@ function ISRolesList:prerender()
     self:drawRect(0, 0, self.width, self.height, self.backgroundColor.a, self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b);
     self:drawRectBorder(0, 0, self.width, self.height, self.borderColor.a, self.borderColor.r, self.borderColor.g, self.borderColor.b);
     self:drawText(getText("IGUI_AdminPanel_SeeRoles"), self.width/2 - (getTextManager():MeasureStringX(UIFont.Medium, getText("IGUI_AdminPanel_SeeRoles")) / 2), UI_BORDER_SPACING+1, 1,1,1,1, UIFont.Medium);
+    if (self.tooltipUI ~= null) and
+            ( (Mouse.getXA() < self.datas.x+self.x) or
+            (Mouse.getXA() > self.datas.x+self.x+self.datas.width) or
+            (Mouse.getYA() < self.datas.y+self.y) or
+            (Mouse.getYA() > self.y+self.datas.height) ) then
+        self.tooltipUI:setVisible(false);
+    end
 end
 
 function ISRolesList:onClick(button)

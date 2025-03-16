@@ -81,7 +81,7 @@ function ISTakeEngineParts:getExtraLogData()
 	end;
 end
 
-function ISRepairEngine:getDuration(maxTime)
+function ISTakeEngineParts:getDuration(maxTime)
 	if self.character:isTimedActionInstant() then
 		return 1;
 	end
