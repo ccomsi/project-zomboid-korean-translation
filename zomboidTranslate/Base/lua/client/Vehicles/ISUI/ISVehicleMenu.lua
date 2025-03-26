@@ -1334,7 +1334,7 @@ end
 function ISVehicleMenu.tryMoveItemsFromSeat(playerObj, vehicle, seat, moveThem, doEnter, seatTo, itemListIndex)
 	local currentSeat = vehicle:getPartForSeatContainer(seat);
 	local cont = currentSeat:getItemContainer();
-	local minWeight = cont:getWeight()/4;
+	--local minWeight = cont:getWeight()/4;
 	if cont:getItems():isEmpty() then return 0; end
 	local newSeat = vehicle:getPartById(seatTo);
 	if not newSeat or newSeat:getInventoryItem() == nil then return 0; end

@@ -652,28 +652,28 @@ end
 ISFarmingMenu.plantInfo = function(prop)
 	local text = ""
 	text = text .. getText("Farming_Tooltip_MinWater") .. " " .. prop.waterLvl
-	text = text .. " <LINE> " .. getText("Farming_Tooltip_TimeOfGrow") .. math.floor((prop.timeToGrow * prop.harvestLevel) / 24 * calcNextTimeFactor()) .. " " .. getText("IGUI_Gametime_days")
+	text = text .. " <LINE>" .. getText("Farming_Tooltip_TimeOfGrow") .. math.floor((prop.timeToGrow * prop.harvestLevel) / 24 * calcNextTimeFactor()) .. " " .. getText("IGUI_Gametime_days")
 	if getSandboxOptions():getOptionByName("PlantGrowingSeasons"):getValue() == true and prop.sowMonth then
-		text = text .. " <LINE> " .. getText("Farming_Tooltip_InSeason") .. ": "
+		text = text .. " <LINE>" .. getText("Farming_Tooltip_InSeason") .. ": "
 		for i, monthNum in ipairs(prop.sowMonth) do
 			text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.sowMonth and ", ") or "")
 		end
 
 		if prop.bestMonth then
-			text = text .. " <LINE> " .. getText("Farming_Tooltip_BestMonth2") .. ": "
+			text = text .. " <LINE>" .. getText("Farming_Tooltip_BestMonth2") .. ": "
 			for i, monthNum in ipairs(prop.bestMonth) do
 				text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.bestMonth and ", ") or "")
 			end
 		else
-			text = text .. " <LINE> " .. getText("Farming_Tooltip_BestMonth2") .. ": " .. getText("Farming_Tooltip_None");
+			text = text .. " <LINE>" .. getText("Farming_Tooltip_BestMonth2") .. ": " .. getText("Farming_Tooltip_None");
 		end
 		if prop.riskMonth then
-			text = text .. " <LINE> " .. getText("Farming_Tooltip_RiskMonth2") .. ": "
+			text = text .. " <LINE>" .. getText("Farming_Tooltip_RiskMonth2") .. ": "
 			for i, monthNum in ipairs(prop.riskMonth) do
 				text = text .. getText("Farming_Month_" .. monthNum) .. ((i ~= #prop.riskMonth and ", ") or "")
 			end
 		else
-			text = text .. " <LINE> " .. getText("Farming_Tooltip_RiskMonth2") .. ": " .. getText("Farming_Tooltip_None");
+			text = text .. " <LINE>" .. getText("Farming_Tooltip_RiskMonth2") .. ": " .. getText("Farming_Tooltip_None");
 		end
 	end
 	return text

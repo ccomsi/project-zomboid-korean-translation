@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateJunkWeaponDefs()
 	local junkWeapons = {
@@ -26,7 +27,6 @@ local function generateJunkWeaponDefs()
 				Pencil                      = "Base.Pencil",
 				RedPen                      = "Base.RedPen",
 				Scissors                    = "Base.Scissors",
-				SmashedBottle               = "Base.SmashedBottle",
 				Spoon                       = "Base.Spoon",
 			},
 		},
@@ -100,7 +100,6 @@ local function generateJunkWeaponDefs()
 				SpearScissors          		= "Base.SpearScissors",
 				SpearScrewdriver          	= "Base.SpearScrewdriver",
 				Stake                       = "Base.Stake",
-				StoneBlade          		= "Base.StoneBlade",
 				TableLeg                    = "Base.TableLeg",
 -- 				SpearBreadKnife          	= "Base.SpearBreadKnife",
 -- 				SpearMachete          		= "Base.SpearMachete",
@@ -125,9 +124,6 @@ local function generateJunkWeaponDefs()
 				KnifeButterfly             	= "Base.KnifeButterfly",
 				KnifeSushi             		= "Base.KnifeSushi",
 				StraightRazor            	= "Base.StraightRazor",
-				StoneBladeLong          	= "Base.StoneBladeLong",
-				StoneAxeHead                = "Base.StoneAxeHead",
-				StoneMaulHead               = "Base.StoneMaulHead",
 				SwitchKnife            		= "Base.SwitchKnife",
 				TennisRacket                = "Base.TennisRacket",
 			},
@@ -162,29 +158,32 @@ local function generateJunkWeaponDefs()
 	};
 	for _, spawnTable in pairs(junkWeapons) do
 		for itemName, itemFullName in pairs(spawnTable.items) do
-			forageDefs[itemName] = {
-				type = itemFullName,
-				skill = 0,
-				xp = spawnTable.xp,
-				categories = spawnTable.categories,
-				zones = {
-					Forest      	= spawnTable.chance,
-					DeepForest  	= spawnTable.chance,
-					PHForest  		= spawnTable.chance,
-					PRForest  		= spawnTable.chance,
-					BirchForest  	= spawnTable.chance,
-					Vegitation  	= spawnTable.chance,
-					FarmLand    	= spawnTable.chance,
-					TrailerPark 	= spawnTable.chance,
-					TownZone    	= spawnTable.chance,
-					ForagingNav 	= spawnTable.chance,
-				},
-				spawnFuncs = { forageSystem.doJunkWeaponSpawn },
-				forceOutside = false,
-				canBeAboveFloor = true,
-				itemSizeModifier = 0.5,
-				isItemOverrideSize = true,
-			};
+			forageSystem.addForageDef(
+				itemName,
+				{
+					type = itemFullName,
+					skill = 0,
+					xp = spawnTable.xp,
+					categories = spawnTable.categories,
+					zones = {
+						Forest = spawnTable.chance,
+						DeepForest = spawnTable.chance,
+						PHForest = spawnTable.chance,
+						PRForest = spawnTable.chance,
+						BirchForest = spawnTable.chance,
+						Vegitation = spawnTable.chance,
+						FarmLand = spawnTable.chance,
+						TrailerPark = spawnTable.chance,
+						TownZone = spawnTable.chance,
+						ForagingNav = spawnTable.chance,
+					},
+					spawnFuncs = { forageSystem.doJunkWeaponSpawn },
+					forceOutside = false,
+					canBeAboveFloor = true,
+					itemSizeModifier = 0.5,
+					isItemOverrideSize = true,
+				}
+			);
 		end;
 	end;
 end

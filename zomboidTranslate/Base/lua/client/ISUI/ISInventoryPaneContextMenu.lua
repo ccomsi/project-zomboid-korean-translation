@@ -1886,6 +1886,7 @@ ISInventoryPaneContextMenu.addItemInEvoRecipe = function(subMenuRecipe, baseItem
         tooltip.description = tooltip.description .. getText("ContextMenu_NeedCooked");
         option.toolTip = tooltip;
     end
+    option.itemForTexture = evoItem
 end
 
 local function formatFoodValue(f)
@@ -2168,15 +2169,9 @@ end
 
 ISInventoryPaneContextMenu.doDrinkForThirstMenu = function(context, playerObj, waterContainer)
     local thirst = playerObj:getStats():getThirst()
-    local units = math.min(math.ceil(thirst / 0.1), 10)
-	local uses = 1;
-	local delta = 10.0;
-	if waterContainer:getFluidContainer() then
-		uses = waterContainer:getFluidContainer():getAmount() / 0.12;
-		delta = waterContainer:getFluidContainer():getAmount();
-	end
-    units = math.min(units, uses)
-    local option = context:addOption(getText("ContextMenu_Drink"), waterContainer, ISInventoryPaneContextMenu.onDrinkForThirst, playerObj, units)
+	local units = math.min((thirst * 2), waterContainer:getFluidContainer():getFluidAmount())
+	local percent = units / waterContainer:getFluidContainer():getFluidAmount();
+    local option = context:addOption(getText("ContextMenu_Drink"), waterContainer, ISInventoryPaneContextMenu.onDrinkForThirst, playerObj, percent)
     local tooltip = ISInventoryPaneContextMenu.addToolTip()
     local tx1 = getTextManager():MeasureStringX(tooltip.font, getText("Tooltip_food_Thirst") .. ":") + 20
     local tx2 = getTextManager():MeasureStringX(tooltip.font, getText("ContextMenu_WaterName") .. ":") + 20
@@ -2190,12 +2185,12 @@ ISInventoryPaneContextMenu.doDrinkForThirstMenu = function(context, playerObj, w
     option.toolTip = tooltip
 end
 
-ISInventoryPaneContextMenu.onDrinkForThirst = function(waterContainer, playerObj, units)
-    getPlayer():Say("Units - " .. tostring(unit))
+ISInventoryPaneContextMenu.onDrinkForThirst = function(waterContainer, playerObj, percent)
+    --getPlayer():Say("Units - " .. tostring(percent))
     ISInventoryPaneContextMenu.transferIfNeeded(playerObj, waterContainer)
 	-- now remove a mask
 	local mask = ISInventoryPaneContextMenu.getEatingMask(playerObj, true)
-    ISTimedActionQueue.add(ISDrinkFromBottle:new(playerObj, waterContainer, units))
+    ISTimedActionQueue.add(ISDrinkFromBottle:new(playerObj, waterContainer, percent))
     if mask then ISTimedActionQueue.add(ISWearClothing:new(playerObj, mask, 50)) end
 end
 

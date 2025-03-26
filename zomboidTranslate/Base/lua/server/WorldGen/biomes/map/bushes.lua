@@ -6,7 +6,6 @@ local bush_dry = {
     },
     params = {
         bush = { "DRY" },
-        zombies = 0.001,
         placement = {
             "blends_natural_01_*",
 

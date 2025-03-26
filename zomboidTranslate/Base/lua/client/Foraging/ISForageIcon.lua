@@ -31,11 +31,15 @@ function ISForageIcon:doForage(_x, _y, _contextOption, _targetContainer)
 	if not targetSquare then return; end;
 	--
 	--double clicking sends item to currently selected inventory in panel
-	local targetContainer = _targetContainer or getPlayerInventory(self.player).inventory or self.character:getInventory();
-	if targetContainer:isItemAllowed(self.itemObj) then
-		if targetContainer and targetSquare and luautils.walkAdj(self.character, targetSquare) then
-			ISTimedActionQueue.add(ISForageAction:new(self.character, self, targetContainer, false, self.itemType, self.isKnownPoison));
+	if self:getIsSeen() and self:getAlpha() > 0 then
+		local targetContainer = _targetContainer or getPlayerInventory(self.player).inventory or self.character:getInventory();
+		if targetContainer:isItemAllowed(self.itemObj) then
+			if targetContainer and targetSquare and luautils.walkAdj(self.character, targetSquare) then
+				ISTimedActionQueue.add(ISForageAction:new(self.character, self, targetContainer, false, self.itemType));
+			end;
 		end;
+	else
+		return false;
 	end;
 end
 -------------------------------------------------
@@ -71,44 +75,49 @@ function ISForageIcon:getNewCategoryItem(_catDef, _zoneData)
 			pickedItemType = possibleItemTypes[ZombRand(#possibleItemTypes) + 1];
 		end;
 		--convert icon to new type
-		if pickedItemType then
-			self.itemDef					= pickedItemType;
-			self.catDef						= _catDef;
-			self.itemSize					= self.itemDef.itemSize or 1.0;
-			self.itemType					= pickedItemType.type;
-			self.altWorldTexture			= self.itemDef.altWorldTexture;
-			self.render3DTexture			= self.itemDef.render3DTexture;
-			self.isMover					= self.itemDef.isMover or false;
-			self.icon.itemType				= self.itemType;
-			self.itemObj					= instanceItem(self.icon.itemType);
-			self.itemTexture				= self.itemObj:getTexture();
-			self:initialise();
-			ISSearchManager.iconItems[self.iconID] = nil;
-			if self.itemList then
+		if pickedItemType and pickedItemType.type then
+			local itemObj = instanceItem(pickedItemType.type);
+			if itemObj then
+				self.itemDef					= pickedItemType;
+				self.catDef						= _catDef;
+				self.itemSize					= self.itemDef.itemSize or 1.0;
+				self.itemType					= pickedItemType.type;
+				self.icon.itemType				= pickedItemType.type;
+				self.altWorldTexture			= pickedItemType.altWorldTexture;
+				self.render3DTexture			= pickedItemType.render3DTexture;
+				self.isMover					= pickedItemType.isMover or false;
+				self.itemObj					= itemObj;
+				self.itemTexture				= itemObj:getTexture();
+				self:initialise();
+				ISSearchManager.iconItems[self.iconID] = nil;
 				self.itemList = nil;
 				self:getItemList();
-			end
+				return true;
+			end;
 		end;
 	end;
+	return false;
 end
 
 function ISForageIcon:doSearchFocusCheck()
 	--only roll valid icons
-	if not (self.catDef and self.catDef.focusChanceMin and self.catDef.focusChanceMax and self.zoneData) then
+	if not (self.catDef and self.zoneData and self.itemObj) then
+		print("[ISForageIcon][doSearchFocusCheck] icon: " .. self.itemType .. " failed test, skipping. " .. self.iconID);
 		return;
 	end;
 
 	--don't roll more than once
 	if not self.canRollForSearchFocus then return; end;
 
-	--don't attempt with hidden categories (these are rarer items)
-	if self.catDef.categoryHidden then return; end;
-
 	local searchWindow = ISSearchWindow.players[self.character];
+
+	local iconNeedsUpdate = false;
+
 	if searchWindow and searchWindow.searchFocusCategory then
-		if not forageSystem.catDefs[searchWindow.searchFocusCategory] then return; end;
 		if self.catDef.name ~= searchWindow.searchFocusCategory then
-			self:getNewCategoryItem(forageSystem.catDefs[searchWindow.searchFocusCategory], self.zoneData);
+			local catDef = forageSystem.catDefs[searchWindow.searchFocusCategory];
+			if not catDef then return; end;
+			iconNeedsUpdate = self:getNewCategoryItem(catDef, self.zoneData);
 		end;
 	end;
 
@@ -116,8 +125,10 @@ function ISForageIcon:doSearchFocusCheck()
 	self.canRollForSearchFocus			= false;
 	self.icon.canRollForSearchFocus		= false;
 
-	--update icon for split screen players
-	triggerEvent("onUpdateIcon", self.zoneData, self.iconID, self);
+	--update icon for all split screen players
+	if iconNeedsUpdate then
+		triggerEvent("onUpdateIcon", self.zoneData, self.iconID, self);
+	end;
 end
 -------------------------------------------------
 -------------------------------------------------
@@ -166,30 +177,34 @@ end
 -------------------------------------------------
 -------------------------------------------------
 function ISForageIcon:new(_manager, _forageIcon, _zoneData)
+	local forageIcon = _forageIcon;
+	local zoneData = _zoneData;
 	local o = {};
-	o = ISBaseIcon:new(_manager, _forageIcon, _zoneData);
+	o = ISBaseIcon:new(_manager, forageIcon, zoneData);
 	setmetatable(o, self)
 	self.__index				= self;
-	o.zoneData					= _zoneData;
-	o.zoneDef					= forageSystem.zoneDefs[_zoneData.name];
-	o.catDef					= forageSystem.catDefs[_forageIcon.catName];
-	o.itemDef					= forageSystem.itemDefs[_forageIcon.itemType];
+	o.zoneData					= zoneData;
+	o.zoneDef					= forageSystem.zoneDefs[zoneData.name];
+	o.catDef					= forageSystem.catDefs[forageIcon.catName];
+	o.itemDef					= forageSystem.itemDefs[forageIcon.itemType];
+	o.itemType					= forageIcon.itemType;
+	o.itemObj					= instanceItem(forageIcon.itemType);
+	o.itemTexture				= o.itemObj:getTexture();
 	o.itemSize					= (o.itemDef and o.itemDef.itemSize) or 1.0;
 	o.onMouseDoubleClick		= ISForageIcon.doForage;
 	o.identifyDistance			= 0;
 	o.altWorldTexture			= o.itemDef.altWorldTexture;
 	o.render3DTexture			= o.itemDef.render3DTexture;
 	o.textureCenter				= 0;
-	o.isMover					= o.itemDef.isMover or false;
 	o.onClickContext			= ISForageIcon.doForage;
 	o.identified				= false;
 	o.canMoveVertical			= true;
 	o.iconClass					= "forageIcon";
-	if type(_forageIcon.canRollForSearchFocus) == "boolean" then
-		o.canRollForSearchFocus				= _forageIcon.canRollForSearchFocus;
+	if type(forageIcon.canRollForSearchFocus) == "boolean" then
+		o.canRollForSearchFocus				= forageIcon.canRollForSearchFocus;
 	else
 		o.canRollForSearchFocus				= true;
-		_forageIcon.canRollForSearchFocus	= true;
+		forageIcon.canRollForSearchFocus	= true;
 	end;
 	o:initialise();
 	return o;

@@ -86,7 +86,7 @@ function CharacterCreationAvatar:setFacePreview(val)
 		self.avatarPanel:setZoom(14)
 		self.avatarPanel:setYOffset(-0.85)
 	else
-		self.avatarPanel:setZoom(1)
+		self.avatarPanel:setZoom(-3)
 		self.avatarPanel:setYOffset(0)
 	end
 end

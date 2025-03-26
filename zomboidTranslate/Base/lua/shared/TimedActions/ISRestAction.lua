@@ -62,7 +62,7 @@ function ISRestAction:start()
 	self.character:setVariable("ExerciseStarted", false);
 	self.character:setVariable("ExerciseEnded", true);
 	self.character:setIsResting(true)
-	self.character:setBed(bed)
+	self.character:setBed(self.bed)
 end
 
 function ISRestAction:stop()

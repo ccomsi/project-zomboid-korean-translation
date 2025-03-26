@@ -1,12 +1,7 @@
 local phmix_forest = {
     features = {
         TREE = {
-            { f = worldgen.features.TREE.silverbell_jumbo, p = 0.2 },
-            { f = worldgen.features.TREE.redbud_jumbo, p = 0.2 },
-            { f = worldgen.features.TREE.dogwood_jumbo, p = 0.1 },
-            { f = worldgen.features.TREE.silverbell, p = 0.2 },
-            { f = worldgen.features.TREE.redbud, p = 0.2 },
-            { f = worldgen.features.TREE.dogwood, p = 0.1 },
+            { f = worldgen.features.TREE.dogwood, p = 1 },
 
         },
         BUSH = {
@@ -24,7 +19,6 @@ local phmix_forest = {
         landscape = { "FOREST" },
         temperature = { "MEDIUM" },
         hygrometry = { "DRY", "RAIN" },
-        zombies = 0.001,
         placement = {
             "blends_natural_01_*",
 

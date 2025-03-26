@@ -23,9 +23,7 @@ function ISGetHutchInfo:stop()
 end
 
 function ISGetHutchInfo:perform()
-	local ui = ISHutchUI:new(getPlayerScreenLeft(self.playerNum)+100, getPlayerScreenTop(self.playerNum)+100, 200, 200, self.hutch, self.character)
-	ui:initialise();
-	ui:addToUIManager();
+	local ui = ISHutchUI.ShowWindow(self.character, self.hutch);
 	if getJoypadData(self.playerNum) then
 		setJoypadFocus(self.playerNum, ui)
 	end

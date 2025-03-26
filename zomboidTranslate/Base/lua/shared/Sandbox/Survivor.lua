@@ -124,6 +124,7 @@ return {
 		ZombiesArmorFactor = 1,
 		ZombiesMaxDefense = 70,
 		ChanceOfAttachedWeapon = 12,
+        FenceThumpersRequired = 50,
     },
     ZombieConfig = {
         PopulationMultiplier = tonumber(ZombiePopulationMultiplier.Normal),

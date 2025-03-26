@@ -28,7 +28,7 @@ function ISEnterVehicle:start()
 		local playerNum = self.character:getPlayerNum()
 		getCell():setDrag(nil, playerNum)
 		local contextMenu = getPlayerContextMenu(playerNum)
-		if contextMenu and contextMenu:isVisible() then
+		if contextMenu and contextMenu:isAnyVisible() then
 			contextMenu:hideAndChildren()
 		end
 	end

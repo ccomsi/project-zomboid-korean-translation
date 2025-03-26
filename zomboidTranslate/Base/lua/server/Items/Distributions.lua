@@ -21991,6 +21991,8 @@ local distributionTable = {
 
 	KeyRing_Bug = BagsAndContainers.KeyRing,
 
+	KeyRing_Clover = BagsAndContainers.KeyRing,
+
 	KeyRing_EagleFlag = BagsAndContainers.KeyRingOutdoors,
 
 	KeyRing_EightBall = BagsAndContainers.KeyRing,

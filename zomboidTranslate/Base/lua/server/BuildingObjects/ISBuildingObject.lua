@@ -479,6 +479,7 @@ function ISBuildingObject:init()
 	self.canBePlastered = false;
 	self.hoppable = false;
     self.isThumpable = true;
+    self.isFloor = false;
 	self.modData = {};
 end
 

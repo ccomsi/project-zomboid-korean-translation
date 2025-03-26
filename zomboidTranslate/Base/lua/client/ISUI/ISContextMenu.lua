@@ -228,6 +228,13 @@ function ISContextMenu:showTooltip(option)
 		self.toolTip:addToUIManager()
 		self.toolTip.followMouse = not self.joyfocus
 	end
+	if self.highlightedOption ~= option then
+		if self.highlightedOption ~= nil then
+			self:callOptionHighlightFunction(self.highlightedOption, false)
+		end
+		self.highlightedOption = option
+		self:callOptionHighlightFunction(self.highlightedOption, true)
+	end
 end
 
 function ISContextMenu:hideToolTip()
@@ -236,6 +243,16 @@ function ISContextMenu:hideToolTip()
 		self.toolTip:setVisible(false)
 		self.toolTip = nil
 	end
+	if self.highlightedOption ~= nil then
+		self:callOptionHighlightFunction(self.highlightedOption, false)
+		self.highlightedOption = nil
+	end
+end
+
+function ISContextMenu:callOptionHighlightFunction(option, isHighlighted)
+    if option == nil then return end
+    if type(option.onHighlight) ~= "function" then return end
+    option:onHighlight(self, isHighlighted, unpack(option.onHighlightParams))
 end
 
 function ISContextMenu:onJoypadDown(button)

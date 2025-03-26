@@ -604,6 +604,7 @@ function CharacterCreationMain:loadOutfit(box)
 			end
 		end
 	end
+	self:arrangeClothingUI()
 end
 
 function CharacterCreationMain.readSavedOutfitFile()
@@ -2157,7 +2158,8 @@ function CharacterCreationMain:rescaleAvatarViewer()
 	self.avatarPanel:setHeight(h);
 	self.avatarPanel:setWidth(w);
 	self.avatarPanel:rescaleAvatarViewer()
-	self.avatarPanel:setX((w1-w)/2)
+	local offsetDivisor = getSandboxOptions():getAllClothesUnlocked() and 0.4 or 0.5
+	self.avatarPanel:setX((w1-w)*offsetDivisor)
 	self.avatarPanel:setY(y1)
 end
 

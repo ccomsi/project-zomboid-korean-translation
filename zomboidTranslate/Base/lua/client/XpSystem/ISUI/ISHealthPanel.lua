@@ -469,8 +469,8 @@ function ISHealthPanel:render()
     if isClient() and not self:getPatient():isLocalPlayer() then
         painLevel = self:getPatient():getBodyDamageRemote():getRemotePainLevel()
     end
-    if (self.doctorLevel > 4 or self.character == getPlayer() or ISHealthPanel.cheat) and painLevel > 0 then
-        self:drawText(getText("Moodles_pain_lvl" .. painLevel), x, y, 1, 1, 1, 1, UIFont.Small);
+    if (ISHealthPanel.cheat or (doctor == self.otherPlayer and self.doctorLevel > 4)) and painLevel > 0 then
+        self:drawText(getText("Moodles_Pain_lvl" .. painLevel), x, y, 1, 1, 1, 1, UIFont.Small);
         y = y + fontHgt;
    end
     if self.cheat and self.character:getBodyDamage():getFakeInfectionLevel() > 0 then
@@ -1171,7 +1171,8 @@ function HApplyBandage:addToMenu(context)
         context:addSubMenu(option, subMenu)
         for i=1,#types do
             local item = self:getItemOfType(self.items.ITEMS, types[i])
-            subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+            option = subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+            option.itemForTexture = item
         end
     end
 end
@@ -1211,7 +1212,11 @@ end
 
 function HRemoveBandage:addToMenu(context)
     if self.bodyPart:bandaged() then
-        context:addOption(getText("ContextMenu_Remove_Bandage"), self, self.onMenuOptionSelected)
+        local option = context:addOption(getText("ContextMenu_Remove_Bandage"), self, self.onMenuOptionSelected)
+        local bandageType = self.bodyPart:getBandageType()
+        if bandageType then
+            option.itemForTexture = instanceItem(bandageType)
+        end
     end
 end
 
@@ -1254,7 +1259,8 @@ function HApplyPoultice:addToMenu(context)
         context:addSubMenu(option, subMenu)
         for i=1,#types do
             local item = self:getItemOfType(self.items.ITEMS, types[i])
-            subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+            option = subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+            option.itemForTexture = item
         end
     end
 end
@@ -1341,7 +1347,8 @@ function HDisinfect:addToMenu(context)
         context:addSubMenu(option, subMenu)
         for i=1,#types do
             local item = self:getItemOfType(self.items.ITEMS, types[i])
-            subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+            option = subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+            option.itemForTexture = item
         end
     end
 end
@@ -1401,11 +1408,13 @@ function HStitch:addToMenu(context)
         local subMenu = context:getNew(context)
         context:addSubMenu(option, subMenu)
         if needlePlusThread then
-            subMenu:addOption(needlePlusThread:getName(), self, self.onMenuOptionSelected, needlePlusThread:getFullType(), needlePlusThread:getFullType())
+            option = subMenu:addOption(needlePlusThread:getName(), self, self.onMenuOptionSelected, needlePlusThread:getFullType(), needlePlusThread:getFullType())
+            option.itemForTexture = needlePlusThread
         end
         if needle and thread then
             local text = needle:getName() .. " + " .. thread:getName()
-            subMenu:addOption(text, self, self.onMenuOptionSelected, needle:getFullType(), thread:getFullType())
+            option = subMenu:addOption(text, self, self.onMenuOptionSelected, needle:getFullType(), thread:getFullType())
+            option.itemForTexture = needle
         end
     end
 end
@@ -1511,7 +1520,8 @@ function HRemoveGlass:addToMenu(context)
         if #types > 0 then
             for i=1,#types do
                 local item = self:getItemOfType(self.items.ITEMS, types[i])
-                subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+                option = subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, types[i])
+                option.itemForTexture = item
             end
         end
         subMenu:addOption(getText("ContextMenu_Hand"), self, self.onMenuOptionSelected, "Hands")
@@ -1585,14 +1595,16 @@ function HSplint:addToMenu(context)
         context:addSubMenu(option, subMenu)
         for i=1,#splintType do
             local item = self:getItemOfType(self.items.splint, splintType[i])
-            subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, nil, item:getFullType())
+            option = subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, nil, item:getFullType())
+            option.itemForTexture = item
         end
         if #plankType > 0 and #rippedSheetType > 0 then
             local rippedSheet = self:getItemOfType(self.items.rippedSheet, rippedSheetType[1])
             for i=1,#plankType do
                 local plank = self:getItemOfType(self.items.plank, plankType[i])
                 local text = plank:getName() .. " + " .. rippedSheet:getName()
-                subMenu:addOption(text, self, self.onMenuOptionSelected, rippedSheet:getFullType(), plank:getFullType())
+                option = subMenu:addOption(text, self, self.onMenuOptionSelected, rippedSheet:getFullType(), plank:getFullType())
+                option.itemForTexture = plank
             end
         end
     end
@@ -1662,7 +1674,11 @@ end
 
 function HRemoveSplint:addToMenu(context)
     if (self.bodyPart:HasInjury() or self.bodyPart:stitched() or self.bodyPart:getSplintFactor() > 0) and self.bodyPart:getSplintFactor() > 0 then
-        context:addOption(getText("ContextMenu_Remove_Splint"), self, self.onMenuOptionSelected)
+        local option = context:addOption(getText("ContextMenu_Remove_Splint"), self, self.onMenuOptionSelected)
+        local splintType = self.bodyPart:getSplintItem()
+        if splintType ~= "" then
+            option.itemForTexture = instanceItem(splintType)
+        end
     end
 end
 
@@ -1699,7 +1715,8 @@ function HRemoveBullet:addToMenu(context)
         context:addSubMenu(option, subMenu)
         for i=1,#types do
             local item = self:getItemOfType(self.items.ITEMS, types[i])
-            subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, item:getFullType())
+            option = subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, item:getFullType())
+            option.itemForTexture = item
         end
     end
 end
@@ -1748,7 +1765,8 @@ function HCleanBurn:addToMenu(context)
         context:addSubMenu(option, subMenu)
         for i=1,#types do
             local item = self:getItemOfType(self.items.ITEMS, types[i])
-            subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, item:getFullType())
+            option = subMenu:addOption(item:getName(), self, self.onMenuOptionSelected, item:getFullType())
+            option.itemForTexture = item
         end
     end
 end

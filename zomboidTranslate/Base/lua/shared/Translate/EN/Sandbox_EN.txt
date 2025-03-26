@@ -18,7 +18,8 @@ Sandbox_EN = {
     Sandbox_ZombieDistribution_tooltip = "How zombies are distributed across the map.",
     Sandbox_ZombieDistribution_option1 = "Urban Focused",
     Sandbox_ZombieDistribution_option2 = "Uniform",
-    Sandbox_Advanced = "Advanced...",
+    Sandbox_Advanced = "Advanced",
+    Sandbox_Advanced_tooltip = "Show all options and their raw values.",
     Sandbox_ZombieOptions = "ZOMBIE OPTIONS",
     --
     Sandbox_TimeOptions = "Time",
@@ -293,15 +294,23 @@ Sandbox_EN = {
     Sandbox_SurvivalGearsLootNew = "Survival Essentials",
     Sandbox_SurvivalGearsLootNew_tooltip = "Fishing Rods, Tents, camping gear etc.",
     Sandbox_MedicalLootNew = "Medical",
+    Sandbox_MedicalLootNew_tooltip = "Medicine, bandages and first aid tools.",
     Sandbox_FoodLootNew = "Perishable Food",
+    Sandbox_FoodLootNew_tooltip = "Any food that can rot or spoil.",
     Sandbox_LiteratureLootNew = "Literature",
+    Sandbox_LiteratureLootNew_tooltip = "All items that can be read, includes fliers",
     Sandbox_CannedFoodLootNew = "Non-Perishable Food",
+    Sandbox_CannedFoodLootNew_tooltip = "Canned and dried food, beverages.",
     Sandbox_WeaponLootNew = "Melee Weapons",
+    Sandbox_WeaponLootNew_tooltip = "Weapons that are not tools in other categories.",
     Sandbox_RangedWeaponLootNew = "Ranged Weapons",
     Sandbox_RangedWeaponLootNew_tooltip = "Also includes weapon attachments.",
     Sandbox_AmmoLootNew = "Ammo",
+    Sandbox_AmmoLootNew_tooltip = "Loose ammo, boxes and magazines.",
     Sandbox_MechanicsLootNew = "Mechanics",
+    Sandbox_MechanicsLootNew_tooltip = "Vehicle parts and the tools needed to install them.",
     Sandbox_ClothingLootNew = "Clothing",
+    Sandbox_ClothingLootNew_tooltip = "All wearable items that are not containers.",
     Sandbox_ContainerLootNew = "Bags",
     Sandbox_ContainerLootNew_tooltip = "Backpacks and other wearable/equippable containers, eg. cases.",
     Sandbox_KeyLootNew = "Keys",
@@ -573,6 +582,7 @@ Sandbox_EN = {
     Sandbox_RallyGroupSeparation = "Rally Group Separation",
     Sandbox_RallyGroupRadius = "Rally Group Radius",
     Sandbox_ZombiesCountBeforeDelete = "Zombie count before deletion"
+    Sandbox_ZombiesCountBeforeDelete_tooltip = "How many zombies can occupy a certain area."
     -- Zombie Config tooltips and zombie.ini comments
     Sandbox_PopulationMultiplier_help = "Set by the \"Zombie Count\" population option, or by a custom number here.\nInsane = 2.5, Very High = 1.6, High = 1.2, Normal = 0.65, Low = 0.15, None = 0.0.",
     Sandbox_PopulationStartMultiplier_help = "A multiplier for the desired zombie population at the start of the game.\nInsane = 3.0, Very High = 2.0, High = 1.5, Normal = 1.0, Low = 0.5, None = 0.0.",
@@ -1018,6 +1028,8 @@ Sandbox_EN = {
 
     Sandbox_MaximumLooted = "Maximum Looted Building Chance",
     Sandbox_MaximumLooted_tooltip = "The chance that any building will already be looted when found.\nCheck the "Advanced" box below to use a custom number.",
+    Sandbox_DaysUntilMaximumDiminishedLoot = "Days Until Maximum Diminished Loot",
+    Sandbox_DaysUntilMaximumDiminishedLoot_tooltip = "How long it takes for Maximum Diminished Loot Percentage to be reached.",
     Sandbox_DaysUntilMaximumLooted = "Days Until Max Looted Building Chance",
     Sandbox_DaysUntilMaximumLooted_tooltip = "How long it takes for Maximum Looted Building Chance to be reached.",
     Sandbox_RuralLooted = "Rural Building Looted Chance Multiplier",
@@ -1079,6 +1091,16 @@ Sandbox_EN = {
 
     Sandbox_MaximumFireFuelHours = "MaximumFireFuelHours",
     Sandbox_MaximumFireFuelHours_tooltip = "The maximum hours of fuel that can be placed in a campfire, wood stove etc.",
+
+    Sandbox_FenceThumpersRequired = "Zombies To Damage Fences",
+    Sandbox_FenceThumpersRequired_tooltip = "How many zombies it takes to damage a tall fence.",
+    Sandbox_FenceThumpersRequired_option1 = "Fences Damage Disabled",
+    Sandbox_FenceThumpersRequired_option2 = "10",
+    Sandbox_FenceThumpersRequired_option3 = "25",
+    Sandbox_FenceThumpersRequired_option4 = "50",
+    Sandbox_FenceThumpersRequired_option5 = "100",
+    Sandbox_FenceDamageMultiplier = "Fence Damage Multiplier"
+    Sandbox_FenceDamageMultiplier_tooltip = "How quickly zombies damage tall fences."
 
     // Worldgen
     Sandbox_Worldgen = "Worldgen",

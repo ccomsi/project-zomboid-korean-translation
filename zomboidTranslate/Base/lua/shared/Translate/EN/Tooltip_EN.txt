@@ -578,7 +578,7 @@ Tooltip_EN = {
     Tooltip_FishingTip = "HOW TO FISH<br>- Equip the fishing rod in both hands<br>- Aim at the water<br>- Press LMB to cast<br>- Line tension will increase when you get a bite<br>- To start reeling in your catch, hold LMB<br>- Too much tension and your line could break<br>Change the tension using LMB/RMB<br><br><br><br>Read more about fishing in the Survival Guide.",
     Tooltip_ButcherUI_AddAnimalCorpse = "The dead animal can be near the Hook or in your inventory.",
     Tooltip_ButcherUI_CantAddThis = "Not a valid dead animal for the Butcher Hook.",
-    Tooltip_Animal_BetterOnHook = "If you butcher without a Butcher Hook,<br>you will get less meat and no leather.",
+    Tooltip_Animal_BetterOnHook = "If you butcher without a Butcher Hook, you will get less meat and no leather.",
     Tooltip_GrappleCorpse = "Hold the Interact key to grab/drop a corpse.",
     Tooltip_GrappleCorpseFire = "You can't grab a burning corpse!",
 

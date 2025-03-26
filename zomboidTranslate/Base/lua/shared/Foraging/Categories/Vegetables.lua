@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateVegetablesDefs()
 	local itemDefs = {
@@ -479,7 +480,7 @@ local function generateVegetablesDefs()
 		},
 	};
 	for itemName, itemDef in pairs(itemDefs) do
-		forageDefs[itemName] = itemDef;
+		forageSystem.addForageDef(itemName, itemDef);
 	end;
 end
 

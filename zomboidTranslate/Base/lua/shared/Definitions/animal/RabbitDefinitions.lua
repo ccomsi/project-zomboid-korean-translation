@@ -58,6 +58,9 @@ AnimalDefinitions.breeds["rabbit"].breeds["swamp"].invIconBaby = "Item_Rabbit";
 AnimalDefinitions.breeds["rabbit"].breeds["swamp"].invIconMaleDead = "Item_RabbitDead";
 AnimalDefinitions.breeds["rabbit"].breeds["swamp"].invIconFemaleDead = "Item_RabbitDead";
 AnimalDefinitions.breeds["rabbit"].breeds["swamp"].invIconBabyDead = "Item_RabbitDead";
+AnimalDefinitions.breeds["rabbit"].breeds["swamp"].invIconMaleSkel = "Item_Skeleton_Rabbit";
+AnimalDefinitions.breeds["rabbit"].breeds["swamp"].invIconFemaleSkel = "Item_Skeleton_Rabbit";
+AnimalDefinitions.breeds["rabbit"].breeds["swamp"].invIconBabySkel = "Item_Skeleton_Rabbit_Kit";
 
 AnimalDefinitions.breeds["rabbit"].breeds["appalachian"] = {};
 AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].name = "appalachian";
@@ -75,6 +78,9 @@ AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].invIconBaby = "Item_Rab
 AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].invIconMaleDead = "Item_RabbitDead";
 AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].invIconFemaleDead = "Item_RabbitDead";
 AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].invIconBabyDead = "Item_RabbitDead";
+AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].invIconMaleSkel = "Item_Skeleton_Rabbit";
+AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].invIconFemaleSkel = "Item_Skeleton_Rabbit";
+AnimalDefinitions.breeds["rabbit"].breeds["appalachian"].invIconBabySkel = "Item_Skeleton_Rabbit_Kit";
 
 AnimalDefinitions.breeds["rabbit"].breeds["cottontail"] = {};
 AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].name = "swamp";
@@ -92,6 +98,9 @@ AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].invIconBaby = "Item_Rabb
 AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].invIconMaleDead = "Item_RabbitDead";
 AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].invIconFemaleDead = "Item_RabbitDead";
 AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].invIconBabyDead = "Item_RabbitDead";
+AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].invIconMaleSkel = "Item_Skeleton_Rabbit";
+AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].invIconFemaleSkel = "Item_Skeleton_Rabbit";
+AnimalDefinitions.breeds["rabbit"].breeds["cottontail"].invIconBabySkel = "Item_Skeleton_Rabbit_Kit";
 
 
 
@@ -131,7 +140,7 @@ AnimalDefinitions.animals["rabkitten"].thirstBoost = 30;
 AnimalDefinitions.animals["rabkitten"].idleEmoteChance = 500;
 AnimalDefinitions.animals["rabkitten"].collisionSize = 0;
 AnimalDefinitions.animals["rabkitten"].baseEncumbrance = 10;
-AnimalDefinitions.animals["rabkitten"].canBePet = false;
+AnimalDefinitions.animals["rabkitten"].canBePet = true;
 AnimalDefinitions.animals["rabkitten"].collidable = false;
 AnimalDefinitions.animals["rabkitten"].minWeight = 1;
 AnimalDefinitions.animals["rabkitten"].maxWeight = 2;
@@ -181,7 +190,7 @@ AnimalDefinitions.animals["rabdoe"].thirstMultiplier = 0.001;
 AnimalDefinitions.animals["rabdoe"].eatTypeTrough = "AnimalFeed,Grass,Hay,Vegetables,Fruits";
 AnimalDefinitions.animals["rabdoe"].collisionSize = 0.24;
 AnimalDefinitions.animals["rabdoe"].baseEncumbrance = 20;
-AnimalDefinitions.animals["rabdoe"].canBePet = false;
+AnimalDefinitions.animals["rabdoe"].canBePet = true;
 AnimalDefinitions.animals["rabdoe"].collidable = false;
 AnimalDefinitions.animals["rabdoe"].minWeight = 2;
 AnimalDefinitions.animals["rabdoe"].maxWeight = 7;

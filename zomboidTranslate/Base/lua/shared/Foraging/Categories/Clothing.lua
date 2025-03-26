@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateClothingDefs()
 	local clothing = {
@@ -592,23 +593,26 @@ local function generateClothingDefs()
 	};
 	for _, spawnTable in pairs(clothing) do
 		for itemName, itemFullName in pairs(spawnTable.items) do
-			forageDefs[itemName] = {
-				type = itemFullName,
-				skill = 0,
-				xp = spawnTable.xp,
-				categories = { "Clothing" },
-				zones = {
-					Vegitation  = spawnTable.chance,
-					TrailerPark = spawnTable.chance,
-					TownZone    = spawnTable.chance,
-					ForagingNav = spawnTable.chance,
-				},
-				spawnFuncs = { forageSystem.doClothingItemSpawn },
-				forceOutside = false,
-				canBeAboveFloor = true,
-				itemSizeModifier = 0.5,
-				isItemOverrideSize = true,
-			};
+			forageSystem.addForageDef(
+					itemName,
+				{
+					type = itemFullName,
+					skill = 0,
+					xp = spawnTable.xp,
+					categories = { "Clothing" },
+					zones = {
+						Vegitation = spawnTable.chance,
+						TrailerPark = spawnTable.chance,
+						TownZone = spawnTable.chance,
+						ForagingNav = spawnTable.chance,
+					},
+					spawnFuncs = { forageSystem.doClothingItemSpawn },
+					forceOutside = false,
+					canBeAboveFloor = true,
+					itemSizeModifier = 0.5,
+					isItemOverrideSize = true,
+				}
+			);
 		end;
 	end;
 end

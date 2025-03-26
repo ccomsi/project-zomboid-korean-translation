@@ -439,6 +439,7 @@ ClutterTables.ClosetItems = {
 	"Jumper_TankTopTINT", 0.1,
 	"Jumper_VNeck", 0.1,
 	"Kettle", 0.1,
+	"KeyRing_Clover", 0.005,
 	"KeyRing_RabbitFoot", 1,
 	"Keytar", 0.01,
 	"KitchenKnife", 0.01,

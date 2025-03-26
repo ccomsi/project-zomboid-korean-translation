@@ -642,7 +642,9 @@ function luautils.findRootInventory(_inventory)
 	local inventory = _inventory;
 	local containingItem = inventory:getContainingItem();
 	if containingItem and containingItem:getContainer() and containingItem:getContainer():getContainingItem() then
-		return luautils.findRootInventory(containingItem:getInventory());
+		if containingItem:getInventory() ~= _inventory then
+			return luautils.findRootInventory(containingItem:getInventory());
+		end;
 	end;
 	return inventory;
 end

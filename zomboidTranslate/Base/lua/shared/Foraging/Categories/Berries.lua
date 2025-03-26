@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateBerryDefs()
 	local items = {
@@ -72,7 +73,9 @@ local function generateBerryDefs()
 	};
 	for _, spawnTable in pairs(items) do
 		for itemName, itemFullName in pairs(spawnTable.items) do
-			forageDefs[itemName] = {
+			forageSystem.addForageDef(
+				itemName,
+				{
 				type = itemFullName,
 				minCount = 1,
 				maxCount = 4,
@@ -101,7 +104,8 @@ local function generateBerryDefs()
 				altWorldTexture = forageSystem.worldSprites.berryBushes,
 				doIsoMarkerObject = true,
 				itemSizeModifier = 1.0,
-			};
+				}
+			);
 		end;
 	end;
 end

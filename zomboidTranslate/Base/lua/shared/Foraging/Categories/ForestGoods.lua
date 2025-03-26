@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateForestGoodsDefs()
 	local forestGoods = {
@@ -167,7 +168,7 @@ local function generateForestGoodsDefs()
 		},
 	};
 	for itemName, itemDef in pairs(forestGoods) do
-		forageDefs[itemName] = itemDef;
+		forageSystem.addForageDef(itemName, itemDef);
 	end;
 end
 

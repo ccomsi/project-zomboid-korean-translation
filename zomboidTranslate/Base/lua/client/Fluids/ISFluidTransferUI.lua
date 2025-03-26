@@ -16,6 +16,9 @@ ISFluidTransferUI.cheatTransfer = false;
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
+local UI_BORDER_SPACING = 10
+local BUTTON_HGT = FONT_HGT_SMALL + 6
+local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 -- Container = FluidContainer instance
 function ISFluidTransferUI.OpenPanel(_player, _container, _source)
@@ -81,10 +84,9 @@ end
 function ISFluidTransferUI:createChildren()
     ISPanelJoypad.createChildren(self);
 
-    local btnHgt = FONT_HGT_SMALL + 8;
-    local pad = 10;
-    local y = 5;
-    local c;
+    local textOffsetM = (LABEL_HGT - FONT_HGT_MEDIUM)/2
+    local textOffsetS = (BUTTON_HGT - FONT_HGT_SMALL)/2
+    local y = textOffsetM+1;
 
     self.titleText = getText("Fluid_Transfer_Fluids");
     self.titleLabel = ISLabel:new (0, y, FONT_HGT_MEDIUM, self.titleText, 1, 1, 1, 1.0, UIFont.Medium, true);
@@ -93,7 +95,7 @@ function ISFluidTransferUI:createChildren()
     self.titleLabel:instantiate();
     self:addChild(self.titleLabel);
 
-    y = y + FONT_HGT_MEDIUM + 5;
+    y = y + FONT_HGT_MEDIUM + textOffsetM + textOffsetS;
 
     self.errorText = "";
     self.errorLabel = ISLabel:new (0, y, FONT_HGT_SMALL, self.errorText, 0.8, 0, 0, 1.0, UIFont.Small, true);
@@ -102,13 +104,13 @@ function ISFluidTransferUI:createChildren()
     self.errorLabel:instantiate();
     self.errorLabel:setColor(0.8,0.5,0.5);
     self:addChild(self.errorLabel);
-    y = y + FONT_HGT_SMALL + 5;
+    y = y + FONT_HGT_SMALL + textOffsetS;
 
     local panelY = y;
     local containerLeft = self.source or self.container:getFluidContainer():isEmpty();
 
     self.panelLeftText = getText("Fluid_Source");
-    self.panelLeft = ISFluidContainerPanel:new(pad, panelY, self.player, containerLeft and self.container or nil, true, true, self.isIsoPanel);
+    self.panelLeft = ISFluidContainerPanel:new(UI_BORDER_SPACING+1, panelY, self.player, containerLeft and self.container or nil, true, true, self.isIsoPanel);
     self.panelLeft.funcTarget = self;
     self.panelLeft.onContainerAdd = self.onContainerAdd;
     self.panelLeft.onContainerRemove = self.onContainerRemove;
@@ -119,41 +121,34 @@ function ISFluidTransferUI:createChildren()
 
     self.panelLeftX = self.panelLeft:getX();
 
-    local x = self.panelLeft:getX() + self.panelLeft:getWidth() + pad;
-    local midWidth = 200;
+    local x = self.panelLeft:getX() + self.panelLeft:getWidth() + UI_BORDER_SPACING;
+    local midWidth = getTextManager():MeasureStringX(self.font, getText("Fluid_Max_Transfer") .. ": 99999 ml");
 
-    self.panelMiddle = ISPanelJoypad:new(x, y, midWidth, 100)
+    self.panelMiddle = ISPanelJoypad:new(x, y, midWidth, self.panelLeft:getHeight())
     self.panelMiddle:noBackground()
     self:addChild(self.panelMiddle)
-    x = 0
     y = 0
 
-    c = self.buttonBorderColor;
+    local c = self.buttonBorderColor;
     local btnText = getText("Fluid_Swap");
-    self.btnSwap = ISButton:new(x, y, midWidth, btnHgt, btnText, self, ISFluidTransferUI.onButton);
+    self.btnSwap = ISButton:new(0, y, midWidth, BUTTON_HGT, btnText, self, ISFluidTransferUI.onButton);
     self.btnSwap.internal = "SWAP";
     self.btnSwap:setImage(getTexture("media/ui/Fluids/btn_swap.png"))
     self.btnSwap:initialise();
     self.btnSwap:instantiate();
     self.btnSwap.borderColor = {r=c.r, g=c.g,b=c.b,a=c.a};
     self.panelMiddle:addChild(self.btnSwap);
+    y = self.btnSwap:getBottom() + UI_BORDER_SPACING;
 
-    local sliderHeight = 20;
-    y = self.panelLeft.innerY + (self.panelLeft.innerHeight/2);
-    y = y - (sliderHeight/2);
-    --new Y:
-    y = self.btnSwap:getY() + self.btnSwap:getHeight() + pad + FONT_HGT_SMALL + pad;
-
-    local labelY = y - pad - FONT_HGT_SMALL;
-    local labelX = x + (midWidth/2)
     self.maxTransferText = getText("Fluid_Max_Transfer") .. ":";
-    self.maxTransferLabel = ISLabel:new (labelX, labelY, FONT_HGT_SMALL, self.maxTransferText, 1.0, 1.0, 1.0, 1.0, UIFont.Small, true);
+    self.maxTransferLabel = ISLabel:new (midWidth/2, y, FONT_HGT_SMALL, self.maxTransferText, 1.0, 1.0, 1.0, 1.0, UIFont.Small, true);
     self.maxTransferLabel.center = true;
     self.maxTransferLabel:initialise();
     self.maxTransferLabel:instantiate();
     self.panelMiddle:addChild(self.maxTransferLabel);
-	
-    self.slider = ISSliderPanel:new(x, y, midWidth, sliderHeight, self, ISFluidTransferUI.onSlider );
+    y = self.maxTransferLabel:getBottom() + UI_BORDER_SPACING;
+
+    self.slider = ISSliderPanel:new(0, y, midWidth, BUTTON_HGT, self, ISFluidTransferUI.onSlider );
     self.slider:initialise();
     self.slider:instantiate();
     self.slider:setValues( 0.0, 1.0, 0.01, 0.1, true);
@@ -161,41 +156,16 @@ function ISFluidTransferUI:createChildren()
     self.slider.valueLabel = false;
     self.slider.customData = {};
     self.panelMiddle:addChild(self.slider);
+    y = self.slider:getBottom() + UI_BORDER_SPACING;
 
-    labelY = y + sliderHeight + pad;
     self.transferringText = getText("Fluid_Transferring") .. ":";
-    self.transferringLabel = ISLabel:new (labelX, labelY, FONT_HGT_SMALL, self.transferringText, 1.0, 1.0, 1.0, 1.0, UIFont.Small, true);
+    self.transferringLabel = ISLabel:new (midWidth/2, y, FONT_HGT_SMALL, self.transferringText, 1.0, 1.0, 1.0, 1.0, UIFont.Small, true);
     self.transferringLabel.center = true;
     self.transferringLabel:initialise();
     self.transferringLabel:instantiate();
     self.panelMiddle:addChild(self.transferringLabel);
-	
-	y = labelY + FONT_HGT_SMALL + pad;
-	
-	c = self.buttonBorderColor;
-    local btnText = getText("Fluid_Transfer");
-    self.btnTransfer = ISButton:new(x, y, midWidth, btnHgt, btnText, self, ISFluidTransferUI.onButton);
-    self.btnTransfer.internal = "TRANSFER";
-    self.btnTransfer:initialise();
-    self.btnTransfer:instantiate();
-    self.btnTransfer.backgroundColor.a = 0;
-    self.btnTransfer.borderColor = {r=c.r, g=c.g,b=c.b,a=c.a};
-    self.panelMiddle:addChild(self.btnTransfer);
 
-    y = self.panelLeft:getHeight() - btnHgt;
-
-    c = self.buttonBorderColor;
-    local btnText = getText("Fluid_Close");
-    self.btnClose = ISButton:new(x, y, midWidth, btnHgt, btnText, self, ISFluidTransferUI.onButton);
-    self.btnClose.internal = "CLOSE";
-    self.btnClose:initialise();
-    self.btnClose:instantiate();
-    self.btnClose.borderColor = {r=c.r, g=c.g,b=c.b,a=c.a};
-    self.panelMiddle:addChild(self.btnClose);
-
-	self.panelMiddle:setHeight(self.btnClose:getBottom())
-
-    x = self.panelMiddle:getRight() + pad;
+    x = self.panelMiddle:getRight() + UI_BORDER_SPACING;
 
     self.panelRightText = getText("Fluid_Target");
     self.panelRight = ISFluidContainerPanel:new(x, panelY, self.player, (not containerLeft) and self.container or nil, true, false, self.isIsoPanel);
@@ -208,9 +178,28 @@ function ISFluidTransferUI:createChildren()
     self:addChild(self.panelRight);
 
     self.panelRightX = self.panelRight:getX();
+    x = self.panelRightX + UI_BORDER_SPACING+1;
+    y = self.panelLeft:getBottom() + UI_BORDER_SPACING;
 
-    x = x + self.panelRight:getWidth() + pad;
-    y = panelY + self.panelRight:getHeight() + pad;
+    local buttonWidth = (self.panelRight:getRight() - self.panelLeft.x - UI_BORDER_SPACING)/2
+
+    local btnText = getText("Fluid_Transfer");
+    self.btnTransfer = ISButton:new(self.panelLeft.x, y, buttonWidth, BUTTON_HGT, btnText, self, ISFluidTransferUI.onButton);
+    self.btnTransfer.internal = "TRANSFER";
+    self.btnTransfer:initialise();
+    self.btnTransfer:instantiate();
+    self.btnTransfer:enableAcceptColor();
+    self:addChild(self.btnTransfer);
+
+    local btnText = getText("Fluid_Close");
+    self.btnClose = ISButton:new(self.btnTransfer:getRight() + UI_BORDER_SPACING, y, buttonWidth, BUTTON_HGT, btnText, self, ISFluidTransferUI.onButton);
+    self.btnClose.internal = "CLOSE";
+    self.btnClose:initialise();
+    self.btnClose:instantiate();
+    self.btnClose:enableCancelColor();
+    self:addChild(self.btnClose);
+
+    y = self.btnClose:getBottom() + UI_BORDER_SPACING + 1
 
     self.titleLabel:setX(x/2);
     self.errorLabel:setX(x/2);
@@ -247,7 +236,7 @@ function ISFluidTransferUI:onContainerVerify( _item, _panel)
     if self.action then
         return false;
     end
-    if _item and _item:getFluidContainer() then
+    if _item and _item:getFluidContainer() and _item:getFluidContainer():canPlayerEmpty() then
         if not _item:isInPlayerInventory() then
             return false;
         end
@@ -425,13 +414,18 @@ function ISFluidTransferUI:update()
 end
 
 function ISFluidTransferUI:arrangePanels()
-    local pad = 10
+    local pad = UI_BORDER_SPACING
     self.panelMiddle:setX(self.panelLeft:getRight() + pad)
     self.panelRight:setX(self.panelMiddle:getRight() + pad)
-    self:setWidth(self.panelRight:getRight() + pad)
+    self:setWidth(self.panelRight:getRight() + pad+1)
     self.panelRightX = self.panelRight:getX()
     self.titleLabel:setX(self.width / 2)
     self.errorLabel:setX(self.width / 2)
+
+    local btnWidth = (self.width - UI_BORDER_SPACING*3 - 2)/2
+    self.btnTransfer:setWidth(btnWidth)
+    self.btnClose:setWidth(btnWidth)
+    self.btnClose:setX(self.btnTransfer:getRight() + UI_BORDER_SPACING)
 end
 
 function ISFluidTransferUI:close()

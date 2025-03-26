@@ -343,6 +343,13 @@ BaseGameCharacterDetails.DoTraits = function()
     tailoring:getFreeRecipes():add("KnitSocks");
     tailoring:getFreeRecipes():add("KnitSweaterVest");
     tailoring:getFreeRecipes():add("KnitWoolyHat");
+    tailoring:getFreeRecipes():add("SewCrudeLeatherBackpack");
+    tailoring:getFreeRecipes():add("SewHideBoots");
+    tailoring:getFreeRecipes():add("SewHidePants");
+    tailoring:getFreeRecipes():add("SewHideSleepingBag");
+    tailoring:getFreeRecipes():add("SewHideCoat");
+    tailoring:getFreeRecipes():add("SewHideHoodie");
+    tailoring:getFreeRecipes():add("SewHideJacket");
 
 	TraitFactory.addTrait("Dextrous", getText("UI_trait_Dexterous"), 2, getText("UI_trait_DexterousDesc"), false);
 	TraitFactory.addTrait("AllThumbs", getText("UI_trait_AllThumbs"), -2, getText("UI_trait_AllThumbsDesc"), false);
@@ -517,6 +524,7 @@ BaseGameCharacterDetails.DoTraits = function()
     whittler:getFreeRecipes():add("CarveBucket");
     whittler:getFreeRecipes():add("CarveFleshingTool");
     whittler:getFreeRecipes():add("CarveShortBat");
+    whittler:getFreeRecipes():add("CarveWhistle");
 
 
 

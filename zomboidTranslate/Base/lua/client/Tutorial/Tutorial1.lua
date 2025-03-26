@@ -384,7 +384,9 @@ Tutorial1.addBarricade = function(x, y, z)
         for i = 0, sq:getObjects():size()-1 do
             local o = sq:getObjects():get(i);
             if instanceof(o, "IsoWindow") then
-                o:addBarricadesDebug(ZombRand(2,5), false);
+                -- 3 or 4 barricades block light and vision, making building interiors too dark for some player's liking. SPIF-1071
+                o:addBarricadesDebug(2, false);
+--                o:addBarricadesDebug(ZombRand(2,5), false);
                 break;
             end
             if instanceof(o, "IsoDoor") then

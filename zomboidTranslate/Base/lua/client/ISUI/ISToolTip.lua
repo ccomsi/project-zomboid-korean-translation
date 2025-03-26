@@ -23,6 +23,14 @@ function ISToolTip:setName(name)
 	self.name = name;
 end
 
+function ISToolTip:setTitle(str)
+	self.name = str;
+end
+
+function ISToolTip:setDescription(str)
+	self.description = str;
+end
+
 function ISToolTip:setContextMenu(contextMenu)
 	self.contextMenu = contextMenu;
 end

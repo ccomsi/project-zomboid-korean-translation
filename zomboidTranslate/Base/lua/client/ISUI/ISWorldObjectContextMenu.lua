@@ -955,7 +955,7 @@ ISWorldObjectContextMenu.createMenu = function(player, worldobjects, x, y, test)
     -- 		-- See ISCampingMenu.  Avoid duplicate Rest option when clicking on a tent.
     -- 	elseif bed and not ISWorldObjectContextMenu.isSomethingTo(bed, player) and (playerObj:getStats():getEndurance() < 1) then
 
-        if fetch.bed and not ISWorldObjectContextMenu.isSomethingTo(fetch.bed, player) then
+        if fetch.bed and not ISWorldObjectContextMenu.isSomethingTo(fetch.bed, player) and not playerObj:isSitOnFurnitureObject(fetch.bed) then
             if test == true then return true; end
             if (fetch.bed:getSquare():getRoom() == playerObj:getSquare():getRoom()) or fetch.bed:getSquare():isCanSee(player) then
                 context:addGetUpOption(getText("ContextMenu_Rest"), fetch.bed, ISWorldObjectContextMenu.onRest, player);
@@ -1141,7 +1141,7 @@ ISWorldObjectContextMenu.createMenu = function(player, worldobjects, x, y, test)
         end
 
 	    -- window interaction
-        if fetch.window ~= nil and not invincibleWindow then
+        if fetch.window ~= nil and not fetch.invincibleWindow then
             if fetch.window:canAddSheetRope() and playerObj:getCurrentSquare():getZ() > 0 and not fetch.window:isBarricaded() and playerInv:containsTypeRecurse("Nails") and hasHammer then
                 if (playerInv:getItemCountRecurse("SheetRope") >= fetch.window:countAddSheetRope()) then
                     if test == true then return true; end
@@ -1246,8 +1246,17 @@ ISWorldObjectContextMenu.createMenu = function(player, worldobjects, x, y, test)
             end
         end
 
+        if fetch.curtain == nil and fetch.windowFrame ~= nil then
+            local curtain2 = fetch.windowFrame:HasCurtains();
+            fetch.curtain = fetch.curtain or curtain2
+        end
+        if fetch.curtain == nil and fetch.thumpableWindow ~= nil then
+            local curtain2 = fetch.thumpableWindow:HasCurtains();
+            fetch.curtain = fetch.curtain or curtain2
+        end
+
 	-- curtain interaction
-        if fetch.curtain ~= nil and not invincibleWindow then
+        if fetch.curtain ~= nil and not fetch.invincibleWindow then
                 local text = getText("ContextMenu_Open_curtains");
                 if fetch.curtain:IsOpen() then
                     text = getText("ContextMenu_Close_curtains");
@@ -1273,7 +1282,7 @@ ISWorldObjectContextMenu.createMenu = function(player, worldobjects, x, y, test)
         end
 
         -- window frame without window
-        if fetch.windowFrame and not window and not fetch.thumpableWindow then
+        if fetch.windowFrame and not fetch.window and not fetch.thumpableWindow then
             if fetch.windowFrame:getCurtain() == nil and playerInv:containsTypeRecurse("Sheet") then
                 if test == true then return true; end
                 context:addGetUpOption(getText("ContextMenu_Add_sheet"), worldobjects, ISWorldObjectContextMenu.onAddSheet, fetch.windowFrame, player);
@@ -3597,17 +3606,17 @@ function ISWorldObjectContextMenu.doThumpableWindowOption(test, context, player)
                 climboption.toolTip = tooltip;
             end
         end
-    elseif fetch.thump and fetch.thump:isHoppable() and fetch.thump:canClimbOver(playerObj) then
-        if test == true then return true; end
-        local climbDir = nil
-        local climboption = context:addGetUpOption(getText("ContextMenu_Climb_over"), worldobjects, ISWorldObjectContextMenu.onClimbOverFence, fetch.thump, climbDir, player);
-        if not JoypadState.players[player+1] then
-            local tooltip = ISWorldObjectContextMenu.addToolTip()
-            tooltip:setName(getText("ContextMenu_Info"))
-            tooltip.description = getText("Tooltip_Climb", getKeyName(getCore():getKey("Interact")));
-            climboption.toolTip = tooltip;
-        end
-    end
+	elseif fetch.thump and fetch.thump:isHoppable() and fetch.thump:canClimbOver(playerObj) then
+		if test == true then return true; end
+		local climbDir = nil
+		local climboption = context:addGetUpOption(getText("ContextMenu_Climb_over"), worldobjects, ISWorldObjectContextMenu.onClimbOverFence, fetch.thump, climbDir, player);
+		if not JoypadState.players[player+1] then
+			local tooltip = ISWorldObjectContextMenu.addToolTip()
+			tooltip:setName(getText("ContextMenu_Info"))
+			tooltip.description = getText("Tooltip_Climb", getKeyName(getCore():getKey("Interact")));
+			climboption.toolTip = tooltip;
+		end
+	end
     return false
 end
 
@@ -4009,6 +4018,7 @@ ISWorldObjectContextMenu.doFillFluidMenu = function(sink, playerNum, context)
 		local destItem = containerType[1]
 		if #containerType > 1 then --#containerType gets the length of the table.
 			containerOption = containerMenu:addOption(destItem:getName() .. " (" .. #containerType ..")", worldobjects, nil);
+			containerOption.itemForTexture = destItem
 			local containerTypeMenu = ISContextMenu:getNew(containerMenu)
 			containerMenu:addSubMenu(containerOption, containerTypeMenu)
 			local containerTypeOption
@@ -4020,6 +4030,7 @@ ISWorldObjectContextMenu.doFillFluidMenu = function(sink, playerNum, context)
 			end
 		else
 			containerOption = containerMenu:addOption(destItem:getName(), worldobjects, ISWorldObjectContextMenu.onTakeWater, sink, nil, destItem, playerNum);
+			containerOption.itemForTexture = destItem
 			local t = createWaterSourceTooltip(sink)
 			if instanceof(destItem, "DrainableComboItem") then
 				t.description = t.description .. " <LINE> " .. getText("ContextMenu_ItemWaterCapacity") .. ": " .. math.floor(destItem:getCurrentUsesFloat()*10) .. "/10"
@@ -4083,6 +4094,7 @@ ISWorldObjectContextMenu.doFillFuelMenu = function(source, playerNum, context)
         local destItem = containerType[1]
         if #containerType > 1 then --#containerType gets the length of the table.
             containerOption = containerMenu:addOption(destItem:getName() .. " (" .. #containerType ..")", worldobjects, nil);
+            containerOption.itemForTexture = destItem
             local containerTypeMenu = ISContextMenu:getNew(containerMenu)
             containerMenu:addSubMenu(containerOption, containerTypeMenu)
             local containerTypeOption
@@ -4092,6 +4104,7 @@ ISWorldObjectContextMenu.doFillFuelMenu = function(source, playerNum, context)
             end
         else
             containerOption = containerMenu:addGetUpOption(destItem:getName(), worldobjects, ISWorldObjectContextMenu.onTakeFuelNew, source, nil, destItem, playerNum);
+            containerOption.itemForTexture = destItem
             if destItem:getFluidContainer() then
                 local t = ISWorldObjectContextMenu.addToolTip()
                 t.maxLineWidth = 512
@@ -4301,6 +4314,7 @@ ISWorldObjectContextMenu.doWashClothingMenu = function(sink, player, context)
 				end
 				local option = mainSubMenu:addGetUpOption(getText("ContextMenu_WashClothing", item:getDisplayName()), playerObj, ISWorldObjectContextMenu.onWashClothing, sink, soapList, nil, item, noSoap);
 				option.toolTip = tooltip;
+				option.itemForTexture = item
 				if (waterRemaining < waterRequired) then
 					option.notAvailable = true;
 				end

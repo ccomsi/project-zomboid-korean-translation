@@ -40,6 +40,9 @@ AnimalDefinitions.breeds["turkey"].breeds["meleagris"].invIconBaby = "Item_Turke
 AnimalDefinitions.breeds["turkey"].breeds["meleagris"].invIconMaleDead = "Item_Turkey_Dead";
 AnimalDefinitions.breeds["turkey"].breeds["meleagris"].invIconFemaleDead = "Item_TurkeyHen_Dead";
 AnimalDefinitions.breeds["turkey"].breeds["meleagris"].invIconBabyDead = "Item_TurkeyPoult_Dead";
+AnimalDefinitions.breeds["turkey"].breeds["meleagris"].invIconMaleSkel = "Item_Skeleton_Turkey";
+AnimalDefinitions.breeds["turkey"].breeds["meleagris"].invIconFemaleSkel = "Item_Skeleton_Turkey";
+AnimalDefinitions.breeds["turkey"].breeds["meleagris"].invIconBabySkel = "Item_Skeleton_Turkey_Poult";
 AnimalDefinitions.breeds["turkey"].breeds["meleagris"].featherItem = "Base.TurkeyFeather";
 AnimalDefinitions.breeds["turkey"].breeds["meleagris"].maxFeather = 120;
 

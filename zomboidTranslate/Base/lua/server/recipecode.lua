@@ -406,7 +406,7 @@ function Recipe.OnCreate.Make2Bowls(craftRecipeData, character)
 				local result = results:get(j)
 				if instanceof(result, "Food") then
 					result:setBaseHunger(item:getBaseHunger() / 2);
-					result:setHungChange(item:getBaseHunger() / 2);
+					result:setHungChange(item:getHungChange() / 2);
 					result:setThirstChange(item:getThirstChangeUnmodified() / 2);
 					result:setBoredomChange(item:getBoredomChangeUnmodified() / 2);
 					result:setUnhappyChange(item:getUnhappyChangeUnmodified() / 2);
@@ -454,7 +454,7 @@ function Recipe.OnCreate.Slice3(craftRecipeData, character)
 				if instanceof(result, "Food") then
 					if item:isBurnt() then result:setBurnt(true) end
 					result:setBaseHunger(item:getBaseHunger() / 3);
-					result:setHungChange(item:getBaseHunger() / 3);
+					result:setHungChange(item:getHungChange() / 3);
 					result:setThirstChange(item:getThirstChangeUnmodified() / 3);
 					result:setBoredomChange(item:getBoredomChangeUnmodified() / 3);
 					result:setUnhappyChange(item:getUnhappyChangeUnmodified() / 3);
@@ -3300,4 +3300,20 @@ function Recipe.WeaponParts.hasScrewdriver(character, weapon, weaponPart)
 	-- this needs to return true if character is nil for sawing shotguns to properly transfer parts.
 	-- see: Recipe.OnCreate.ShotgunSawnoff and tryAttachPart
 	return character == nil or character:getInventory():containsTagEval("Screwdriver", predicateNotBroken)
+end
+
+function Recipe.OnCreate.UntieHeadband(craftRecipeData, character)
+	local items = craftRecipeData:getAllConsumedItems();
+	local result = craftRecipeData:getAllCreatedItems():get(0)
+    local dirty = false;
+    if instanceof(item, "Clothing") then
+        dirty = item:isDirty() or item:isBloody()
+    end
+    if (not dirty) or (not character) then
+        return
+    end
+
+    character:getInventory():Remove(result)
+    local item2 = instanceItem("Base.LeatherStripsDirty")
+    character:getInventory():AddItem(item2);
 end

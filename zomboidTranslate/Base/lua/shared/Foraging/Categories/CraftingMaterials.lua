@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateCraftingMaterialDefs()
 	-- "Bottleneck" and tool type items for crafting
@@ -50,11 +51,9 @@ local function generateCraftingMaterialDefs()
 				MetalworkingChisel      = "Base.MetalworkingChisel",
 				MetalworkingPunch       = "Base.MetalworkingPunch",
 				Multitool               = "Base.Multitool",
-				OldDrill                = "Base.OldDrill",
 				SheetMetalSnips         = "Base.SheetMetalSnips",
 				SmallFileSet            = "Base.SmallFileSet",
 				SmallPunchSet           = "Base.SmallPunchSet",
-				StoneDrill              = "Base.StoneDrill",
 				ViseGrips               = "Base.ViseGrips",
 				Whetstone               = "Base.Whetstone",
 			},
@@ -62,32 +61,35 @@ local function generateCraftingMaterialDefs()
 	};
 	for _, spawnTable in pairs(craftingMaterials) do
 		for itemName, itemFullName in pairs(spawnTable.items) do
-			forageDefs[itemName] = {
-				type = itemFullName,
-				minCount = spawnTable.minCount,
-				maxCount = spawnTable.maxCount,
-				skill = 0,
-				xp = spawnTable.xp,
-				categories = spawnTable.categories,
-				zones = {
-					Forest      	= spawnTable.chance,
-					DeepForest  	= spawnTable.chance,
-					PHForest  		= spawnTable.chance,
-					PRForest  		= spawnTable.chance,
-					BirchForest  	= spawnTable.chance,
-					OrganicForest  	= spawnTable.chance,
-					Vegitation  	= spawnTable.chance,
-					FarmLand    	= spawnTable.chance,
-					TrailerPark 	= spawnTable.chance,
-					TownZone    	= spawnTable.chance,
-					ForagingNav 	= spawnTable.chance,
-				},
-				spawnFuncs = { forageSystem.doGenericItemSpawn },
-				forceOutside = false,
-				canBeAboveFloor = true,
-				itemSizeModifier = 0.5,
-				isItemOverrideSize = true,
-			};
+			forageSystem.addForageDef(
+                itemName,
+                {
+                    type = itemFullName,
+                    minCount = spawnTable.minCount,
+                    maxCount = spawnTable.maxCount,
+                    skill = 0,
+                    xp = spawnTable.xp,
+                    categories = spawnTable.categories,
+                    zones = {
+                        Forest = spawnTable.chance,
+                        DeepForest = spawnTable.chance,
+                        PHForest = spawnTable.chance,
+                        PRForest = spawnTable.chance,
+                        BirchForest = spawnTable.chance,
+                        OrganicForest = spawnTable.chance,
+                        Vegitation = spawnTable.chance,
+                        FarmLand = spawnTable.chance,
+                        TrailerPark = spawnTable.chance,
+                        TownZone = spawnTable.chance,
+                        ForagingNav = spawnTable.chance,
+                    },
+                    spawnFuncs = { forageSystem.doGenericItemSpawn },
+                    forceOutside = false,
+                    canBeAboveFloor = true,
+                    itemSizeModifier = 0.5,
+                    isItemOverrideSize = true,
+                }
+			);
 		end;
 	end;
 end

@@ -5024,7 +5024,9 @@ SettingsTable = {
 					{ name = "Map.AllowMiniMap" },
 					{ name = "Map.MapAllKnown" },
 					{ name = "Map.MapNeedsLight" },
-
+					-- Bent Fences
+					{ name = "ZombieLore.FenceThumpersRequired" },
+					{ name = "ZombieLore.FenceDamageMultiplier" },
 				},
 			},
 			{

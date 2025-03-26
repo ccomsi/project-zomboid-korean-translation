@@ -128,21 +128,22 @@ end
 
 function ISObjectClickHandler.doClickDoor(object, playerNum, playerObj)
     if false then
-        ISWorldObjectContextMenu.onOpenCloseDoor(nil, object, playerNum)
-        return true
-    end
-    local playerSq = playerObj:getCurrentSquare()
-    if object:getSquare():getZ() ~= playerSq:getZ() then return false end
-    if not object:isAdjacentToSquare(playerSq) then return false end
+        ISWorldObjectContextMenu.onOpenCloseDoor(nil, object, playerNum);
+        return true;
+    end;
+    local playerSq = playerObj:getCurrentSquare();
+    if playerSq:isWallTo(object:getSquare()) then return false; end;
+    if object:getSquare():getZ() ~= playerSq:getZ() then return false end;
+    if not object:isAdjacentToSquare(playerSq) then return false end;
     if isKeyDown(Keyboard.KEY_LSHIFT) and not playerObj:isWalking() then
         if object:HasCurtains() and (playerSq == object:getSheetSquare()) then
-            ISTimedActionQueue.addGetUpAndThen(playerObj, ISOpenCloseCurtain:new(playerObj, object))
-            return true
-        end
-    end
-    CancelAction(playerNum)
+            ISTimedActionQueue.addGetUpAndThen(playerObj, ISOpenCloseCurtain:new(playerObj, object));
+            return true;
+        end;
+    end;
+    CancelAction(playerNum);
     ISTimedActionQueue.addGetUpAndThen(playerObj, ISOpenCloseDoor:new(playerObj, object));
-    return true
+    return true;
 end
 
 function ISObjectClickHandler.doClickLightSwitch(object, playerNum, playerObj)
@@ -236,7 +237,7 @@ ISObjectClickHandler.doClick = function (object, x, y)
 
 
     local isPaused = UIManager.getSpeedControls() and UIManager.getSpeedControls():getCurrentGameSpeed() == 0
-    if getCore():getGameMode() ~= "Tutorial" and not isPaused and instanceof(object, "IsoWaveSignal") and playerObj:isAlive() and not playerObj:IsAiming() and
+    if getCore():getGameMode() ~= "Tutorial" and not isPaused and instanceof(object, "IsoWaveSignal") and playerObj:isAlive() and not playerObj:isAiming() and
             playerObj:getCurrentSquare() and object:getSquare() and
             playerObj:DistToSquared(object:getX() + 0.5, object:getY() + 0.5) < 1.5 * 1.5 and
             not playerObj:getCurrentSquare():isSomethingTo(object:getSquare()) then
@@ -247,7 +248,7 @@ ISObjectClickHandler.doClick = function (object, x, y)
     if object:getSpriteConfig() and object:getSpriteConfig():getMultiSquareMaster() then
         local old = object;
         object = object:getSpriteConfig():getMultiSquareMaster();
-        if getCore():getGameMode() ~= "Tutorial" and not isPaused and playerObj:isAlive() and not playerObj:IsAiming() and
+        if getCore():getGameMode() ~= "Tutorial" and not isPaused and playerObj:isAlive() and not playerObj:isAiming() and
                 playerObj:getCurrentSquare() and object:getSquare() and
                 playerObj:DistToSquared(object:getX() + 0.5, object:getY() + 0.5) < 1.5 * 4.0 and
                 not playerObj:getCurrentSquare():isSomethingTo(object:getSquare()) then
@@ -262,7 +263,7 @@ ISObjectClickHandler.doClick = function (object, x, y)
 -- --     changed clicking on workstations and crafting surfaces to open them to double clicking
 -- --     added check to ensure that the player can properly access the square in question (ie not in another room; behind a fence; etc)
 --     if playerObj:canUseAsGenericCraftingSurface(object) then
---         if getCore():getGameMode() ~= "Tutorial" and not isPaused and playerObj:isAlive() and not playerObj:IsAiming() and
+--         if getCore():getGameMode() ~= "Tutorial" and not isPaused and playerObj:isAlive() and not playerObj:isAiming() and
 --                 playerObj:getCurrentSquare() and object:getSquare() and
 --                 playerObj:DistToSquared(object:getX() + 0.5, object:getY() + 0.5) < 1.5 * 4.0 and
 --                 not playerObj:getCurrentSquare():isSomethingTo(object:getSquare()) then
@@ -277,7 +278,7 @@ ISObjectClickHandler.doClick = function (object, x, y)
         return
     end
 
-    if object:getContainer() and not playerObj:IsAiming() then
+    if object:getContainer() and not playerObj:isAiming() then
         if instanceof(object, "IsoThumpable") and object:isLockedToCharacter(playerObj) then
             return
         end

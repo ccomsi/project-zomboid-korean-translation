@@ -280,7 +280,7 @@ function ButcheringUtil.addAnimalPart(part, player, carcass, fromGround)
     if carcass:getModData()["roadKill"] then
         minNb = minNb / 2;
         maxNb = maxNb / 2;
-        meatRatio = ZombRand(0.1, 0.2);
+        meatRatio = ZombRandFloat(0.2, 0.4);
     end
 
     local rotten = false;
@@ -348,7 +348,6 @@ end
 -- gives various type of meat depending on the definition
 function ButcheringUtil.giveMeatModified(meatDef, nb, player, meatRatio, carcass, fromGround, rotten, deathAge)
     local text = "";
-
     local percRest = 100;
     local animalDef = ButcheringUtil.getAnimalDef(ButcheringUtil.getCarcassName(carcass));
     local baseXp = animalDef.xpPerItem;
@@ -377,7 +376,7 @@ function ButcheringUtil.giveMeatModified(meatDef, nb, player, meatRatio, carcass
             if fromGround then
                 hungerBoost = hungerBoost * 0.6;
             end
-            ButcheringUtil.modifyMeat(item, carcass:getAnimalSize(), meatRatio, partDef.hungerBoost, rotten, deathAge);
+            ButcheringUtil.modifyMeat(item, carcass:getAnimalSize(), meatRatio, hungerBoost, rotten, deathAge);
             item:setName(getText("IGUI_AnimalMeat", getText(partDef.baseName), getText(partDef.extraName)))
             item:setCustomName(true);
 

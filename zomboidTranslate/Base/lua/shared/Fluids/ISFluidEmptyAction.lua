@@ -42,6 +42,8 @@ function ISFluidEmptyAction:start()
 		self:setActionAnim(CharacterActionAnims.Pour);
 		self:setAnimVariable("PourType", item:getPourType());
 		self.sound = self.character:playSound(item:getPourLiquidOnGroundSound())
+	elseif instanceof(self.containerObject:getOwner(), "IsoFeedingTrough") then
+		self.sound = self.character:playSound("AnimalFeederEmptyWater")
 	end
 	self:setOverrideHandModels(item, nil);
 end

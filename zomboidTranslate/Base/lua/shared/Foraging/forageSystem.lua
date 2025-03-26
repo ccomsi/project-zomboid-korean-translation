@@ -448,7 +448,7 @@ end
 function forageSystem.init()
 	--prevent multiple initialisations
 	if forageSystem.isInitialised then return; end;
-	--
+
 	--clear all imported definition tables
 	forageSystem.clearTables();
 	--
@@ -698,7 +698,7 @@ end
 	For debugging and balancing loot rates.
 ]]--
 
-function forageSystem.statisticsDebug()
+function forageSystem.statisticsDebug(_createDebugLog, _doItemStats)
 	forageSystem.statisticsTable = {zones = {}};
 	local categoryTable = {};
 	local itemTable = {};
@@ -730,11 +730,14 @@ function forageSystem.statisticsDebug()
 			end;
 		end;
 	end;
+	if _createDebugLog then
+		forageSystem.createDebugLog(_doItemStats);
+	end;
 end
 
 function forageSystem.createDebugLog(_doItemStats)
 	local fileWriterObj = getFileWriter("statisticsDebug.log", true, false);
-
+	local itemDef, totalCategoryChance;
 	for zoneName, zoneLoot in pairs(forageSystem.statisticsTable.zones) do
 		fileWriterObj:write("-------\r\n"..zoneName.."\r\n-------\r\n" );
 		for monthName, monthLoot in pairs(zoneLoot) do
@@ -747,7 +750,19 @@ function forageSystem.createDebugLog(_doItemStats)
 						fileWriterObj:write("\r\nCategory = "..categoryName.." = " .. string.format("%.2f", categoryLoot.chance * 100).. "%\r\n");
 						if _doItemStats then
 							for itemName, itemChance in pairs(categoryLoot.items) do
-								fileWriterObj:write("    Item = "..itemName.." = " .. string.format("%.2f", itemChance * 100).. "% = (" .. string.format("%.6f", (itemChance * categoryLoot.chance) * 100) .. "%)\r\n");
+								totalCategoryChance = 0;
+								itemDef = forageSystem.itemDefs[itemName];
+								for _, itemCategory in ipairs(itemDef.categories) do
+									if weatherLoot[itemCategory] then
+										totalCategoryChance = totalCategoryChance + weatherLoot[itemCategory].chance;
+									end;
+								end;
+								fileWriterObj:write(
+										"    Item = "..itemName.." = "
+										.. string.format("%.2f", itemChance * 100) .. "% = ["
+										.. string.format("%.6f", (itemChance * categoryLoot.chance) * 100) .. "%] = ("
+										.. string.format("%.6f", (itemChance * totalCategoryChance) * 100) .. "%)\r\n"
+								);
 							end;
 						end;
 					end;
@@ -756,7 +771,6 @@ function forageSystem.createDebugLog(_doItemStats)
 			end;
 		end;
 	end;
-
 	fileWriterObj:write("\r\n");
 	fileWriterObj:close();
 end
@@ -828,9 +842,9 @@ function forageSystem.createForageIcons(_zoneData, _recreate, _count)
 			end;
 			i = i + 1;
 		until	i >= count
-		or		i >= maxIconsPerZone
-		or		#forageIcons >= maxIconsPerZone
-		or		#forageIcons >= itemsLeft
+				or		i >= maxIconsPerZone
+				or		#forageIcons >= maxIconsPerZone
+				or		#forageIcons >= itemsLeft
 	end;
 	forageClient.updateZone(_zoneData);
 	return forageIcons;
@@ -863,9 +877,9 @@ function forageSystem.recreateIcons()
 		local icon, removeIcon;
 		for zoneID, zoneData in pairs(forageData) do
 			if (not zoneData.forageIcons) then zoneData.forageIcons = {}; end;
-			for iconID, iconData in pairs(zoneData.forageIcons) do
+			for iconID in pairs(zoneData.forageIcons) do
 				removeIcon = true;
-				for character, manager in pairs(ISSearchManager.players) do
+				for _, manager in pairs(ISSearchManager.players) do
 					if manager and manager.isSearchMode then
 						icon = manager.forageIcons[iconID];
 						if icon and (icon:getIsSeen() or icon:getIsNoticed()) then
@@ -879,11 +893,43 @@ function forageSystem.recreateIcons()
 					zoneData.forageIcons[iconID] = nil;
 				end;
 			end;
+			for _, manager in pairs(ISSearchManager.players) do
+				if manager and manager.isSearchMode and manager.activeZones[zoneID] ~= nil then
+					manager.activeZones[zoneID] = nil;
+				end;
+			end;
 			forageSystem.checkRefillZone(zoneData);
 			forageClient.updateZone(zoneData);
 		end;
 	end;
 	--update tracking values
+	forageSystem.updateTimeValues();
+end
+
+function forageSystem.debugRefreshAllZones()
+	forageSystem.lootTableUpdate();
+	--
+	for zoneID, zoneData in pairs(forageData) do
+		if (not zoneData.forageIcons) then zoneData.forageIcons = {}; end;
+		forageSystem.debugRefreshZone(zoneData)
+		forageSystem.checkRefillZone(zoneData);
+		forageClient.updateZone(zoneData);
+	end;
+	--update tracking values
+	forageSystem.updateTimeValues();
+end
+
+function forageSystem.debugRefreshZone(_zoneData)
+	forageSystem.lootTableUpdate();
+	--
+	local zoneData = _zoneData;
+	if (not zoneData.forageIcons) then zoneData.forageIcons = {}; end;
+	for iconID in pairs(zoneData.forageIcons) do
+		triggerEvent("onUpdateIcon", zoneData, iconID, nil);
+		zoneData.forageIcons[iconID] = nil;
+	end;
+	forageSystem.fillZone(zoneData);
+	forageClient.updateZone(zoneData);
 	forageSystem.updateTimeValues();
 end
 
@@ -932,12 +978,26 @@ end
 ]]--
 
 function forageSystem.pickRandomItemType(_lootTable)
-	if #_lootTable > 0 then
-		local rolledCategory = _lootTable[ZombRand(#_lootTable) + 1];
+	local lootTable = _lootTable;
+	if lootTable then
+		local totalChance = lootTable.totalChance;
+		local catRoll = ZombRandFloat(0.0, totalChance);
+		local rolledCategory;
+		local rolledItems;
+		for _, tableData in ipairs(lootTable.categoriesIndexed) do
+			if catRoll <= tableData.chance then
+				rolledCategory = tableData.catName;
+				rolledItems = tableData.items;
+				totalChance = tableData.totalChance;
+				break;
+			end;
+		end;
 		if rolledCategory then
-			local rolledItem = rolledCategory.items[ZombRand(#rolledCategory.items) + 1];
-			if rolledItem then
-				return rolledItem, rolledCategory.category;
+			local itemRoll = ZombRandFloat(0.0, totalChance);
+			for _, tableData in ipairs(rolledItems) do
+				if itemRoll <= tableData.chance  then
+					return tableData.itemType, rolledCategory;
+				end;
 			end;
 		end;
 	end;
@@ -973,10 +1033,14 @@ function forageSystem.generateLootTable()
 	local getTimeOfDayBonus     = forageSystem.getTimeOfDayBonus;
 	local isValidMonth          = forageSystem.isValidMonth;
 	--
+	local monthBonusVal			= forageSystem.monthBonus;
+	local monthMalusVal			= forageSystem.monthMalus;
+	--
 	local monthBonus;
 	local timeBonus;
 	local weatherBonus;
 	local catChance;
+	local totalChance;
 	--
 	--loot table month
 	local month = getGameTime():getMonth() + 1;
@@ -996,30 +1060,27 @@ function forageSystem.generateLootTable()
 	--create the table structure
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Begin generating loot tables");
 	-- do final loot table for zone
-	local zoneLootTable = {};
 	for zoneName in pairs(zoneDefs) do
 		lootTables[zoneName] = {};
-		zoneLootTable[zoneName] = {};
 		lootTables[zoneName][month] = {};
-		zoneLootTable[zoneName][month] = {};
 		for timeOfDay in pairs(timesOfDay) do
 			lootTables[zoneName][month][timeOfDay] = {};
-			zoneLootTable[zoneName][month][timeOfDay] = {};
 			for weatherType in pairs(weatherTypes) do
-				lootTables[zoneName][month][timeOfDay][weatherType] = {};
-				zoneLootTable[zoneName][month][timeOfDay][weatherType] = {};
+				lootTables[zoneName][month][timeOfDay][weatherType] = {categories = {}, categoriesIndexed = {}, totalChance = 0};
 				for catName in pairs(catDefs) do
-					zoneLootTable[zoneName][month][timeOfDay][weatherType][catName] = {category = catName, items = {}};
+					lootTables[zoneName][month][timeOfDay][weatherType].categories[catName] = {category = catName, chance = 0, items = {}, totalChance = 0};
 				end;
 			end;
 		end;
 	end;
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Finished generating loot table structure");
+	--print("[forageSystem][generateLootTable] Finished final loot table, took "..(getTimestampMs() - timeStart).."ms"); timeStart = getTimestampMs();
 	--
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Begin populating loot table");
+	--
 	for itemType, itemDef in pairs(itemDefs) do
 		if isValidMonth(nil, itemDef, nil, month) then
-			monthBonus = getMonthBonus(itemDef, month);
+			monthBonus = getMonthBonus(itemDef, month, monthBonusVal, monthMalusVal);
 			for timeOfDay, timeBonusParams in pairs(timesOfDay) do
 				timeBonus = getTimeOfDayBonus(itemDef, timeBonusParams);
 				for weatherType, weatherBonusParams in pairs(weatherTypes) do
@@ -1028,9 +1089,9 @@ function forageSystem.generateLootTable()
 						if zoneDefs[zoneName] then
 							for _, catName in ipairs(itemDef.categories) do
 								if catDefs[catName] then
-									for _ = 1, zoneChance * monthBonus * timeBonus * weatherBonus do
-										insert(zoneLootTable[zoneName][month][timeOfDay][weatherType][catName].items, itemType);
-									end;
+									totalChance = lootTables[zoneName][month][timeOfDay][weatherType].categories[catName].totalChance + (zoneChance * monthBonus * timeBonus * weatherBonus);
+									insert(lootTables[zoneName][month][timeOfDay][weatherType].categories[catName].items, {itemType = itemType, chance = totalChance});
+									lootTables[zoneName][month][timeOfDay][weatherType].categories[catName].totalChance = totalChance;
 								else
 									log(DebugType.Foraging, "[forageSystem][generateLootTable] no such category is defined "..catName..", ignoring for definition "..itemType);
 								end;
@@ -1044,8 +1105,7 @@ function forageSystem.generateLootTable()
 		end;
 	end;
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Finished populating loot table");
-	--
-
+	--print("[forageSystem][generateLootTable] Finished populating loot table, took "..(getTimestampMs() - timeStart).."ms"); timeStart = getTimestampMs();
 	--
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Begin populating loot table categories");
 	for zoneName in pairs(zoneDefs) do
@@ -1055,17 +1115,24 @@ function forageSystem.generateLootTable()
 				timeBonus = getTimeOfDayBonus(catDef, timeBonusParams);
 				for weatherType, weatherBonusParams in pairs(weatherTypes) do
 					weatherBonus = getWeatherBonus(catDef, unpack(weatherBonusParams));
-					if #zoneLootTable[zoneName][month][timeOfDay][weatherType][catName].items > 0 then
-						for _ = 1, catChance * timeBonus * weatherBonus do
-							insert(lootTables[zoneName][month][timeOfDay][weatherType], zoneLootTable[zoneName][month][timeOfDay][weatherType][catName]);
-						end;
-					end;
+					totalChance = lootTables[zoneName][month][timeOfDay][weatherType].totalChance + (catChance * timeBonus * weatherBonus);
+					lootTables[zoneName][month][timeOfDay][weatherType].categories[catName].chance = totalChance;
+					lootTables[zoneName][month][timeOfDay][weatherType].totalChance = totalChance;
+					insert(lootTables[zoneName][month][timeOfDay][weatherType].categoriesIndexed,
+						{
+							catName = catName,
+							chance = totalChance,
+							items = lootTables[zoneName][month][timeOfDay][weatherType].categories[catName].items,
+							totalChance = lootTables[zoneName][month][timeOfDay][weatherType].categories[catName].totalChance,
+						}
+					);
 				end;
 			end;
 		end;
 	end;
-	--
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Finished populating loot table categories");
+	--
+	--print("[forageSystem][generateLootTable] Finished final loot table categories, took "..(getTimestampMs() - timeStart).."ms"); timeStart = getTimestampMs();
 	--
 	forageSystem.lootTables = lootTables;
 	log(DebugType.Foraging, "[forageSystem][generateLootTable] Finished generating loot tables");
@@ -1161,8 +1228,9 @@ function forageSystem.addItemDef(_itemDef)
 					--add definition
 					forageSystem.itemDefs[defType] = def;
 					-- update the item script to know that it can be foraged
-                    local scriptItem = ScriptManager.instance:getItem(_itemDef.type)
+                    local scriptItem = ScriptManager.instance:getItem(itemDef.type)
                     scriptItem:setCanBeForaged(true);
+                    forageSystem.setScriptItemFocusCategories(itemDef, scriptItem);
 					return defType, true; -- defType is added
 				else
 					log(DebugType.Foraging, "[forageSystem][addItemDef] item is already defined! "..itemDef.type);
@@ -1206,6 +1274,7 @@ function forageSystem.removeItemDef(_itemDef)
         -- update the item script to know that it cannot be foraged
         local scriptItem = ScriptManager.instance:getItem(_itemDef.type)
         scriptItem:setCanBeForaged(false);
+        scriptItem:clearForageFocusCategories();
 	else
 		log(DebugType.Foraging, "[forageSystem][removeItemDef] no such item, ignoring "..((_itemDef and _itemDef.type) or "unknown type"));
 	end;
@@ -1282,9 +1351,11 @@ end
 
 function forageSystem.populateItemDefs(_itemDefs)
 	--populate itemDefs
+	--local timeStart = getTimestampMs();
 	for _, def in pairs(_itemDefs or forageDefs) do
 		forageSystem.addItemDef(def);
 	end;
+	--print("[forageSystem][populateItemDefs] Finished populating item definitions, took "..(getTimestampMs() - timeStart).."ms");
 end
 
 --[[---------------------------------------------
@@ -2032,15 +2103,15 @@ end
 	Returns month bonus total for itemDef as percent
 ]]--
 
-function forageSystem.getMonthBonus(_itemDef, _month)
+function forageSystem.getMonthBonus(_itemDef, _month, _monthBonus, _monthMalus)
 	if not _itemDef then return 1; end;
 	local month = _month or getGameTime():getMonth() + 1;
 	local monthBonus, monthMalus = 0, 0;
 	for _, bonusMonth in ipairs(_itemDef.bonusMonths) do
-		if month == bonusMonth then monthBonus = forageSystem.monthBonus; break; end;
+		if month == bonusMonth then monthBonus = _monthBonus; break; end;
 	end;
 	for _, malusMonth in ipairs(_itemDef.malusMonths) do
-		if month == malusMonth then monthMalus = forageSystem.monthMalus; break; end;
+		if month == malusMonth then monthMalus = _monthMalus; break; end;
 	end;
 	return 1 - ((monthBonus + monthMalus) / 100);
 end
@@ -2065,12 +2136,17 @@ end
 
 function forageSystem.getTimeOfDayBonus(_def, _isDay)
 	if (not _def) then return 1; end;
-	local isDay = (_isDay == true) or (forageSystem.getTimeOfDay() == "isDay");
-	local isNight = (_isDay == false) or (forageSystem.getTimeOfDay() == "isNight");
-	local bonusChance = 100;
-	if isDay then bonusChance = bonusChance + _def.dayChance; end;
-	if isNight then bonusChance = bonusChance + _def.nightChance; end;
-	return (bonusChance / 100)
+	local isDay;
+	if _isDay ~= nil then
+		isDay = _isDay == true;
+	else
+		isDay = forageSystem.getTimeOfDay() == "isDay";
+	end;
+	if isDay then
+		return (100 + _def.dayChance) / 100;
+	else
+		return (100 + _def.nightChance) / 100;
+	end;
 end
 
 --[[--======== getWeatherType ========--]]--
@@ -2090,9 +2166,9 @@ end
 
 function forageSystem.getWeatherBonus(_def, _isRaining, _isSnowing, _hasRained)
 	if not _def then return 1; end;
-	local isRaining = _isRaining or getClimateManager():getPrecipitationIntensity() > 0;
-	local hasRained = _hasRained or getPuddlesManager():getPuddlesSize() > 0.1;
-	local isSnowing = _isSnowing or getClimateManager():getSnowStrength() > 0;
+	local isRaining = _isRaining ~= nil and _isRaining or getClimateManager():getPrecipitationIntensity() > 0;
+	local hasRained = _hasRained ~= nil and _hasRained or getPuddlesManager():getPuddlesSize() > 0.1;
+	local isSnowing = _isSnowing ~= nil and _isSnowing or getClimateManager():getSnowStrength() > 0;
 	local bonusChance = 100;
 	if isRaining then bonusChance = bonusChance + _def.rainChance; end;
 	if hasRained then bonusChance = bonusChance + _def.hasRainedChance; end;
@@ -2215,27 +2291,37 @@ end
 
 function forageSystem.isItemScriptValid(_character, _itemDef, _zoneDef)
 	local isValid = false;
-	--
-	local scriptItem = (_itemDef and _itemDef.type) and ScriptManager.instance:FindItem(_itemDef.type);
-	--
-	--item type may only contain a-z, 0-9, underscore, period
-	if _itemDef.type:match('^[a-zA-Z0-9._]+$') ~= nil then
-		if scriptItem then
-			if (not scriptItem:getObsolete()) then
-				local iconsForTexture = scriptItem:getIconsForTexture();
-				if (scriptItem:getIcon() ~= "None") or (iconsForTexture and (not iconsForTexture:isEmpty())) then
-					isValid = true;
+	if _itemDef and _itemDef.type then
+		local itemType = _itemDef.type;
+		local scriptItem = ScriptManager.instance:FindItem(itemType);
+		--item type may only contain a-z, 0-9, underscore, period
+		if itemType:match('^[a-zA-Z0-9._]+$') ~= nil then
+			if scriptItem then
+				if (not scriptItem:getObsolete()) then
+					local iconsForTexture = scriptItem:getIconsForTexture();
+					if (scriptItem:getIcon() ~= "None") or (iconsForTexture and (not iconsForTexture:isEmpty())) then
+						local itemObj = instanceItem(itemType);
+						if itemObj then
+							if itemObj:getTexture() then
+								isValid = true;
+							else
+								log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item failed test [getTexure], ignoring definition for "..itemType);
+							end;
+						else
+							log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item failed test [instanceItem], ignoring definition for "..itemType);
+						end;
+					else
+						log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item script failed test [getIcon] or [getIconsForTexture], ignoring definition for "..itemType);
+					end;
 				else
-					log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item script failed test [getIcon] or [getIconsForTexture], ignoring definition for ".._itemDef.type);
+					log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item failed test [getObsolete], ignoring definition for "..itemType);
 				end;
 			else
-				log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item failed test [getObsolete], ignoring definition for ".._itemDef.type);
+				log(DebugType.Foraging, "[forageSystem][isItemScriptValid] could not find an item script, ignoring definition for "..itemType);
 			end;
 		else
-			log(DebugType.Foraging, "[forageSystem][isItemScriptValid] could not find an item script, ignoring definition for ".._itemDef.type);
+			log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item type contains illegal characters, ignoring definition for "..itemType);
 		end;
-	else
-		log(DebugType.Foraging, "[forageSystem][isItemScriptValid] item type contains illegal characters, ignoring definition for ".._itemDef.type);
 	end;
 	--
 	return isValid;
@@ -2261,6 +2347,18 @@ function forageSystem.isValidMonth(_, _itemDef, _zoneDef, _month)
 		if month == thisMonth then return true; end;
 	end;
 	return false;
+end
+
+function forageSystem.setScriptItemFocusCategories(_itemDef, _scriptItem)
+	local itemDef = _itemDef;
+	local scriptItem = _scriptItem;
+	if itemDef and scriptItem then
+		for _, categoryName in ipairs(itemDef.categories) do
+			if forageSystem.catDefs[categoryName] and not forageSystem.catDefs[categoryName].categoryHidden then
+				scriptItem:addForageFocusCategory(categoryName);
+			end;
+		end;
+	end;
 end
 
 --[[--======== isForageable ========--
@@ -2289,6 +2387,24 @@ function forageSystem.isForageable(_character, _itemDef, _zoneDef)
 		end;
 	end;
 	return true;
+end
+
+--[[--======== addForageDef ========--
+	@param _itemType - item type, without "Module."
+	@param _forageDef - forageDef is an unprocessed itemDef.
+]]--
+
+function forageSystem.addForageDef(_itemType, _forageDef)
+	if not _forageDef then return; end;
+	if not _itemType then
+		log(DebugType.Foraging, "[forageSystem][addForageDef] a forageDef is missing a type! ".. _itemType);
+		return;
+	end;
+	if not forageDefs[_itemType] then
+		forageDefs[_itemType] = _forageDef;
+	else
+		log(DebugType.Foraging, "[forageSystem][addForageDef] a forageDef is already defined! ".. _itemType);
+	end;
 end
 
 --[[---------------------------------------------
@@ -2377,16 +2493,7 @@ end
 --
 --]]---------------------------------------------
 
-function forageSystem.doPoisonItemSpawn(_character, _inventory, _itemDef, _items, isKnownPoison)
-	if isKnownPoison then
-		for item in iterList(_items) do
-			item:setPoisonPower(ZombRand(_itemDef.poisonPowerMin, _itemDef.poisonPowerMax) + 1);
-			item:setPoisonDetectionLevel(_itemDef.poisonDetectionLevel or 0);
-			item:setUseForPoison(item:getHungChange());
-		end;
-		return _items;
-	end
-
+function forageSystem.doPoisonItemSpawn(_character, _inventory, _itemDef, _items)
 	if _itemDef.poisonChance and _itemDef.poisonPowerMin and _itemDef.poisonPowerMax then
 		if _itemDef.poisonChance > 0 and _itemDef.poisonPowerMax > 0 then
 			local perkLevel = forageSystem.getPerkLevel(_character, _itemDef);
@@ -2423,7 +2530,6 @@ end
 function forageSystem.doWorldAgeSpawn(_character, _inventory, _itemDef, _items)
 	local worldAge = getGameTime():getWorldAgeHours();
 	for item in iterList(_items) do
-		--set age based on world age
 		item:setAge(worldAge);
 	end;
 	return _items; --custom spawn scripts must return an arraylist of items (or nil)
@@ -2548,7 +2654,7 @@ end
 
 function forageSystem.doClothingItemSpawn(_character, _inventory, _itemDef, _items)
 	for item in iterList(_items) do
-		if (not item:isCosmetic()) then
+		if item:IsClothing() and not item:isCosmetic() then
 			item:randomizeCondition(25, 75, 25, 33);
 		end;
 	end;

@@ -40,6 +40,9 @@ AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].invIconBaby = "Item_Ch
 AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].invIconMaleDead = "Item_Chicken_RoosterBrown_Dead";
 AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].invIconFemaleDead = "Item_Chicken_HenBrown_Dead";
 AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].invIconBabyDead = "Item_Chicken_Chick_Dead";
+AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].invIconMaleSkel = "Item_Skeleton_Chicken";
+AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].invIconFemaleSkel = "Item_Skeleton_Chicken";
+AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].invIconBabySkel = "Item_Skeleton_Chicken_Chick";
 AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].featherItem = "Base.ChickenFeather";
 AnimalDefinitions.breeds["chicken"].breeds["rhodeisland"].maxFeather = 100;
 
@@ -55,6 +58,9 @@ AnimalDefinitions.breeds["chicken"].breeds["leghorn"].invIconBaby = "Item_Chicke
 AnimalDefinitions.breeds["chicken"].breeds["leghorn"].invIconMaleDead = "Item_Chicken_RoosterWhite_Dead";
 AnimalDefinitions.breeds["chicken"].breeds["leghorn"].invIconFemaleDead = "Item_Chicken_HenWhite_Dead";
 AnimalDefinitions.breeds["chicken"].breeds["leghorn"].invIconBabyDead = "Item_Chicken_Chick_Dead";
+AnimalDefinitions.breeds["chicken"].breeds["leghorn"].invIconMaleSkel = "Item_Skeleton_Chicken";
+AnimalDefinitions.breeds["chicken"].breeds["leghorn"].invIconFemaleSkel = "Item_Skeleton_Chicken";
+AnimalDefinitions.breeds["chicken"].breeds["leghorn"].invIconBabySkel = "Item_Skeleton_Chicken_Chick";
 AnimalDefinitions.breeds["chicken"].breeds["leghorn"].featherItem = "Base.ChickenFeather";
 AnimalDefinitions.breeds["chicken"].breeds["leghorn"].maxFeather = 100;
 

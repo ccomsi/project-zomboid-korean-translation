@@ -60,7 +60,8 @@ function ISBuildIsoEntity:removeFromGround(square)
 	--]]
 end
 
--- return the health of the new furniture, it's 200 + 100 per carpentry lvl
+-- return the health of the new furniture, it reads base health and skill-based bonus health from the entity's script
+-- skill-based bonus health then needs to be multiplied by the character's relevant skill level
 function ISBuildIsoEntity:getHealth()
 	if self.objectInfo:getScript():getHealth() ~= -1 then
 		return self.objectInfo:getScript():getHealth();
@@ -528,11 +529,12 @@ function ISBuildIsoEntity:setInfo(square, north, sprite, openSprite)
 	local spriteType = thumpable:getType();
 	local thumpableProps = thumpable:getProperties();
 	self.blockAllTheSquare = thumpableProps and thumpableProps:Is("BlocksPlacement"); -- need to consider prop IsHigh and IsLow here
-	self.canPassThrough = thumpableProps and not (thumpableProps:Is(IsoFlagType.solid) or thumpableProps:Is(IsoFlagType.solidtrans));
+	self.canPassThrough = thumpableProps and not (thumpableProps:Is(IsoFlagType.solid) or thumpableProps:Is(IsoFlagType.solidtrans) or thumpableProps:Is(IsoFlagType.WallN) or thumpableProps:Is(IsoFlagType.WallNTrans) or thumpableProps:Is(IsoFlagType.WallW) or thumpableProps:Is(IsoFlagType.WallWTrans) or thumpableProps:Is(IsoFlagType.WallNW));
 	self.hoppable = thumpableProps and (thumpableProps:Is(IsoFlagType.HoppableN) or thumpableProps:Is(IsoFlagType.HoppableW) or thumpableProps:Is(IsoFlagType.TallHoppableN) or thumpableProps:Is(IsoFlagType.TallHoppableW));
 	self.isStairs = spriteType and (spriteType == IsoObjectType.stairsTW or spriteType == IsoObjectType.stairsTN or spriteType == IsoObjectType.stairsMW or spriteType == IsoObjectType.stairsMN or spriteType == IsoObjectType.stairsBW or spriteType == IsoObjectType.stairsBN);
 	self.isDoorFrame = spriteType and (spriteType == IsoObjectType.doorFrN or spriteType == IsoObjectType.doorFrW);
 	self.isDoor = spriteType and (spriteType == IsoObjectType.doorN or spriteType == IsoObjectType.doorW);
+	self.isFloor = thumpableProps and thumpableProps:Is(IsoFlagType.solidfloor);
 	if self.isDoor then	-- set thumpDmg override for doors
 		self.thumpDmg = 5;
 	end
@@ -546,8 +548,8 @@ function ISBuildIsoEntity:setInfo(square, north, sprite, openSprite)
 	end
 
 	local bonusHealth = self.objectInfo:getScript():getBonusHealth();
-	local skillBonus = 0; -- need to get from recipe
-	local baseHealth = self.previousStageObject and self.previousStageObject:getMaxHealth() or self:getHealth();
+	local skillBonus = (getSpecificPlayer(self.player):getPerkLevel(self.objectInfo:getRecipe():getCraftRecipe():getHighestRelevantSkill(getSpecificPlayer(self.player))) * self.objectInfo:getScript():getSkillBaseHealth()) or 0;
+	local baseHealth = self.objectInfo:getScript():getHealth();
 	-- MULTIPLY BONUS HEALTH
 	local bonusHealthMultiplier = getSandboxOptions():getOptionByName("ConstructionBonusPoints"):getValue()
 	if bonusHealthMultiplier == 1 then bonusHealth = bonusHealth * 0.5; end

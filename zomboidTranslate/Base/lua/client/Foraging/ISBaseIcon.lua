@@ -86,54 +86,66 @@ function ISBaseIcon:getGameSpeed()
 end
 -------------------------------------------------
 -------------------------------------------------
---todo: refactor - move grab menu constructor to a new method
+function ISBaseIcon:doGrabSubMenu(_context, _contextOption, _inventory)
+	local contextMenu = _context;
+	local contextOption = _contextOption;
+	local inventory = _inventory;
+	if self.itemObjTable then
+		local itemTable = {};
+		for _, itemObj in pairs(self.itemObjTable) do
+			if itemObj and itemObj:getWorldItem() then
+				table.insert(itemTable, itemObj);
+			end;
+		end;
+		if #itemTable > 1 then
+			contextOption.onSelect = nil
+			local subMenuGrab = ISContextMenu:getNew(contextMenu);
+			contextMenu:addSubMenu(contextOption, subMenuGrab);
+			subMenuGrab:addOption(getText("ContextMenu_Grab_one"), self, self.onClickContext, 0, 0, contextMenu, inventory, {self.itemObj});
+			if #itemTable > 2 then
+				subMenuGrab:addOption(getText("ContextMenu_Grab_half"), self, self.onClickContext, 0, 0, contextMenu, inventory, {unpack(itemTable, 1, math.ceil(#itemTable / 2))});
+			end;
+			subMenuGrab:addOption(getText("ContextMenu_Grab_all"), self, self.onClickContext, 0, 0, contextMenu, inventory, itemTable);
+		end;
+	end;
+end
+
 function ISBaseIcon:doContextMenu(_context)
 	if self.isTrack then return; end
 	if self:getIsSeen() and self:getAlpha() > 0 then
 		self:getGridSquare();
 		if (not self.square) then return; end;
-		--
-		local contextMenu;
-		if _context then
-			local forageSubOption = _context:addOptionOnTop(getText("IGUI_perks_Foraging"), self);
-			contextMenu = ISContextMenu:getNew(_context);
-			contextMenu:addSubMenu(forageSubOption, contextMenu);
-		else
+
+		local contextMenu = _context;
+		if not contextMenu then
 			contextMenu = ISContextMenu.get(self.player, getMouseX(), getMouseY());
-		end
-		--
+		end;
 		if not contextMenu then return; end;
-		--
+
 		local plInventory = self.character:getInventory();
 		local plInventoryHasSpace = (plInventory:getCapacityWeight() <= plInventory:getEffectiveCapacity(self.character));
 		local contextName = getText("IGUI_Pickup").." "..getText("UI_foraging_UnknownItem");
-		--
-		if self.identified then contextName = getText("IGUI_Pickup").." "..self.itemObj:getDisplayName(); end;
-		--
+
+		if self.identified then
+			local displayName = self.itemObj:getDisplayName();
+			if self.itemList and not self.itemList:isEmpty() then
+				if self.itemList:get(0) ~= nil then
+					displayName = self.itemList:get(0):getDisplayName();
+				end;
+			end;
+			if not displayName then
+				displayName = getText("UI_foraging_UnknownItem");
+			end;
+			contextName = getText("IGUI_Pickup").." "..displayName;
+		end;
+
 		local contextOption = contextMenu:addOption(contextName, self, nil, contextMenu, plInventory);
 		local subMenu = ISContextMenu:getNew(contextMenu);
 		local bpList = getPlayerInventory(self.player).backpacks;
-		--
+
 		local plInvOption = subMenu:addOption(getText("ContextMenu_PutInContainer", getText("ContextMenu_MoveToInventory")), self, self.onClickContext, 0, 0, contextMenu, plInventory, {self.itemObj});
 		if plInventory:hasRoomFor(self.character, self.itemObj) and plInventoryHasSpace then
-			if self.itemObjTable then
-				local itemTable = {};
-				for _, itemObj in pairs(self.itemObjTable) do
-					if itemObj and itemObj:getWorldItem() then
-						table.insert(itemTable, itemObj);
-					end;
-				end;
-				if #itemTable > 1 then
-					plInvOption.onSelect = nil
-					local subMenuGrab = ISContextMenu:getNew(contextMenu);
-					contextMenu:addSubMenu(plInvOption, subMenuGrab);
-					subMenuGrab:addOption(getText("ContextMenu_Grab_one"), self, self.onClickContext, 0, 0, contextMenu, plInventory, {self.itemObj});
-					if #itemTable > 2 then
-						subMenuGrab:addOption(getText("ContextMenu_Grab_half"), self, self.onClickContext, 0, 0, contextMenu, plInventory, {unpack(itemTable, 1, math.ceil(#itemTable / 2))});
-					end;
-					subMenuGrab:addOption(getText("ContextMenu_Grab_all"), self, self.onClickContext, 0, 0, contextMenu, plInventory, itemTable);
-				end;
-			end;
+			self:doGrabSubMenu(contextMenu, plInvOption, plInventory);
 		else
 			plInvOption.onSelect = nil;
 			plInvOption.notAvailable = true;
@@ -147,25 +159,7 @@ function ISBaseIcon:doContextMenu(_context)
 						backPackOption.onSelect = nil;
 						backPackOption.notAvailable = true;
 					else
-						if self.itemObjTable then
-							local itemTable = {};
-							for _, itemObj in pairs(self.itemObjTable) do
-								if itemObj and itemObj:getWorldItem() then
-									table.insert(itemTable, itemObj);
-								end;
-							end;
-							--
-							if #itemTable > 1 then
-								backPackOption.onSelect = nil
-								local subMenuGrab = ISContextMenu:getNew(contextMenu);
-								contextMenu:addSubMenu(backPackOption, subMenuGrab);
-								subMenuGrab:addOption(getText("ContextMenu_Grab_one"), self, self.onClickContext, 0, 0, contextMenu, backpack.inventory, {self.itemObj});
-								if #itemTable > 2 then
-									subMenuGrab:addOption(getText("ContextMenu_Grab_half"), self, self.onClickContext, 0, 0, contextMenu, backpack.inventory, {unpack(itemTable, 1, math.ceil(#itemTable / 2))});
-								end;
-								subMenuGrab:addOption(getText("ContextMenu_Grab_all"), self, self.onClickContext, 0, 0, contextMenu, backpack.inventory, itemTable);
-							end;
-						end;
+						self:doGrabSubMenu(contextMenu, backPackOption, backpack.inventory);
 					end;
 				end;
 			end;
@@ -179,7 +173,7 @@ function ISBaseIcon:doContextMenu(_context)
 			end;
 			contextOption = contextMenu:addOption(contextName, self, self.onClickDiscard, contextMenu);
 		end;
-		--
+
 		triggerEvent("onFillSearchIconContextMenu", contextMenu, self);
 		return false;
 	end;
@@ -523,15 +517,14 @@ function ISBaseIcon:getItemList()
 			--
 			ISSearchManager.iconItems[self.iconID] = self.itemList;
 		end;
-		--
-		self.isKnownPoison = false
-		for item in iterList(self.itemList) do
-			if self.character:isKnownPoison(item) then
-				self.isKnownPoison = true;
-				break;
-			end
+	end;
+	--reset the itemObj to be the first item in the new list
+	if self.itemList and not self.itemList:isEmpty() then
+		if self.itemList:get(0) ~= nil then
+			self.itemObj = self.itemList:get(0);
 		end;
 	end;
+	self:checkForPoison();
 end
 -------------------------------------------------
 -------------------------------------------------
@@ -704,6 +697,18 @@ function ISBaseIcon:isNearby()				return self.distanceToPlayer <= self.maxRadius
 function ISBaseIcon:checkIsForageable()     return self.isForageable;                               end;
 -------------------------------------------------
 -------------------------------------------------
+function ISBaseIcon:checkForPoison()
+	if self.isTrack then return; end
+	self.isKnownPoison = false;
+	for item in iterList(self.itemList) do
+		if self.character:isKnownPoison(item) then
+			self.isKnownPoison = true;
+			break;
+		end;
+	end;
+end;
+-------------------------------------------------
+-------------------------------------------------
 function ISBaseIcon:updateManagerMarkers()
 	local manager = self.manager;
 	local managedMarkers = self.managedMarkers;
@@ -854,7 +859,6 @@ function ISBaseIcon:updateBounce()
 end
 -------------------------------------------------
 -------------------------------------------------
-
 function ISBaseIcon:initGridSquare()
 	local cell = getCell();
 	if cell then
@@ -1003,7 +1007,6 @@ function ISBaseIcon:new(_manager, _icon)
 	o.itemType              = _icon.itemType;
 	o.itemSize              = _icon.itemSize or 1.0;
 
-	o.isMover               = false;
 	o.moveState             = "idle";
 	o.moveTargetX           = o.xCoord;
 	o.moveTargetY           = o.yCoord;

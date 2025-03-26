@@ -391,6 +391,7 @@ function buildUtil.setInfo(javaObject, ISItem)
 	if ISItem.modData and ISItem.modData["use:Base.BlowTorch"] then
 		javaObject:setThumpSound("ZombieThumpMetal")
 	end
+	javaObject:setIsFloor(ISItem.isFloor);
 end
 
 local function addStairObject(objects, x, y, z)

@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateStoneDefs()
 	local stones = {
@@ -150,7 +151,7 @@ local function generateStoneDefs()
 		},
 	};
 	for itemName, itemDef in pairs(stones) do
-		forageDefs[itemName] = itemDef;
+		forageSystem.addForageDef(itemName, itemDef);
 	end;
 end
 

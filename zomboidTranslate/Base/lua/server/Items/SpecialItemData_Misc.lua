@@ -1408,6 +1408,7 @@ SpecialLootSpawns.SurvivalSchematics = {
     "CarveBucket",
     "CarveKnittingNeedles",
     "CarveFleshingTool",
+    "CarveWhistle",
     "CarveWoodenSpade",
     "FireHardenSpear",
     "MakeBoneAwl",
@@ -1437,6 +1438,13 @@ SpecialLootSpawns.SurvivalSchematics = {
     "MakeTrapBox",
     "MakeWoodenBoxTrap",
     "RechargeFilters",
+    "SewCrudeLeatherBackpack",
+    "SewHideBoots",
+    "SewHideCoat",
+    "SewHideHoodie",
+    "SewHideJacket",
+    "SewHidePants",
+    "SewHideSleepingBag",
     "SharpenBone",
 }
 

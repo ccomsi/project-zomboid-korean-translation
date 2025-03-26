@@ -29,7 +29,11 @@ end
 
 function ISClimbOverFence:perform()
 	local dir = self:getFacingDirection()
-	self.character:climbOverFence(dir)
+	if self.isTallHoppable then
+		self.character:climbOverWall(dir);
+	else
+		self.character:climbOverFence(dir);
+	end;
 	-- needed to remove from queue / start next.
 	ISBaseTimedAction.perform(self)
 end
@@ -66,5 +70,6 @@ function ISClimbOverFence:new(character, item, direction)
 	o.stopOnWalk = false;
 	o.stopOnRun = false;
 	o.stopOnAim = false;
+	o.isTallHoppable = item:isTallHoppable();
 	return o
 end	

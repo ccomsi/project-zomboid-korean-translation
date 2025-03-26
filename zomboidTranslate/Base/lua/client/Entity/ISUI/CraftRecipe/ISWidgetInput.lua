@@ -550,7 +550,17 @@ function ISWidgetInput:updateValues()
                     self.iconConsumed.mouseovertext = getText("IGUI_CraftingWindow_WillBeConsume", tostring(amount));
                 end
                 if not self.displayAsOutput then
-                    self.primary.label:setName(tostring(satisfiedAmount).."/"..tostring(amount));
+                    local item = inputItem and inputItem:getScriptItem() or self.primary.inputItem;
+                    if self.inputScript:isUsesPartialItem(item) then
+                        if inputItem and not self.logic:getRecipeData():getDataForInputScript(self.inputScript):isInputItemsSatisfied() then 
+                            self.primary.label:setName(tostring(satisfiedAmount).."/"..tostring(amount).." "..getText("Attributes_Type_Uses"));                        
+                        else
+                            self.primary.label:setName(tostring(amount).." "..getText("Attributes_Type_Uses"));
+                        end
+                    else
+                        self.primary.label:setName(tostring(satisfiedAmount).."/"..tostring(amount));
+                    end
+                    
                 end
                 self.primary.label.amountValue = amount;
                 self.primary.label.satisfiedValue = satisfiedAmount;

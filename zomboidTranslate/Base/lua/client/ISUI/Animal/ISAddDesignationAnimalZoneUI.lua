@@ -61,8 +61,6 @@ function ISAddDesignationAnimalZoneUI:onMouseDownOutside(x, y)
     if not self.drawTileMouse or self.startingX then return; end
     local sq = self:pickSquare(x + self:getAbsoluteX(), y + self:getAbsoluteY())
     if sq then
-        self.selectedSq = ArrayList.new();
-        self.selectedSq:add(sq);
         self.startRenderTile = true;
         self.drawTileMouse = true;
         self.startingX = sq:getX();
@@ -77,9 +75,6 @@ function ISAddDesignationAnimalZoneUI:onMouseMoveOutside(dx, dy)
     if self.playerNum ~= 0 then return end
     local sq = self:pickSquare(getMouseX(), getMouseY())
     if sq and self.drawTileMouse then
-        if not self.selectedSq:contains(sq) then
-            self.selectedSq:add(sq);
-        end
         self.endX = sq:getX();
         self.endY = sq:getY();
     end
@@ -123,16 +118,6 @@ end
 
 function ISAddDesignationAnimalZoneUI:addZone()
     ISWorldObjectContextMenu.disableWorldMenu = false;
-    for i=0, self.selectedSq:size()-1 do
-        local sq = self.selectedSq:get(i);
-        if sq then
-            sq:getFloor():setHighlighted(false);
-        end
-        --for n = 0,sq:getObjects():size()-1 do
-        --    local obj = sq:getObjects():get(n);
-        --    obj:setHighlighted(false);
-        --end
-    end
 
     if not self.widthCorrect or not self.heightCorrect then
         local h = 150;
@@ -219,7 +204,6 @@ function ISAddDesignationAnimalZoneUI:reset()
     end
 
 
-    self.selectedSq = ArrayList.new();
     self.startRenderTile = false;
     self.drawTileMouse = false;
     self.startingX = nil;
@@ -308,50 +292,6 @@ function ISAddDesignationAnimalZoneUI:prerender()
     addAreaHighlightForPlayer(self.playerNum, startingX, startingY, endX + 1, endY + 1, self.player:getCurrentSquare():getZ(), r, g, b, a)
 
     self:highlightSquareAtMousePointer()
-
---[[
-    -- remove not used anymore sq
-    local trueSq = ArrayList.new();
-    local removeSq = ArrayList.new();
-
-    for x2=startingX, endX do
-        for y=startingY, endY do
-            local sq = getCell():getGridSquare(x2,y,self.player:getSquare():getZ());
-            if sq then
-                if sq and sq:getFloor() then
-                    trueSq:add(sq);
-                    sq:getFloor():setHighlighted(true, false);
-                    sq:getFloor():setHighlightColor(self.zoneColor.r,self.zoneColor.g,self.zoneColor.b,self.zoneColor.a);
-                end
-                --for n = 0,sq:getObjects():size()-1 do
-                --    local obj = sq:getObjects():get(n);
-                --    obj:setHighlighted(true, false);
-                --    obj:setHighlightColor(self.zoneColor.r,self.zoneColor.g,self.zoneColor.b,self.zoneColor.a);
-                --end
-            end
-        end
-    end
-
-    -- compare the list to stop highlight the non selected sq, jeeze we need a better method than this, otherwise it makes sq blinks
-    for i=0, self.selectedSq:size()-1 do
-        if not trueSq:contains(self.selectedSq:get(i)) then
-            removeSq:add(self.selectedSq:get(i));
-        end
-    end
-
-    self.selectedSq = trueSq;
-
-    for i=0, removeSq:size()-1 do
-        local sq = removeSq:get(i);
-        if sq and sq:getFloor() then
-            sq:getFloor():setHighlighted(false);
-        end
-        --for n = 0,sq:getObjects():size()-1 do
-        --    local obj = sq:getObjects():get(n);
-        --    obj:setHighlighted(false);
-        --end
-    end
---]]
     self:updateButtons();
 end
 
@@ -510,6 +450,5 @@ function ISAddDesignationAnimalZoneUI:new(x, y, width, height, player)
     ISAddDesignationAnimalZoneUI.instance = o;
     o.buttonBorderColor = {r=0.7, g=0.7, b=0.7, a=0.5};
     player:setSeeDesignationZone(true);
-    o.selectedSq = ArrayList.new();
     return o;
 end

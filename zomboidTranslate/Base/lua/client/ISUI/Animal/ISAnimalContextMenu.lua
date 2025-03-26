@@ -621,7 +621,7 @@ AnimalContextMenu.doAnimalBodyMenuFromInv = function(context, playerObj, animalb
             butcherOption.toolTip = tooltip;
         elseif ISButcherHookUI:isCorpseValid(animalbody) then -- notice the player you won't get as much as using a butchering hook
             local tooltip = ISWorldObjectContextMenu.addToolTip();
-            tooltip:setName(getText("Tooltip_Animal_BetterOnHook"));
+            tooltip:setDescription(getText("Tooltip_Animal_BetterOnHook"));
             butcherOption.toolTip = tooltip;
         end
 
@@ -649,7 +649,7 @@ AnimalContextMenu.doAnimalBodyMenu = function(context, player, animalbody)
             butcherOption.toolTip = tooltip;
         elseif ISButcherHookUI:isCorpseValid(animalbody) then -- notice the player you won't get as much as using a butchering hook
             local tooltip = ISWorldObjectContextMenu.addToolTip();
-            tooltip:setName(getText("Tooltip_Animal_BetterOnHook"));
+            tooltip:setDescription(getText("Tooltip_Animal_BetterOnHook"));
             butcherOption.toolTip = tooltip;
         end
 
@@ -738,6 +738,7 @@ end
 AnimalContextMenu.onPetAnimal = function(animal, chr)
     animal:getBehavior():setBlockMovement(true);
     local vec = animal:getAttachmentWorldPos("head");
+    if not vec then return; end
     ISTimedActionQueue.add(ISWalkToTimedActionF:new(chr, vec));
     ISTimedActionQueue.add(ISPetAnimal:new(chr, animal))
 end

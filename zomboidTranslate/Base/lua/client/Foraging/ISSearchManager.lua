@@ -166,21 +166,6 @@ end
 function ISSearchManager:renderDebugInfo()
 	if self:getGameSpeed() ~= 1 then return; end;
 	self:checkMarkers();
-	--if ISSearchManager.showDebugVisionRadius then
-	--	if not self.debugPlayerMarker then
-	--		self.debugPlayerMarker = getIsoMarkers():addCircleIsoMarker(self.character:getCurrentSquare(), 1, 1, 1, 1);
-	--		self.debugPlayerMarker:setSize(self.radius);
-	--		self.debugPlayerMarker:setPos(self.character:getX(), self.character:getY(), self.character:getZ());
-	--	else
-	--		self.debugPlayerMarker:setSize(self.radius);
-	--		self.debugPlayerMarker:setPos(self.character:getX(), self.character:getY(), self.character:getZ());
-	--	end;
-	--else
-	--	if self.debugPlayerMarker then
-	--		self.debugPlayerMarker:remove();
-	--		self.debugPlayerMarker = nil;
-	--	end;
-	--end;
 	for iconID, icon in pairs(self.stashIcons) do
 		--renderIsoCircle(icon.xCoord, icon.yCoord, icon.zCoord, icon.viewDistance, 1, 1, 0, 1, 1);
 		icon:drawTextCentre("stash", 0, 50, 1, 1, 1, 1, UIFont.NewMedium);
@@ -404,15 +389,35 @@ function ISSearchManager:checkForSpriteAffinity(_square, _object, _zoneData)
 	for _, spriteName in ipairs(spriteTable) do
 		categoryTable = affinityTable[spriteName];
 		if categoryTable then
-			spriteCategory = categoryTable[ZombRand(#categoryTable) + 1];
+			local useFocusCategory;
+			local chanceToPreferIcon;
+			--if we have a search focus set, we'll attempt to prefer that category when choosing an affinity category.
+			local searchWindow = ISSearchWindow.players[self.character];
+			if searchWindow then
+				--check if the focus also has a valid affinity for this sprite.
+				for _, categoryName in ipairs(categoryTable) do
+					if categoryName == searchWindow.searchFocusCategory then
+						catDef = forageSystem.catDefs[categoryName];
+						chanceToPreferIcon = math.max(catDef.chanceToMoveIcon * 2, 75.0);
+						if catDef and catDef.chanceToMoveIcon and ZombRandFloat(0.0, 100.0) < chanceToPreferIcon then
+							useFocusCategory = searchWindow.searchFocusCategory;
+						end;
+						break;
+					end;
+				end;
+			end;
+			--if we haven't found a focus category in the previous step, it just picks a random valid category.
+			spriteCategory = useFocusCategory or categoryTable[ZombRand(#categoryTable) + 1];
 			catDef = spriteCategory and forageSystem.catDefs[spriteCategory] or false;
 			if spriteCategory and catDef then
 				if (not self:isIconOnSquare(_square, self.activeIcons)) then
 					doSpriteCheck = false;
 					if ZombRandFloat(0.0, 100.0) < catDef.chanceToMoveIcon then
 						self:findSpriteAffinityIcon(_square, catDef, _zoneData);
+						break;
 					elseif ZombRandFloat(0.0, 100.0) < catDef.chanceToCreateIcon then
 						self:createBonusIcon(_square, catDef, _zoneData);
+						break;
 					end;
 				end;
 			end;
@@ -435,7 +440,7 @@ function ISSearchManager:createBonusIcon(_square, _catDef, _zoneData)
 						table.insert(possibleItemTypes, itemDef);
 					end;
 					break;
-				end
+				end;
 			end;
 		end;
 	end;
@@ -460,6 +465,7 @@ function ISSearchManager:createBonusIcon(_square, _catDef, _zoneData)
 		self.forageIcons[iconID] = ISForageIcon:new(self, forageIcon, _zoneData);
 		self.activeIcons[iconID] = self.forageIcons[iconID];
 		self.activeIcons[iconID]:doUpdateEvents(true);
+		self.activeIcons[iconID]:getItemList();
 		self.activeIcons[iconID]:addToUIManager();
 		--
 		--ignore this icon next time if it's still active
@@ -478,6 +484,48 @@ function ISSearchManager:createBonusIcon(_square, _catDef, _zoneData)
 	end;
 end
 
+function ISSearchManager:createSpecificIcon(_square, _itemType, _zoneData, _isBonus, _isFocus, _count)
+	local square, itemType = _square, _itemType;
+	local pickedItemType = forageSystem.itemDefs[itemType];
+	local _count = _count or 1;
+	if pickedItemType then
+		for _ = 1, _count do
+			local iconID = getRandomUUID();
+			local forageIcon = {
+				id          			= iconID,
+				zoneid      			= _zoneData.id,
+				x           			= square:getX(),
+				y           			= square:getY(),
+				z           			= square:getZ(),
+				catName     			= pickedItemType.categories[1],
+				itemType    			= pickedItemType.type,
+				isBonusIcon				= type(_isBonus == "boolean") and _isBonus or false;
+				canRollForSearchFocus	= type(_isFocus == "boolean") and _isFocus or true,
+			};
+			_zoneData.forageIcons[iconID] = forageIcon;
+			self.forageIcons[iconID] = ISForageIcon:new(self, forageIcon, _zoneData);
+			self.activeIcons[iconID] = self.forageIcons[iconID];
+			self.activeIcons[iconID]:doUpdateEvents(true);
+			self.activeIcons[iconID]:getItemList();
+			self.activeIcons[iconID]:addToUIManager();
+			--
+			--ignore this icon next time if it's still active
+			self.movedIcons[iconID] = iconID;
+			--ignore this square until the zone refills
+			self.movedIconsSquares[square] = true;
+			--add the bonus item to the loading queue of all managers
+			for _, manager in pairs(ISSearchManager.players) do
+				if manager.activeZones[_zoneData.id] then
+					if (not manager.iconStack[iconID]) and (not manager.forageIcons[iconID]) then
+						manager.iconStack[forageIcon] = _zoneData;
+						manager.iconQueue = manager.iconQueue + 1;
+					end;
+				end;
+			end;
+		end;
+	end;
+end
+
 function ISSearchManager:findSpriteAffinityIcon(_square, _catDef, _zoneData)
 	local square, catDef = _square, _catDef;
 	local foundIcon = false;
@@ -486,28 +534,32 @@ function ISSearchManager:findSpriteAffinityIcon(_square, _catDef, _zoneData)
 			if (not icon:getIsNoticed()) and (icon.catDef.name == catDef.name) then
 				--make sure it's from this zone and not seen before
 				if icon.icon.zoneid == _zoneData.id and (not icon:getIsSeen()) then
-					foundIcon = true;
-					--move it to the square
-					self:doMoveIcon(icon, square:getX(), square:getY(), square:getZ());
-					--force activate the icon
-					icon:removeFromUIManager();
-					icon:doUpdateEvents(true);
-					icon:addToUIManager();
-					self.activeIcons[iconID] = icon;
-					--ignore this icon next time if it's still active
-					self.movedIcons[iconID] = iconID;
-					--ignore this square until the zone refills
-					self.movedIconsSquares[square] = true;
-					--prevent rolling this icon for search focus ever again (saved to the zoneData)
-					icon.canRollForSearchFocus = false;
-					icon.icon.canRollForSearchFocus = false;
-					--stop here, we found an icon to move
-					break;
+					--make sure it can actually go on this square
+					if forageSystem.isValidSquare(_square, icon.itemDef, _catDef) then
+						foundIcon = true;
+						--move it to the square
+						self:doMoveIcon(icon, square:getX(), square:getY(), square:getZ());
+						--force activate the icon
+						icon:removeFromUIManager();
+						icon:doUpdateEvents(true);
+						icon:addToUIManager();
+						self.activeIcons[iconID] = icon;
+						--ignore this icon next time if it's still active
+						self.movedIcons[iconID] = iconID;
+						--ignore this square until the zone refills
+						self.movedIconsSquares[square] = true;
+						--prevent rolling this icon for search focus ever again (saved to the zoneData)
+						icon.canRollForSearchFocus = false;
+						icon.icon.canRollForSearchFocus = false;
+						--stop here, we found an icon to move
+						break;
+					end;
 				end;
 			end;
 		end;
 	end;
-	--if we didn't find an icon to move, we'll try an extra roll here to generate one instead
+	--if we didn't find an icon to move, we'll try an extra roll here to generate one instead.
+	--this is technically a bonus roll, the chanceToCreateIcon is also rolled in checkForSpriteAffinity.
 	if (not foundIcon) then
 		if ZombRandFloat(0.0, 100.0) < catDef.chanceToCreateIcon then
 			self:createBonusIcon(_square, _catDef, _zoneData);
@@ -843,8 +895,6 @@ function ISSearchManager:checkActiveZones()
 		if not zoneData then
 			self:removeIcon(icon);
 		else
---			zD = self.activeZones[icon.icon.zoneid].bounds;
---			if not isInRect(plX, plY, zD.x1 - eW, zD.x2 + eW, zD.y1 - eW, zD.y2 + eW) then
 			if not forageSystem.zoneIntersects(zoneData, plX - eW, plY - eW, 0, eW * 2, eW * 2) then
 				self:removeIcon(icon);
 				self.activeZones[icon.icon.zoneid] = nil;
@@ -949,12 +999,9 @@ end
 
 function ISSearchManager:getAndActivateZoneAtXY(_x, _y)
 	local zoneData;
-	local zD;
 	local topZoneData = nil;
 	--check if there is a zone here already loaded
 	for activeZoneID, activeZoneData in pairs(self.activeZones) do
---		zD = activeZoneData.bounds;
---		if zD and isInRect(_x, _y, zD.x1, zD.x2, zD.y1, zD.y2) then
 		if forageSystem.zoneContains(activeZoneData, _x, _y, 0) then
 			if not topZoneData or getWorld():getMetaGrid():isZoneAbove(activeZoneData.metaZone, topZoneData.metaZone, _x, _y, 0) then
 				topZoneData = activeZoneData;
@@ -1501,47 +1548,45 @@ Events.OnGameStart.Add(ISSearchManager.OnGameStart);
 -------------------------------------------------
 -------------------------------------------------
 function ISSearchManager.onUpdateIcon(_zoneData, _iconID, _icon)
+	local icon = _icon;
+	local iconID = _iconID;
 	for _, manager in pairs(ISSearchManager.players) do
-		if _icon then
+		if icon and icon.itemObj and icon.itemDef and icon.catDef and icon.zoneDef then
 			table.wipe(manager.iconStack);
 			table.wipe(manager.closeIcons);
-			table.wipe(manager.activeZones);
 			manager.iconQueue = 0;
-			if manager.forageIcons[_iconID] then
-				manager.forageIcons[_iconID]:removeIsoMarker();
-				manager.forageIcons[_iconID]:removeWorldMarker();
-				manager.forageIcons[_iconID].xCoord				= _icon.xCoord;
-				manager.forageIcons[_iconID].yCoord				= _icon.yCoord;
-				manager.forageIcons[_iconID].icon.x				= _icon.xCoord;
-				manager.forageIcons[_iconID].icon.y				= _icon.yCoord;
-				manager.forageIcons[_iconID].itemDef			= _icon.itemDef;
-				manager.forageIcons[_iconID].catDef				= _icon.catDef;
-				manager.forageIcons[_iconID].itemType			= _icon.itemType;
-				manager.forageIcons[_iconID].icon.itemType		= _icon.itemType;
-				manager.forageIcons[_iconID].icon.catName		= _icon.catDef.name;
-				manager.forageIcons[_iconID].itemObj			= instanceItem(_icon.itemType);
-				manager.forageIcons[_iconID].itemTexture		= _icon.itemObj:getTexture();
-				manager.forageIcons[_iconID].isMover			= _icon.isMover or false;
-				manager.forageIcons[_iconID].altWorldTexture	= _icon.altWorldTexture;
-				manager.forageIcons[_iconID].render3DTexture	= _icon.render3DTexture;
-				if _icon.itemDef then
-					manager.forageIcons[_iconID].itemSize		= _icon.itemDef.itemSize or 1.0;
-				end;
+			if manager.forageIcons[iconID] then
+				manager.forageIcons[iconID]:removeIsoMarker();
+				manager.forageIcons[iconID]:removeWorldMarker();
+				manager.forageIcons[iconID].xCoord				= icon.xCoord;
+				manager.forageIcons[iconID].yCoord				= icon.yCoord;
+				manager.forageIcons[iconID].icon.x				= icon.xCoord;
+				manager.forageIcons[iconID].icon.y				= icon.yCoord;
+				manager.forageIcons[iconID].itemDef				= icon.itemDef;
+				manager.forageIcons[iconID].catDef				= icon.catDef;
+				manager.forageIcons[iconID].zoneDef				= icon.zoneDef;
+				manager.forageIcons[iconID].itemType			= icon.itemType;
+				manager.forageIcons[iconID].icon.itemType		= icon.itemType;
+				manager.forageIcons[iconID].icon.catName		= icon.catDef.name;
+				manager.forageIcons[iconID].itemObj				= icon.itemObj;
+				manager.forageIcons[iconID].itemTexture			= icon.itemTexture;
+				manager.forageIcons[iconID].altWorldTexture		= icon.altWorldTexture;
+				manager.forageIcons[iconID].render3DTexture		= icon.render3DTexture;
+				manager.forageIcons[iconID].itemSize			= icon.itemDef.itemSize or 1.0;
 			end;
-			manager.activeIcons[_iconID] = nil;
-			_zoneData.forageIcons[_iconID] = _icon.icon;
+			manager.activeIcons[iconID] = nil;
+			_zoneData.forageIcons[iconID] = icon.icon;
 		else
 			table.wipe(manager.iconStack);
 			table.wipe(manager.closeIcons);
-			table.wipe(manager.activeZones);
 			manager.iconQueue = 0;
-			if manager.forageIcons[_iconID] then
-				manager.forageIcons[_iconID]:reset();
-				manager.forageIcons[_iconID]:removeIsoMarker();
-				manager.forageIcons[_iconID]:removeWorldMarker();
-				manager:removeIcon(manager.forageIcons[_iconID]);
+			if manager.forageIcons[iconID] then
+				manager.forageIcons[iconID]:reset();
+				manager.forageIcons[iconID]:removeIsoMarker();
+				manager.forageIcons[iconID]:removeWorldMarker();
+				manager:removeIcon(manager.forageIcons[iconID]);
 			end;
-			_zoneData.forageIcons[_iconID] = nil;
+			_zoneData.forageIcons[iconID] = nil;
 		end;
 	end;
 end
@@ -1549,6 +1594,116 @@ end
 Events.onUpdateIcon.Add(ISSearchManager.onUpdateIcon);
 -------------------------------------------------
 -------------------------------------------------
+function ISSearchManager:onEnteredItemType(button, _square, _zoneData, _count)
+	if button.internal == "OK" then
+		local itemType = button.parent.entry:getText();
+		if not forageSystem.itemDefs[itemType] then return; end;
+		self:createSpecificIcon(_square, itemType, _zoneData, nil, nil, _count)
+	end;
+end
+
+local function onClickCreateIcon(_manager, _square, _count)
+	local zoneData = _manager:getAndActivateZoneAtXY(_square:getX(), _square:getY());
+	if not zoneData then return; end;
+	local modal = ISTextBox:new(
+			0, 0, 280, 180,
+			"Enter Item Type:", "Base.",
+			_manager, ISSearchManager.onEnteredItemType, nil,
+			_square, zoneData, _count
+	);
+	modal:initialise()
+	modal:addToUIManager()
+end
+
+function ISSearchManager:moveAllZoneIconsToSquare(_square)
+	local square = _square;
+	if square then
+		local zoneData = self:getAndActivateZoneAtXY(square:getX(), square:getY());
+		if not zoneData then return; end;
+		local x = square:getX();
+		local y = square:getY();
+		local z = square:getZ();
+		for iconID, icon in pairs(self.forageIcons) do
+			if zoneData.forageIcons[iconID] then
+				if forageSystem.isValidSquare(square, icon.itemDef, icon.catDef) then
+					self:doMoveIcon(icon, x, y, z);
+				end;
+			end;
+		end;
+	end;
+end
+
+function ISSearchManager:refreshZoneIcons(_square)
+	local square = _square;
+	if square then
+		local zoneData = self:getAndActivateZoneAtXY(square:getX(), square:getY());
+		if not zoneData then return; end;
+		forageSystem.debugRefreshZone(zoneData);
+		self:createIconsForZone(zoneData, true);
+	end;
+end
+
+function ISSearchManager:createAllIconsOnSquare(_square, _category)
+	local square = _square;
+	if square then
+		local zoneData = self:getAndActivateZoneAtXY(square:getX(), square:getY());
+		if not zoneData then return; end;
+		local category = _category;
+		local catDef = forageSystem.catDefs[category];
+		for itemType, itemDef in pairs(forageSystem.itemDefs) do
+			local spawnItem = false;
+			if itemDef.categories and itemDef.categories[1] then
+				if _category then
+					for _, catName in ipairs(itemDef.categories) do
+						if catName == category then
+							spawnItem = true;
+							break;
+						end;
+					end;
+				else
+					spawnItem = true;
+					catDef = forageSystem.catDefs[itemDef.categories[1]];
+				end;
+				if catDef and spawnItem and forageSystem.isValidSquare(square, itemDef, catDef) then
+					self:createSpecificIcon(square, itemType, zoneData, nil, nil, 1);
+				end;
+			else
+				print("[ISSearchManager][createAllIconsOnSquare] Item has no categories: " .. itemType);
+			end;
+		end;
+	end;
+end
+
+function ISSearchManager.createDebugSpawnAllContextMenu(_player, _context, _manager, _square)
+	local contextMenu = ISContextMenu:getNew(_context);
+	if not contextMenu then return; end;
+
+	local spawnCategorySubOption = _context:addDebugOption("Create Bulk Icons On This Square");
+	contextMenu:addSubMenu(spawnCategorySubOption, contextMenu);
+
+	for catName in pairs(forageSystem.catDefs) do
+		contextMenu:addDebugOption("Create All From " .. catName, _manager, _manager.createAllIconsOnSquare, _square, catName);
+	end;
+	contextMenu:addDebugOption("Every Possible Forage Icon", _manager, _manager.createAllIconsOnSquare, _square)
+end
+
+function ISSearchManager.createDebugContextMenu(_player, _context, _manager, _square)
+	local contextMenu = ISContextMenu:getNew(_context);
+	if not contextMenu then return; end;
+
+	local forageDebugOption = _context:addDebugOption(getText("IGUI_perks_Foraging"), self);
+	contextMenu:addSubMenu(forageDebugOption, contextMenu);
+
+	--add test icons
+	contextMenu:addDebugOption("Add Forage Icon Here (x1)", _manager, onClickCreateIcon, _square, 1);
+	contextMenu:addDebugOption("Add Forage Icon Here (x10)", _manager, onClickCreateIcon, _square, 10);
+	contextMenu:addDebugOption("Add Forage Icon Here (x50)", _manager, onClickCreateIcon, _square, 50);
+	ISSearchManager.createDebugSpawnAllContextMenu(_player, contextMenu, _manager, _square)
+	contextMenu:addDebugOption("----------");
+	contextMenu:addDebugOption("Clear And Refresh All Icons In This Zone", _manager, _manager.refreshZoneIcons, _square);
+	contextMenu:addDebugOption("Move All Forage Icons In Zone To This Square", _manager, _manager.moveAllZoneIconsToSquare, _square);
+end
+
 function ISSearchManager.OnFillWorldObjectContextMenu(_player, _context, _worldObjects)
 	if not _player and _context then return; end;
 	local character = getSpecificPlayer(_player);
@@ -1570,9 +1725,28 @@ function ISSearchManager.OnFillWorldObjectContextMenu(_player, _context, _worldO
 			if square then clickedSquareTable[square] = true; end;
 		end;
 	end;
+
+	local doContextMenu = false;
 	for iconID, icon in pairs(manager.activeIcons) do
 		if (clickedSquareTable[icon.square]) and icon:getIsSeen() then
-			icon:doContextMenu(_context);
+			doContextMenu = true;
+			break;
+		end;
+	end;
+
+	if doContextMenu then
+		local contextMenu;
+		if _context then
+			local forageSubOption = _context:addOptionOnTop(getText("IGUI_perks_Foraging"), self);
+			contextMenu = ISContextMenu:getNew(_context);
+			contextMenu:addSubMenu(forageSubOption, contextMenu);
+		end;
+		if not contextMenu then return; end;
+
+		for iconID, icon in pairs(manager.activeIcons) do
+			if (clickedSquareTable[icon.square]) and icon:getIsSeen() then
+				icon:doContextMenu(contextMenu);
+			end;
 		end;
 	end;
 end

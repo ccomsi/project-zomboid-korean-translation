@@ -161,9 +161,9 @@ function ISTakeWaterAction:new (character, item, waterObject, waterTaintedCL)
 		    o.waterUnit = math.min(o.endUsedAmount - o.startUsedAmount, waterAvailable)
         end
     else
-        local thirst = o.character:getStats():getThirst()
-        local waterNeeded = math.min(thirst, 1)
-        o.waterUnit = math.min(waterNeeded, waterAvailable)
+        local thirst = o.character:getStats():getThirst() * 2
+        local waterNeeded = math.min(thirst, waterAvailable)
+        o.waterUnit = waterNeeded
         o.startUsedAmount = 0.0
         o.endUsedAmount = math.min(o.waterUnit, 1.0)
     end

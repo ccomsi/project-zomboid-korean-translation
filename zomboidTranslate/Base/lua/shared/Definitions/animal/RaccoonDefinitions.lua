@@ -29,6 +29,9 @@ AnimalDefinitions.breeds["raccoon"].breeds["grey"].invIconBaby = "Item_Raccoon_K
 AnimalDefinitions.breeds["raccoon"].breeds["grey"].invIconMaleDead = "Item_Raccoon_Dead";
 AnimalDefinitions.breeds["raccoon"].breeds["grey"].invIconFemaleDead = "Item_Raccoon_Dead";
 AnimalDefinitions.breeds["raccoon"].breeds["grey"].invIconBabyDead = "Item_Raccoon_Kit_Dead";
+AnimalDefinitions.breeds["raccoon"].breeds["grey"].invIconMaleSkel = "Item_Skeleton_Raccoon";
+AnimalDefinitions.breeds["raccoon"].breeds["grey"].invIconFemaleSkel = "Item_Skeleton_Raccoon";
+AnimalDefinitions.breeds["raccoon"].breeds["grey"].invIconBabySkel = "Item_Skeleton_Raccoon";
 
 -- genome
 AnimalDefinitions.genome = AnimalDefinitions.genome or {};
@@ -92,6 +95,7 @@ AnimalDefinitions.animals["raccoonkit"].corpseSize = 0;
 AnimalDefinitions.animals["raccoonkit"].minWeight = 1;
 AnimalDefinitions.animals["raccoonkit"].maxWeight = 8;
 AnimalDefinitions.animals["raccoonkit"].minEnclosureSize = 40;
+AnimalDefinitions.animals["raccoonkit"].dung = "Dung_Raccoon";
 
 
 AnimalDefinitions.animals = AnimalDefinitions.animals or {};
@@ -118,7 +122,7 @@ AnimalDefinitions.animals["raccoonsow"].thirstMultiplier = 0.01;
 AnimalDefinitions.animals["raccoonsow"].hungerBoost = 20;
 AnimalDefinitions.animals["raccoonsow"].thirstBoost = 25;
 AnimalDefinitions.animals["raccoonsow"].thirstHungerTrigger = 0.1;
-AnimalDefinitions.animals["raccoonsow"].distToEat = 1;
+AnimalDefinitions.animals["raccoonsow"].distToEat = AnimalDefinitions.animals["raccoonkit"].distToEat;
 AnimalDefinitions.animals["raccoonsow"].minAge = AnimalDefinitions.stages["raccoon"].stages["raccoonkit"].ageToGrow;
 AnimalDefinitions.animals["raccoonsow"].maxAgeGeriatric = 19 * 30;
 AnimalDefinitions.animals["raccoonsow"].minAgeForBaby = AnimalDefinitions.animals["raccoonsow"].minAge;
@@ -133,7 +137,7 @@ AnimalDefinitions.animals["raccoonsow"].baseEncumbrance = 20;
 AnimalDefinitions.animals["raccoonsow"].wild = true;
 AnimalDefinitions.animals["raccoonsow"].idleTypeNbr = 2;
 AnimalDefinitions.animals["raccoonsow"].canClimbStairs = true; -- most animals can't climb stairs, this is defaulted to false
-AnimalDefinitions.animals["raccoonsow"].eatTypeTrough = "AnimalFeed,Grass,Hay,Vegetables,Fruits";
+AnimalDefinitions.animals["raccoonsow"].eatTypeTrough = AnimalDefinitions.animals["raccoonkit"].eatTypeTrough;
 AnimalDefinitions.animals["raccoonsow"].canBePet = true;
 --AnimalDefinitions.animals["raccoonsow"].canClimbFences = true;
 --AnimalDefinitions.animals["raccoonsow"].canBeDomesticated = false;
@@ -144,6 +148,7 @@ AnimalDefinitions.animals["raccoonsow"].corpseSize = 0;
 AnimalDefinitions.animals["raccoonsow"].minWeight = 9;
 AnimalDefinitions.animals["raccoonsow"].maxWeight = 14;
 AnimalDefinitions.animals["raccoonsow"].minEnclosureSize = AnimalDefinitions.animals["raccoonkit"].minEnclosureSize;
+AnimalDefinitions.animals["raccoonsow"].dung = "Dung_Raccoon";
 
 
 AnimalDefinitions.animals["raccoonboar"] = {};
@@ -167,7 +172,7 @@ AnimalDefinitions.animals["raccoonboar"].thirstMultiplier = AnimalDefinitions.an
 AnimalDefinitions.animals["raccoonboar"].hungerBoost = AnimalDefinitions.animals["raccoonsow"].hungerBoost;
 AnimalDefinitions.animals["raccoonboar"].thirstBoost = AnimalDefinitions.animals["raccoonsow"].thirstBoost;
 AnimalDefinitions.animals["raccoonboar"].thirstHungerTrigger = AnimalDefinitions.animals["raccoonsow"].thirstHungerTrigger;
-AnimalDefinitions.animals["raccoonboar"].distToEat = AnimalDefinitions.animals["raccoonsow"].thirstHungerTrigger;
+AnimalDefinitions.animals["raccoonboar"].distToEat = AnimalDefinitions.animals["raccoonkit"].distToEat;
 AnimalDefinitions.animals["raccoonboar"].minAge = AnimalDefinitions.stages["raccoon"].stages["raccoonkit"].ageToGrow;
 AnimalDefinitions.animals["raccoonboar"].maxAgeGeriatric = 19 * 30;
 AnimalDefinitions.animals["raccoonboar"].minAgeForBaby = AnimalDefinitions.animals["raccoonboar"].minAge;
@@ -182,7 +187,7 @@ AnimalDefinitions.animals["raccoonboar"].baseEncumbrance = AnimalDefinitions.ani
 AnimalDefinitions.animals["raccoonboar"].wild = true;
 AnimalDefinitions.animals["raccoonboar"].idleTypeNbr = 2;
 AnimalDefinitions.animals["raccoonboar"].canClimbStairs = true; -- most animals can't climb stairs, this is defaulted to false
-AnimalDefinitions.animals["raccoonboar"].eatTypeTrough = "AnimalFeed,Grass,Hay,Vegetables,Fruits";
+AnimalDefinitions.animals["raccoonboar"].eatTypeTrough = AnimalDefinitions.animals["raccoonkit"].eatTypeTrough;
 AnimalDefinitions.animals["raccoonboar"].canBePet = true;
 --AnimalDefinitions.animals["raccoonboar"].canClimbFences = true;
 --AnimalDefinitions.animals["raccoonboar"].canBeDomesticated = false;
@@ -193,6 +198,7 @@ AnimalDefinitions.animals["raccoonboar"].corpseSize = 0;
 AnimalDefinitions.animals["raccoonboar"].minWeight = 10;
 AnimalDefinitions.animals["raccoonboar"].maxWeight = 15;
 AnimalDefinitions.animals["raccoonboar"].minEnclosureSize = AnimalDefinitions.animals["raccoonkit"].minEnclosureSize;
+AnimalDefinitions.animals["raccoonboar"].dung = "Dung_Raccoon";
 
 local raccoon_kit_sounds = {
 	death = { name = "AnimalVoiceBabyRaccoonDeath", slot = "voice", priority = 100 },

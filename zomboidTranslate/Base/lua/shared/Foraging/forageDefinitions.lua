@@ -56,7 +56,6 @@ forageDefaultDefs = {
 		forceOutside            = true,                                         --item must be outside
 		isOnWater               = false,                                        --item can be on water
 		forceOnWater            = false,                                        --item must be on water
-		isMover                 = false,                                        --does nothing, ignored
 		canBeAboveFloor         = false,                                        --does nothing, ignored
 		doIsoMarkerObject       = false,                                        --create an IsoMarker temp object on square
 		doIsoMarkerSprite       = nil,                                          --use a custom sprite/sprites for IsoMarker

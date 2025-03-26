@@ -276,12 +276,12 @@ function ISHutchNestParentPanel:createChildren()
 
     -----
 
-    self.boxCleanBtn = ISButton:new(0, 0, 90, BUTTON_HGT, "", self.hutchUI, ISHutchUI.onCleanNest);
-    self.boxCleanBtn:initialise();
-    self.boxCleanBtn.anchorTop = false
-    self.boxCleanBtn.anchorBottom = false
-    self.boxCleanBtn.borderColor = self.hutchUI.btnBorder;
-    self:addChild(self.boxCleanBtn);
+    --self.boxCleanBtn = ISButton:new(0, 0, 90, BUTTON_HGT, "", self.hutchUI, ISHutchUI.onCleanNest);
+    --self.boxCleanBtn:initialise();
+    --self.boxCleanBtn.anchorTop = false
+    --self.boxCleanBtn.anchorBottom = false
+    --self.boxCleanBtn.borderColor = self.hutchUI.btnBorder;
+    --self:addChild(self.boxCleanBtn);
 
     self.eggHatchDoorBtn = ISButton:new(0, 0, 80, BUTTON_HGT, "", self.hutchUI, ISHutchUI.onToggleEggHatchDoor);
     self.eggHatchDoorBtn:initialise();
@@ -354,21 +354,21 @@ function ISHutchNestParentPanel:render()
         return
     end
 
-    local hutch = self.hutchUI.hutch
-    local fgBar = self.hutchUI.fgBar;
-    if hutch:getHutchDirt() > 70 then
-        fgBar = self.fgBarRed;
-    elseif hutch:getHutchDirt() > 40 then
-        fgBar = self.fgBarOrange;
-    end
-    local rowX = PADXY
-    local rowY = self.height - UI_BORDER_SPACING - BUTTON_HGT - PROGRESS_HEIGHT
-    self:drawProgressBar(rowX, rowY, PROGRESS_WIDTH, FONT_HGT_SMALL, hutch:getNestBoxDirt() / 100, fgBar)
-    self:drawText(getText("IGUI_Hutch_Dirt", round(hutch:getNestBoxDirt(), 2)), rowX + 7, rowY, 1,1,1,1, UIFont.NewSmall);
-    self.boxCleanBtn:setX(rowX)
-    self.boxCleanBtn:setY(rowY + PROGRESS_HEIGHT + 2)
-    self.boxCleanBtn:setTitle(getText("IGUI_Hutch_Clean"))
-    self.boxCleanBtn:setVisible(hutch:getNestBoxDirt() > 0);
+    --local hutch = self.hutchUI.hutch
+    --local fgBar = self.hutchUI.fgBar;
+    --if hutch:getHutchDirt() > 70 then
+    --    fgBar = self.hutchUI.fgBarRed;
+    --elseif hutch:getHutchDirt() > 40 then
+    --    fgBar = self.hutchUI.fgBarOrange;
+    --end
+    --local rowX = PADXY
+    --local rowY = self.height - UI_BORDER_SPACING - BUTTON_HGT - PROGRESS_HEIGHT
+    --self:drawProgressBar(rowX, rowY, PROGRESS_WIDTH, FONT_HGT_SMALL, hutch:getNestBoxDirt() / 100, fgBar)
+    --self:drawText(getText("IGUI_Hutch_Dirt", round(hutch:getNestBoxDirt(), 2)), rowX + 7, rowY, 1,1,1,1, UIFont.NewSmall);
+    --self.boxCleanBtn:setX(rowX)
+    --self.boxCleanBtn:setY(rowY + PROGRESS_HEIGHT + 2)
+    --self.boxCleanBtn:setTitle(getText("IGUI_Hutch_Clean"))
+    --self.boxCleanBtn:setVisible(hutch:getNestBoxDirt() > 0);
 end
 
 function ISHutchNestParentPanel:configJoypad()
@@ -395,7 +395,7 @@ function ISHutchNestParentPanel:configJoypad()
         if #joypadButtons > 0 then
             self:insertNewListOfButtons(joypadButtons)
         end
-        self:setISButtonForY(self.boxCleanBtn)
+        --self:setISButtonForY(self.boxCleanBtn)
         self:setISButtonForX(self.eggHatchDoorBtn)
     end
     self:restoreJoypadFocus(joypadData)
@@ -406,7 +406,7 @@ function ISHutchNestParentPanel:onGainJoypadFocus(joypadData)
     if self.closedDoorPanel:isVisible() then
         self:setISButtonForX(self.openDoorBtn)
     else
-        self:setISButtonForY(self.boxCleanBtn)
+        --self:setISButtonForY(self.boxCleanBtn)
         self:setISButtonForX(self.eggHatchDoorBtn)
     end
     self:restoreJoypadFocus(joypadData)
@@ -736,9 +736,9 @@ function ISHutchRoostParentPanel:render()
     local hutch = self.hutchUI.hutch
     local fgBar = self.hutchUI.fgBar;
     if hutch:getHutchDirt() > 70 then
-        fgBar = self.fgBarRed;
+        fgBar = self.hutchUI.fgBarRed;
     elseif hutch:getHutchDirt() > 40 then
-        fgBar = self.fgBarOrange;
+        fgBar = self.hutchUI.fgBarOrange;
     end
     self:drawProgressBar(rowX, boxY, PROGRESS_WIDTH, FONT_HGT_SMALL, hutch:getHutchDirt() / 100, fgBar)
     self:drawText(getText("IGUI_Hutch_Dirt", round(hutch:getHutchDirt(), 2)), rowX + 7, boxY, 1,1,1,1, UIFont.NewSmall);
@@ -1024,9 +1024,6 @@ function ISHutchUI:onJoypadDown_Descendant(descendant, button, joypadData)
 end
 
 function ISHutchUI:new(x, y, width, height, hutch, player)
-    if ISHutchUI.ui[player:getPlayerNum()] then
-        return ISHutchUI.ui[player:getPlayerNum()];
-    end
     local o = ISCollapsableWindowJoypad.new(self, x, y, width, height);
     o:setTitle(getText("ContextMenu_Hutch_Info"))
     o.hutch = hutch;
@@ -1049,4 +1046,15 @@ function ISHutchUI:new(x, y, width, height, hutch, player)
     hutch:reforceUpdate();
     ISHutchUI.ui[o.playerNum] = o;
     return o;
+end
+
+function ISHutchUI.ShowWindow(playerObj, hutch)
+    local playerNum = playerObj:getPlayerNum()
+    local ui = ISHutchUI.ui[playerNum]
+    if ui == nil then
+        ui = ISHutchUI:new(getPlayerScreenLeft(playerNum)+100, getPlayerScreenTop(playerNum)+100, 200, 200, hutch, playerObj)
+        ui:initialise()
+    end
+    ui:addToUIManager()
+    return ui
 end

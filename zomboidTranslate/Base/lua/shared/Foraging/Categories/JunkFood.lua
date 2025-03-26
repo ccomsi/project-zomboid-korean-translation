@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateJunkFoodDefs()
 	--random food items lost or tossed by survivors
@@ -333,19 +334,22 @@ local function generateJunkFoodDefs()
 		Yoghurt						= "Base.Yoghurt",
 	};
 	for itemName, itemFullName in pairs(junkFood) do
-		forageDefs[itemName] = {
-			type = itemFullName,
-			xp = 10,
-			categories = { "JunkFood", "Trash" },
-			zones = {
-				TrailerPark = 1,
-				TownZone    = 1,
-				ForagingNav = 1,
-			},
-			spawnFuncs = { forageSystem.doWorldAgeSpawn, forageSystem.doGenericItemSpawn },
-			forceOutside = false,
-			canBeAboveFloor = true,
-		};
+		forageSystem.addForageDef(
+            itemName,
+            {
+                type = itemFullName,
+                xp = 10,
+                categories = { "JunkFood", "Trash" },
+                zones = {
+                    TrailerPark = 1,
+                    TownZone = 1,
+                    ForagingNav = 1,
+                },
+                spawnFuncs = { forageSystem.doWorldAgeSpawn, forageSystem.doGenericItemSpawn },
+                forceOutside = false,
+                canBeAboveFloor = true,
+            }
+		);
 	end;
 end
 

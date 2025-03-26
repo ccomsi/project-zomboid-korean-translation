@@ -12,7 +12,7 @@ local UI_BORDER_SPACING = 10
 local TEXTURE_WIDTH = 0
 local TEXTURE_HEIGHT = 0
 
-function setTextureWidth()
+local function setTextureWidth()
     local size = getCore():getOptionSidebarSize()
     if size == 6 then
         size = getCore():getOptionFontSizeReal() - 1
@@ -33,6 +33,7 @@ end
 
 
 function ISEquippedItem:prerender()
+    self:checkSidebarSizeOption()
 --	self:drawTexture(self.HandSecondaryTexture, -1, 50, 1, 1, 1, 1);
 
     if self.invBtn == nil then
@@ -610,20 +611,13 @@ end
 
 function ISEquippedItem:new (x, y, width, height, chr)
     setTextureWidth()
-	local o = {}
-	--o.data = {}
-	o = ISPanel:new(x, y, width, height);
-	setmetatable(o, self)
-    self.__index = self
-	o.x = x;
-	o.y = y;
+	local o = ISPanel.new(self, x, y, width, height);
     o.borderColor = {r=0.4, g=0.4, b=0.4, a=1};
     o.backgroundColor = {r=0, g=0, b=0, a=0.5};
-	o.width = width;
-	o.height = height;
-    o.inventory = getPlayerInventory(chr:getPlayerNum());
-    o.loot = getPlayerLoot(chr:getPlayerNum());
-    o.infopanel = getPlayerInfoPanel(chr:getPlayerNum());
+    o.playerNum = chr:getPlayerNum();
+    o.inventory = getPlayerInventory(o.playerNum);
+    o.loot = getPlayerLoot(o.playerNum);
+    o.infopanel = getPlayerInfoPanel(o.playerNum);
     o.anchorLeft = true;
     o.chr = chr;
     o.safety = o.chr:getSafety()
@@ -685,6 +679,7 @@ function ISEquippedItem:new (x, y, width, height, chr)
     o.healthIconOscillatorStartLevel = 1.0;
     o.healthIconOscillatorStep = 0.0;
     o.previousHealth = 0.0;
+    o.sidebarSizeOption = getCore():getOptionSidebarSize()
     ISEquippedItem.instance = o;
 	return o;
 end
@@ -1065,6 +1060,17 @@ function ISEquippedItem:removeFromUIManager()
         self.mapPopup:removeFromUIManager()
     end
 	ISPanel.removeFromUIManager(self)
+end
+
+function ISEquippedItem:checkSidebarSizeOption()
+    local playerData = getPlayerData(self.playerNum)
+    if playerData == nil then return end
+    if playerData.equipped ~= self then return end
+    if self.sidebarSizeOption == getCore():getOptionSidebarSize() then return end
+    self.sidebarSizeOption = getCore():getOptionSidebarSize()
+    self:setVisible(false)
+    self:removeFromUIManager()
+    playerData.equipped = launchEquippedItem(self.chr)
 end
 
 -----

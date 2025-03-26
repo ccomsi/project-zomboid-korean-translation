@@ -390,7 +390,7 @@ CFarming_Interact.ChangeClimbDirection = function(key)
     and not getCore():isKey("ReleaseRope", key)--DropBothHeldItemsAndWornBag
     then return end
     local doUp = getCore():isKey("Forward", key)
-    local isUp = player:getCurrentState():equals(ClimbSheetRopeState.instance())
+    local isUp = player:getCurrentState() == ClimbSheetRopeState.instance()
 
 --     print("climbing up " .. tostring(player:getCurrentState():equals(ClimbSheetRopeState.instance())))
 --     print("climbing down " .. tostring(player:getCurrentState():equals(ClimbDownSheetRopeState.instance())))

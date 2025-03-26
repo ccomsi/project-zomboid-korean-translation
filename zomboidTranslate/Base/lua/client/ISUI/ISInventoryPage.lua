@@ -365,14 +365,26 @@ function ISInventoryPage:isRemoveButtonVisible()
 	return sprite and sprite:getProperties() and sprite:getProperties():Is("IsTrashCan")
 end
 
-function ISInventoryPage:update()
-    local playerObj = getSpecificPlayer(self.player)
-    if self.inventory:getEffectiveCapacity(playerObj) ~= self.capacity then
-        self.capacity = self.inventory:getEffectiveCapacity(playerObj)
+-- Hack to give priority to another piece of code highlighting an object.
+local ObjectsHighlightedElsewhere = {}
+ObjectsHighlightedElsewhere[1] = {}
+ObjectsHighlightedElsewhere[2] = {}
+ObjectsHighlightedElsewhere[3] = {}
+ObjectsHighlightedElsewhere[4] = {}
+function ISInventoryPage.OnObjectHighlighted(playerNum, object, isHighlighted)
+    ObjectsHighlightedElsewhere[playerNum+1][object] = isHighlighted or nil
+    local pdata = getPlayerData(playerNum)
+    if pdata then
+        pdata.playerInventory:updateContainerHighlight()
+        pdata.lootInventory:updateContainerHighlight()
     end
+end
 
-    if self.coloredInv and (self.inventory ~= self.coloredInv or self.isCollapsed) then
-        if self.coloredInv:getParent() then
+function ISInventoryPage:updateContainerHighlight()
+    if self.coloredInv and (self.inventory ~= self.coloredInv or self.isCollapsed ) then
+        if ObjectsHighlightedElsewhere[self.player+1][self.coloredInv:getParent()] then
+            -- Another piece of code is highlighting this object, don't change it.
+        elseif self.coloredInv:getParent() then
             self.coloredInv:getParent():setHighlighted(self.player, false)
             self.coloredInv:getParent():setOutlineHighlight(self.player, false);
             self.coloredInv:getParent():setOutlineHlAttached(self.player, false);
@@ -380,23 +392,34 @@ function ISInventoryPage:update()
         self.coloredInv = nil;
     end
 
-    if not self.isCollapsed then
+    if ObjectsHighlightedElsewhere[self.player+1][self.inventory:getParent()] then
+        -- Another piece of code is highlighting this object, don't change it.
+    elseif not self.isCollapsed then
 --        print(self.inventory:getParent());
         if self.inventory:getParent() and ((not instanceof(self.inventory:getParent(), "IsoPlayer")) or instanceof(self.inventory:getParent(), "IsoDeadBody")) then
             self.inventory:getParent():setHighlighted(self.player, true, false);
 			if getCore():getOptionDoContainerOutline() then -- TODO RJ: this make the player blink, not sure what was wanted here?
 				self.inventory:getParent():setOutlineHighlight(self.player, true);
 				self.inventory:getParent():setOutlineHlAttached(self.player, true);
-				self.inventory:getParent():setOutlineHighlightCol(getCore():getObjectHighlitedColor():getR(), getCore():getObjectHighlitedColor():getG(), getCore():getObjectHighlitedColor():getB(), 1);
+				self.inventory:getParent():setOutlineHighlightCol(self.player, getCore():getObjectHighlitedColor():getR(), getCore():getObjectHighlitedColor():getG(), getCore():getObjectHighlitedColor():getB(), 1);
 			end
-            self.inventory:getParent():setHighlightColor(getCore():getObjectHighlitedColor());
+            self.inventory:getParent():setHighlightColor(self.player, getCore():getObjectHighlitedColor());
 --             self.inventory:getParent():setHighlightColor(ColorInfo.new(0.3,0.3,0.3,1));
             --            self.inventory:getParent():setBlink(true);
 --            self.inventory:getParent():setCustomColor(0.98,0.56,0.11,1);
             self.coloredInv = self.inventory;
         end
 	end
-	
+end
+
+function ISInventoryPage:update()
+    local playerObj = getSpecificPlayer(self.player)
+    if self.inventory:getEffectiveCapacity(playerObj) ~= self.capacity then
+        self.capacity = self.inventory:getEffectiveCapacity(playerObj)
+    end
+
+    self:updateContainerHighlight()
+
     if (ISMouseDrag.dragging ~= nil and #ISMouseDrag.dragging > 0) or self.pin then
         self.collapseCounter = 0;
         if isClient() and self.isCollapsed then
@@ -459,9 +482,9 @@ function ISInventoryPage:setBlinkingContainer(blinking, containerType)
 	end
 end
 
-function ISInventoryPage:setForceSelectedContainer(container)
+function ISInventoryPage:setForceSelectedContainer(container, ms)
 	self.forceSelectedContainer = container
-	self.forceSelectedContainerTime = getTimestampMs() + 1000
+	self.forceSelectedContainerTime = getTimestampMs() + (ms or 1000)
 end
 
 --************************************************************************--

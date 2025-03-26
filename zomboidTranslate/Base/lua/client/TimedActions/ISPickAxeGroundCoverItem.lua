@@ -55,7 +55,8 @@ end
 function ISPickAxeGroundCoverItem:perform()
 	if self.item == nil then
 		return
-	end	
+	end
+	local xp = false
 	if self.objectType then
 		local trashItem
 		if self.objectType == "Small Stump" then trashItem = "Base.UnusableWood" end
@@ -64,42 +65,52 @@ function ISPickAxeGroundCoverItem:perform()
         if (string.find(tostring(self.objectType), "ironOre") ~= nil) then
 -- 		if self.objectType:contains("ironOre") then
             trashItem = "Base.IronOre"
+            xp = true
 -- 			self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
             if self.objectType == "ironOreMedium" then
 			    self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
+                addXp(self.character, Perks.Masonry, 5);
             elseif self.objectType == "ironOreLarge" then
 			    self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
 			    self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
+                addXp(self.character, Perks.Masonry, 10);
             end
 --             self.item:getSquare():AddTileObject(IsoObject.new(self.item:getSquare(), "crafting_ore_" .. tostring(ZombRand(2) + 9)));
         elseif (string.find(tostring(self.objectType), "copperOre") ~= nil) then
 -- 		if self.objectType:contains("ironOre") then
             trashItem = "Base.CopperOre"
+            xp = true
 -- 			self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
             if self.objectType == "copperOreMedium" then
 			    self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
+                addXp(self.character, Perks.Masonry, 5);
             elseif self.objectType == "copperOreLarge" then
 			    self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
 			    self.item:getSquare():AddWorldInventoryItem(trashItem, 0.0, 0.0, 0.0)
+                addXp(self.character, Perks.Masonry, 10);
             end
 --             self.item:getSquare():AddTileObject(IsoObject.new(self.item:getSquare(), "crafting_ore_" .. tostring(ZombRand(2) + 25)));
         elseif self.objectType == "FlintBoulder" then
 			self.item:getSquare():AddWorldInventoryItem("Base.SharpedStone", 0.0, 0.0, 0.0)
             trashItem = "Base.FlintNodule"
+            xp = true
             local roll = ZombRand(4) + 1
             for i = 1, roll do
                 local trashItem2 = "Base.FlintNodule"
                 if ZombRand(3) == 0  then trashItem2 = "Base.SharpedStone" end
 			    self.item:getSquare():AddWorldInventoryItem(trashItem2, 0.0, 0.0, 0.0)
+                addXp(self.character, Perks.Masonry, 5);
             end
         elseif self.objectType == "LimestoneBoulder" then
 			self.item:getSquare():AddWorldInventoryItem("Base.CrushedLimestone", 0.0, 0.0, 0.0)
             trashItem = "Base.Limestone"
+            xp = true
             local roll = ZombRand(4) + 1
             for i = 1, roll do
                 local trashItem2 = "Base.Limestone"
                 if ZombRand(3) == 0 then trashItem2 = "Base.CrushedLimestone" end
 			    self.item:getSquare():AddWorldInventoryItem(trashItem2, 0.0, 0.0, 0.0)
+                addXp(self.character, Perks.Masonry, 5);
             end
 		end
 		if trashItem then
@@ -119,7 +130,9 @@ function ISPickAxeGroundCoverItem:perform()
 	else
 		self.item:getSquare():transmitRemoveItemFromSquare(self.item)
 	end
-
+    if xp then
+        addXp(self.character, Perks.Masonry, 5);
+    end
 	addSound(self.character, self.character:getX(),self.character:getY(),self.character:getZ(), 10, 10);
     -- reduce the PickAxe condition
 	if not ISBuildMenu.cheat and self.pickaxe then

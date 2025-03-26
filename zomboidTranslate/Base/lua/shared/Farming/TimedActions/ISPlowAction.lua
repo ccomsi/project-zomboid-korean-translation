@@ -110,7 +110,7 @@ function ISPlowAction:complete()
     end
     local skill = self.character:getPerkLevel(Perks.Farming)
     local strain = (1 - (skill * 0.05))
-    if tool then
+    if tool and instanceof(tool, "HandWeapon")then
         self.character:addCombatMuscleStrain(self.item, 1, strain)
     else
         self.character:addArmMuscleStrain(strain * 1)

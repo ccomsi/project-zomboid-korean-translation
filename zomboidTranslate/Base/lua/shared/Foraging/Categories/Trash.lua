@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateTrashDefs()
 	--this category contains some of the very rare and/or interesting items other survivors have lost or thrown away
@@ -90,11 +91,11 @@ local function generateTrashDefs()
 			categories = { "Junk", "Trash"},
 			items = {
 				Bobber			 = "Base.Bobber",
-				CandleBox		 = "Base.CandleBox",
 				Camera           = "Base.Camera",
 				CameraDisposable = "Base.CameraDisposable",
 				CameraExpensive  = "Base.CameraExpensive",
 				CameraFilm       = "Base.CameraFilm",
+				CandleBox		 = "Base.CandleBox",
 				CardDeck         = "Base.CardDeck",
 				Card_Birthday    = "Base.Card_Birthday",
 				Card_Christmas   = "Base.Card_Christmas",
@@ -130,6 +131,7 @@ local function generateTrashDefs()
 				Leash            = "Base.Leash",
 				LeatherStrips    = "Base.LeatherStrips",
 				Lighter          = "Base.Lighter",
+				LighterDisposable= "Base.LighterDisposable",
 				Locket           = "Base.Locket",
 				Matches          = "Base.Matches",
 				Mirror           = "Base.Mirror",
@@ -162,7 +164,6 @@ local function generateTrashDefs()
 				Torch            = "Base.Torch",
 				ToyBear          = "Base.ToyBear",
 				ToyCar           = "Base.ToyCar",
-				Tweezers         = "Base.Tweezers",
 				Whistle          = "Base.Whistle",
 				Yoyo             = "Base.Yoyo",
 			},
@@ -215,29 +216,32 @@ local function generateTrashDefs()
 	};
 	for _, spawnTable in pairs(trashItems) do
 		for itemName, itemFullName in pairs(spawnTable.items) do
-			forageDefs[itemName] = {
-				type = itemFullName,
-				xp = spawnTable.xp,
-				categories = spawnTable.categories,
-				zones = {
-					Forest      	= spawnTable.chance,
-					DeepForest  	= spawnTable.chance,
-					PHForest  		= spawnTable.chance,
-					PRForest  		= spawnTable.chance,
-					BirchForest  	= spawnTable.chance,
-					OrganicForest  	= spawnTable.chance,
-					Vegitation  	= spawnTable.chance,
-					FarmLand    	= spawnTable.chance,
-					TrailerPark 	= spawnTable.chance,
-					TownZone    	= spawnTable.chance,
-					ForagingNav 	= spawnTable.chance,
-				},
-				spawnFuncs = { forageSystem.doGenericItemSpawn },
-				forceOutside = false,
-				canBeAboveFloor = true,
-				itemSizeModifier = 0.5,
-				isItemOverrideSize = true,
-			};
+			forageSystem.addForageDef(
+				itemName,
+				{
+					type = itemFullName,
+					xp = spawnTable.xp,
+					categories = spawnTable.categories,
+					zones = {
+						Forest = spawnTable.chance,
+						DeepForest = spawnTable.chance,
+						PHForest = spawnTable.chance,
+						PRForest = spawnTable.chance,
+						BirchForest = spawnTable.chance,
+						OrganicForest = spawnTable.chance,
+						Vegitation = spawnTable.chance,
+						FarmLand = spawnTable.chance,
+						TrailerPark = spawnTable.chance,
+						TownZone = spawnTable.chance,
+						ForagingNav = spawnTable.chance,
+					},
+					spawnFuncs = { forageSystem.doGenericItemSpawn },
+					forceOutside = false,
+					canBeAboveFloor = true,
+					itemSizeModifier = 0.5,
+					isItemOverrideSize = true,
+				}
+			);
 		end;
 	end;
 end

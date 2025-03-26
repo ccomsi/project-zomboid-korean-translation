@@ -95,20 +95,7 @@ end
 function ISForageAction:complete()
 	-- add the items to player inventory
 	forageSystem.giveItemXP(self.character, self.itemDef, 0.75);
-	local itemList = {}
-	if self.itemDef then
-		itemList = ArrayList.new();
-		for _ = 1, self.itemCount do
-			itemList:add(instanceItem(self.itemDef.type));
-		end;
-		--
-		if self.itemDef.spawnFuncs then
-			for _, spawnFunc in ipairs(self.itemDef.spawnFuncs) do
-				itemList = spawnFunc(self.character, self.character:getInventory(), self.itemDef, itemList, self.isPoison) or itemList;
-			end;
-		end;
-	end;
-
+	local itemList = self.icon.itemList or ArrayList.new();
 	forageSystem.addOrDropItems(self.character, self.targetContainer, itemList, self.discardItems)
 
 	return true;
@@ -125,13 +112,13 @@ function ISForageAction:getDuration()
 	end
 end
 
-function ISForageAction:new(character, icon, targetContainer, discardItems, itemType, isPoison)
-	local o = ISBaseTimedAction.new(self, character)
+function ISForageAction:new(character, icon, targetContainer, discardItems, itemType)
+	local o = ISBaseTimedAction.new(self, character);
 	o.targetContainer = targetContainer;
 	o.discardItems = discardItems;
+	o.icon = icon;
 	o.iconID = icon.iconID;
 	o.itemType = itemType;
-	o.isPoison = isPoison
 	--
 	if not isServer() then
 		o.manager = ISSearchManager.getManager(character);

@@ -531,8 +531,9 @@ function SandboxOptionsScreen:create()
     self.presetPanel:addChild(self.deletePresetButton)
 
     self.advancedCheckBox = ISTickBox:new(self.deletePresetButton:getRight() + UI_BORDER_SPACING, 0, BUTTON_HGT, BUTTON_HGT, "", self, self.changeAdvancedMode)
-    self.advancedCheckBox:addOption("Advanced")
+    self.advancedCheckBox:addOption(getText("Sandbox_Advanced"))
     self.advancedCheckBox.selected[1] = false
+    self.advancedCheckBox.tooltip = getText("Sandbox_Advanced_tooltip")
     self.advancedCheckBox.onJoypadDirRight = function(_self, joypadData)
         joypadData.focus = _self.parent.parent
         updateJoypadFocus(joypadData)
@@ -571,7 +572,7 @@ function SandboxOptionsScreen:create()
         self.presetPanel:addChild(self.devPresetButton)
         self.advancedCheckBox:setX(self.devPresetButton:getRight()+UI_BORDER_SPACING)
     end
-    self.presetPanel:setWidth(self.advancedCheckBox:getRight()+getTextManager():MeasureStringX(UIFont.Small, "Advanced"))
+    self.presetPanel:setWidth(self.advancedCheckBox:getRight()+getTextManager():MeasureStringX(UIFont.Small, getText("Sandbox_Advanced")))
     self.presetPanel:setX(self.width / 2 - self.presetPanel:getWidth() / 2)
 
     self.presetPanel:insertNewLineOfButtons(self.presetList, self.savePresetButton, self.deletePresetButton, self.devPresetButton)

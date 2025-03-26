@@ -9,7 +9,6 @@ local clay_shore = {
         landscape = { "FOREST" },
         temperature = { "MEDIUM" },
         hygrometry = { "DRY", "RAIN" },
-        zombies = 0.001,
         placement = {
             "blends_natural_01_*",
         },

@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateInsectsDefs()
 	local insects = {
@@ -474,7 +475,7 @@ local function generateInsectsDefs()
 	};
 
 	for itemName, itemDef in pairs(insects) do
-		forageDefs[itemName] = itemDef;
+		forageSystem.addForageDef(itemName, itemDef);
 	end;
 end
 

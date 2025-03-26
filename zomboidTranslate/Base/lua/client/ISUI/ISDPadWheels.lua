@@ -98,7 +98,7 @@ function ISDPadWheels.onDisplayRight(joypadData)
 		menu:addSlice(getText("IGUI_MiniMap_Toggle"), getTexture("media/textures/worldMap/Map_On.png"), ISMiniMap.ToggleMiniMap, playerIndex)
 		menu:addSlice(getText("IGUI_MiniMap_Focus"), getTexture("media/textures/worldMap/Map_On.png"), ISMiniMap.FocusMiniMap, playerIndex)
 	end
-	menu:addSlice(getText("IGUI_Zone_Name"), getTexture("media/ui/Sidebar/AnimalZoneNew_On.png"), ISDPadWheels.showAnimalZoneUI, playerIndex)
+	menu:addSlice(getText("IGUI_Zone_Name"), getTexture("media/ui/Sidebar/64/AnimalZone_On_64.png"), ISDPadWheels.showAnimalZoneUI, playerIndex)
 	menu:addSlice(getText("UI_optionscreen_binding_Toggle Survival Guide"), getTexture("media/ui/emotes/shrug.png"), ISDPadWheels.showSurvGuide, playerIndex)
 
 	menu:setX(getPlayerScreenLeft(playerIndex) + getPlayerScreenWidth(playerIndex) / 2 - menu:getWidth() / 2)

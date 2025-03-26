@@ -301,6 +301,7 @@ VehicleDistributions.SportsGloveBox = {
 		"Gloves_LeatherGlovesBlack", 1,
 		"HottieZ", 1,
 		"IDcard", 1,
+        "KeyRing_Clover", 0.005,
 		"KeyRing_RabbitFoot", 1,
 		"KnifeButterfly", 0.1,
 		"Kneepad_Left_Sport", 1,

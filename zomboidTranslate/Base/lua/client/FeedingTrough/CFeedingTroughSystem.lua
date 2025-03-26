@@ -26,6 +26,7 @@ function CFeedingTroughSystem:OnLuaObjectUpdated(luaObject)
 end
 
 local function DoSpecialTooltip1(tooltip, square)
+	if Mouse.isRightDown() then return; end
 	local luaObject = CFeedingTroughSystem.instance:getLuaObjectOnSquare(square)
 	if not luaObject then return; end
 

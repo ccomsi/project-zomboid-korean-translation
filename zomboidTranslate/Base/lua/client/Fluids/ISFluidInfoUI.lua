@@ -84,9 +84,10 @@ end
 function ISFluidInfoUI:createChildren()
     ISPanelJoypad.createChildren(self);
 
-    self.panelText = getText("Fluid_Info_Panel");
-    self.panel = ISFluidContainerPanel:new(UI_BORDER_SPACING+1, UI_BORDER_SPACING+1, self.player, self.container, true, true, self.isIsoPanel);
-    self.panel.customTitle = self.panelText;
+
+    self.title = ISLabel:new (self.width/2, (BUTTON_HGT-FONT_HGT_SMALL)/2, FONT_HGT_SMALL, getText("Fluid_Info_Panel"), 1, 1, 1, 1, UIFont.Small, false);
+    self:addChild(self.title)
+    self.panel = ISFluidContainerPanel:new(UI_BORDER_SPACING+1, BUTTON_HGT+1, self.player, self.container, false, true, self.isIsoPanel);
     self.panel:initialise();
     self.panel:instantiate();
     self:addChild(self.panel);
@@ -113,9 +114,13 @@ function ISFluidInfoUI:createChildren()
 
     self:setWidth(self.panel:getRight() + UI_BORDER_SPACING + 1);
     self:setHeight(self.btnClose:getBottom() + UI_BORDER_SPACING+1);
-    if self.panel:getIsoObjectTextures() then
-        self:setHeight(self:getHeight() + 180);
-    end
+    --if self.panel:getIsoObjectTextures() then
+    --    self:setHeight(self:getHeight() + 180);
+    --end
+
+    self:setWidth(self.panel.width + UI_BORDER_SPACING*2+2);
+    self.title:setX((self.width - self.title.width)/2)
+    self.btnClose:setWidth(self.panel.width)
 end
 
 function ISFluidInfoUI:prerender()
@@ -141,8 +146,6 @@ function ISFluidInfoUI:update()
             return
         end
     end
-    self:setWidth(self.panel.width + UI_BORDER_SPACING*2+2);
-    self.btnClose:setWidth(self.panel.width)
 end
 
 function ISFluidInfoUI:close()

@@ -2520,8 +2520,10 @@ function MainOptions:addSoundPanel()
 	function gameOption.apply(self)
 		local box = self.control
 		getCore():setOptionPlayMusicWhenPaused(box:isSelected(1))
-		getSoundManager():resumeSoundAndMusic()
-		getSoundManager():pauseSoundAndMusic(true)
+		if MainScreen.instance.inGame then
+			getSoundManager():resumeSoundAndMusic()
+			getSoundManager():pauseSoundAndMusic(true)
+		end
 	end
 	self.gameOptions:add(gameOption)
 
@@ -4066,7 +4068,7 @@ function MainOptions:onConfirmMonitorSettingsClick(button, closeAfter)
 end
 
 function MainOptions:showRestartRequiredDialog(closeAfter)
-	local player = 0
+	local player = nil
 	local modal = ISModalDialog:new(getCore():getScreenWidth() / 2 - 175, getCore():getScreenHeight() / 2 - 75, 350, 150,
 		getText("UI_restart_game_to_apply"), false, self, MainOptions.onRestartRequiredClick, player, closeAfter)
 	modal:initialise()

@@ -20,16 +20,15 @@ function ISFluidContainerPanel:initialise()
 end
 
 function ISFluidContainerPanel:createChildren()
-    self.pad = UI_BORDER_SPACING;
-    self.innerHeight = BUTTON_HGT*4+UI_BORDER_SPACING*2+2;
+    local y = UI_BORDER_SPACING+1
+    self.innerHeight = BUTTON_HGT*4 + y*2;
 
     if self.isIso then
         self:getIsoObjectTextures();
     end
 
-    local y = UI_BORDER_SPACING+1;
     if self.doTitle then
-        y = y+FONT_HGT_SMALL+UI_BORDER_SPACING;
+        y = BUTTON_HGT+1;
     end
 
     self.innerY = y;
@@ -46,9 +45,9 @@ function ISFluidContainerPanel:createChildren()
         h = self.innerHeight,
     }
 
-	if self.isIso and (#self.textureList > 0) then
-		self.containerBox.x = UI_BORDER_SPACING+1+64*2 + UI_BORDER_SPACING
-	end
+	--if self.isIso and (#self.textureList > 0) then
+	--	self.containerBox.x = UI_BORDER_SPACING+1+64*2 + UI_BORDER_SPACING
+	--end
 
     if self.isItem then
         self.itemDropBox = ISItemDropBox:new (self.containerBox.x + UI_BORDER_SPACING+1, self.containerBox.y+UI_BORDER_SPACING+1, BUTTON_HGT, BUTTON_HGT, true, self, ISFluidContainerPanel.addItem, ISFluidContainerPanel.removeItem, ISFluidContainerPanel.verifyItem, nil );
@@ -141,42 +140,42 @@ function ISFluidContainerPanel:prerender()
     end
     local ownerOffsetY = self.owner:getRenderYOffset() * Core.getTileScale();
 
-    -- In case the container is IsoObject draw the square tiles, outline the owner object.
-    if self.textureList and #self.textureList > 0 then
-        local x = UI_BORDER_SPACING+1;
-        local y = self:getHeight() - 128*2;
-        for i = 1, #self.textureList do
-            local children = self.textureList[i].children;
-            local texture = self.textureList[i].texture;
-            local offsetY = -self.textureList[i].offsetY;-- / Core.getTileScale()
---            offsetY = offsetY + 50;
-            if self.textureList[i].texture == self.ownerTexture and self.textureList[i].offsetY == ownerOffsetY then
-                self:drawTextureIso(texture, x, y + offsetY, 1);
-
-                if children and #children>0 then
-                    for j=1, #children do
-                        local childTexture = children[j].texture;
-                        local childOffsetY = -children[j].offsetY;-- / Core.getTileScale()
-                        self:drawTextureIso(childTexture, x, y + childOffsetY);
-                    end
-                end
-
-                if self.doOwnerOutlines then
-                    self:drawTextureOutlines(texture, x, y + offsetY);
-
-                    if children and #children>0 then
-                        for j=1, #children do
-                            local childTexture = children[j].texture;
-                            local childOffsetY = -children[j].offsetY;-- / Core.getTileScale()
-                            self:drawTextureOutlines(childTexture, x, y + childOffsetY);
-                        end
-                    end
-                end
-            else
-                self:drawTextureIso(texture, x, y + offsetY, 0.5);
-            end
-        end
-    end
+--    -- In case the container is IsoObject draw the square tiles, outline the owner object.
+--    if self.textureList and #self.textureList > 0 then
+--        local x = UI_BORDER_SPACING+1;
+--        local y = self:getHeight() - 128*2;
+--        for i = 1, #self.textureList do
+--            local children = self.textureList[i].children;
+--            local texture = self.textureList[i].texture;
+--            local offsetY = -self.textureList[i].offsetY;-- / Core.getTileScale()
+--            --offsetY = offsetY + 50;
+--            if self.textureList[i].texture == self.ownerTexture and self.textureList[i].offsetY == ownerOffsetY then
+--                self:drawTextureIso(texture, x, y + offsetY, 1);
+--
+--                if children and #children>0 then
+--                    for j=1, #children do
+--                        local childTexture = children[j].texture;
+--                        local childOffsetY = -children[j].offsetY;-- / Core.getTileScale()
+--                        self:drawTextureIso(childTexture, x, y + childOffsetY);
+--                    end
+--                end
+--
+--                if self.doOwnerOutlines then
+--                    self:drawTextureOutlines(texture, x, y + offsetY);
+--
+--                    if children and #children>0 then
+--                        for j=1, #children do
+--                            local childTexture = children[j].texture;
+--                            local childOffsetY = -children[j].offsetY;-- / Core.getTileScale()
+--                            self:drawTextureOutlines(childTexture, x, y + childOffsetY);
+--                        end
+--                    end
+--                end
+--            else
+--                self:drawTextureIso(texture, x, y + offsetY, 0.5);
+--            end
+--        end
+--    end
 end
 
 function ISFluidContainerPanel:render()
@@ -186,7 +185,7 @@ function ISFluidContainerPanel:render()
 
     if self.doTitle and self.title then
         c = self.textColor;
-        self:renderText(self.title, self.width/2,UI_BORDER_SPACING+1, c.r,c.g,c.b,c.a,UIFont.Small, self.drawTextCentre);
+        self:renderText(self.title, self.width/2,(BUTTON_HGT-FONT_HGT_SMALL)/2, c.r,c.g,c.b,c.a,UIFont.Small, self.drawTextCentre);
     end
 
     local name = false
@@ -275,31 +274,11 @@ function ISFluidContainerPanel:render()
             self:renderText(self.info.capacity.tag, tagx,y, c.r,c.g,c.b,c.a,UIFont.Small, self.drawTextRight);
             c = self.textColor;
             self:renderText(self.info.capacity.value, valx,y, c.r,c.g,c.b,c.a,UIFont.Small);
-
-            local valRight = valx + math.max(
-                    getTextManager():MeasureStringX(UIFont.Small, self.info.capacity.value),
-                    getTextManager():MeasureStringX(UIFont.Small, self.info.stored.value),
-                    getTextManager():MeasureStringX(UIFont.Small, self.info.free.value)
-            )
---            valRight = math.max(valRight, UI_BORDER_SPACING*3+1 + BUTTON_HGT + getTextManager():MeasureStringX(UIFont.Small, name))
-            self.containerBox.w = math.max(valRight - self.containerBox.x, containerNameRight - self.containerBox.x) + UI_BORDER_SPACING + 1
-            self.fluidBar:setX(self.containerBox.x + self.containerBox.w + UI_BORDER_SPACING);
-            self:setWidth( math.max(self.containerBox.x + self.containerBox.w, self.fluidBar:getRight()) + UI_BORDER_SPACING+1 );
         end
-	else
-		    local tagWid = math.max(
-                    getTextManager():MeasureStringX(UIFont.Small, self.info.capacity.tag),
-                    getTextManager():MeasureStringX(UIFont.Small, self.info.stored.tag),
-                    getTextManager():MeasureStringX(UIFont.Small, self.info.free.tag)
-            )
-			local tagx = self.containerBox.x + UI_BORDER_SPACING + 1 + tagWid
-	        local valx = tagx + UI_BORDER_SPACING;	
-			
-			local valRight = valx + getTextManager():MeasureStringX(UIFont.Small, " 000 mL") + UI_BORDER_SPACING + 1;
-			self.containerBox.w = math.max(valRight - self.containerBox.x, containerNameRight - self.containerBox.x)
-			self.fluidBar:setX(self.containerBox.x + self.containerBox.w + UI_BORDER_SPACING);
-			self:setWidth( math.max(self.containerBox.x + self.containerBox.w, self.fluidBar:getRight()) + UI_BORDER_SPACING+1 );
     end
+
+    self.fluidBar:setX(self.containerBox.x + self.containerBox.w + UI_BORDER_SPACING);
+    self:setWidth( math.max(self.containerBox.x + self.containerBox.w, self.fluidBar:getRight()) + UI_BORDER_SPACING+1 );
 
     c = self.borderOuterColor;
     self:drawRectBorder(0, 0, self.width, self.height, c.a, c.r, c.g, c.b);
@@ -509,7 +488,8 @@ end
 
 function ISFluidContainerPanel:new (x, y, _player, _container, _doTitle, _isLeft, _isoHeight)
     local width = 300;
-    local height = BUTTON_HGT*5+UI_BORDER_SPACING*5+FONT_HGT_SMALL;
+
+    local height = BUTTON_HGT*4 + UI_BORDER_SPACING*3 + 4 + (_doTitle and BUTTON_HGT or UI_BORDER_SPACING);
     local o = ISPanel:new(x, y, width, height);
     setmetatable(o, self)
     self.__index = self

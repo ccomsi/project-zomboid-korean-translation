@@ -817,6 +817,9 @@ end
 
 function ISInventoryPane:updateTooltip()
 	if not self:isReallyVisible() then
+		if self.parent.onCharacter then
+			Key.setHighlightDoors(self.player, nil)
+		end
 		return -- in the main menu
 	end
 	local item = nil
@@ -848,6 +851,9 @@ function ISInventoryPane:updateTooltip()
 	if item and self.toolRender and (item == self.toolRender.item) and
 			(weightOfStack == self.toolRender.tooltip:getWeightOfStack()) and
 			self.toolRender:isVisible() then
+		if self.parent.onCharacter then
+			Key.setHighlightDoors(self.player, item)
+		end
 		return
 	end
 	if item then
@@ -2249,7 +2255,7 @@ function ISInventoryPane:renderdetails(doDragged)
 							self:drawTexture(self.poisonIcon, (10+auxDXY+xoff), (y*self.itemHgt)+self.headerHgt+auxDXY-1+yoff, 1, 1, 1, 1);
 						end
                         if item:isFavorite() then
-                            self:drawTexture(self.favoriteStar, texOffsetX+auxDXY+3, texOffsetY+auxDXY-1, 1, 1, 1, 1);
+                            self:drawTexture(self.favoriteStar, texOffsetX, texOffsetY+auxDXY, 1, 1, 1, 1);
                         end
                     elseif v.count > 2 or (doDragged and count > 1 and self.selected[(y+1) - (count-1)] == nil) then
                         -- removed the fade effect on items in stacks as it makes it difficult to tell what color clothing and bags in stacks are

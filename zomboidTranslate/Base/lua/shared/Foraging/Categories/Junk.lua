@@ -9,6 +9,7 @@
 --]]---------------------------------------------
 
 require "Foraging/forageDefinitions";
+require "Foraging/forageSystem";
 
 local function generateJunkDefs()
 	--this category contains some of the very rare and/or interesting items other survivors have lost or thrown away
@@ -79,11 +80,8 @@ local function generateJunkDefs()
 				--FishingTackle           = "Base.FishingTackle",
 				--FishingTackle2          = "Base.FishingTackle2",
 				Handbag                 = "Base.Handbag",
-				Lighter                 = "Base.Lighter",
-				LighterDisposable       = "Base.LighterDisposable",
 				Lunchbox                = "Base.Lunchbox",
 				Lunchbox2               = "Base.Lunchbox2",
-				Matches                 = "Base.Matches",
 				Purse                   = "Base.Purse",
 				Saw                     = "Base.Saw",
 				Soap2                 	= "Base.Soap2",
@@ -110,8 +108,6 @@ local function generateJunkDefs()
 				Bag_BowlingBallBag      = "Base.Bag_BowlingBallBag",
 				Bag_GolfBag             = "Base.Bag_GolfBag",
 				Bag_Schoolbag           = "Base.Bag_Schoolbag",
-				BakingPan        		= "Base.BakingPan",
-				BakingTray        		= "Base.BakingTray",
 				CigaretteSingle			= "Base.CigaretteSingle",
 				CookingMag1             = "Base.CookingMag1",
 				CookingMag2             = "Base.CookingMag2",
@@ -389,7 +385,6 @@ local function generateJunkDefs()
 				AerosolbombSensorV2   	= "Base.AerosolbombSensorV2",
 				AerosolbombSensorV3    	= "Base.AerosolbombSensorV3",
 				AerosolbombTriggered   	= "Base.AerosolbombTriggered",
-				AmmoStraps              = "Base.AmmoStraps",
 				BoxOfJars            	= "Base.BoxOfJars",
 				ChokeTubeFull           = "Base.ChokeTubeFull",
 				ChokeTubeImproved       = "Base.ChokeTubeImproved",
@@ -425,30 +420,33 @@ local function generateJunkDefs()
 	};
 	for _, spawnTable in pairs(junkItems) do
 		for itemName, itemFullName in pairs(spawnTable.items) do
-			forageDefs[itemName] = {
-				type = itemFullName,
-				skill = 0,
-				xp = spawnTable.xp,
-				categories = spawnTable.categories,
-				zones = {
-					Forest      	= spawnTable.chance,
-					DeepForest  	= spawnTable.chance,
-					PHForest  		= spawnTable.chance,
-					PRForest  		= spawnTable.chance,
-					BirchForest  	= spawnTable.chance,
-					OrganicForest  	= spawnTable.chance,
-					Vegitation  	= spawnTable.chance,
-					FarmLand    	= spawnTable.chance,
-					TrailerPark 	= spawnTable.chance,
-					TownZone    	= spawnTable.chance,
-					ForagingNav 	= spawnTable.chance,
-				},
-				spawnFuncs = { forageSystem.doGenericItemSpawn },
-				forceOutside = false,
-				canBeAboveFloor = true,
-				itemSizeModifier = 0.5,
-				isItemOverrideSize = true,
-			};
+			forageSystem.addForageDef(
+				itemName,
+				{
+					type = itemFullName,
+					skill = 0,
+					xp = spawnTable.xp,
+					categories = spawnTable.categories,
+					zones = {
+						Forest = spawnTable.chance,
+						DeepForest = spawnTable.chance,
+						PHForest = spawnTable.chance,
+						PRForest = spawnTable.chance,
+						BirchForest = spawnTable.chance,
+						OrganicForest = spawnTable.chance,
+						Vegitation = spawnTable.chance,
+						FarmLand = spawnTable.chance,
+						TrailerPark = spawnTable.chance,
+						TownZone = spawnTable.chance,
+						ForagingNav = spawnTable.chance,
+					},
+					spawnFuncs = { forageSystem.doGenericItemSpawn },
+					forceOutside = false,
+					canBeAboveFloor = true,
+					itemSizeModifier = 0.5,
+					isItemOverrideSize = true,
+				}
+			);
 		end;
 	end;
 end

@@ -47,6 +47,9 @@ AnimalDefinitions.breeds["deer"].breeds["whitetailed"].invIconBaby = "Item_DeerF
 AnimalDefinitions.breeds["deer"].breeds["whitetailed"].invIconMaleDead = "Item_DeerMale_Dead";
 AnimalDefinitions.breeds["deer"].breeds["whitetailed"].invIconFemaleDead = "Item_DeerFemale_Dead";
 AnimalDefinitions.breeds["deer"].breeds["whitetailed"].invIconBabyDead = "Item_DeerFawn_Dead";
+AnimalDefinitions.breeds["deer"].breeds["whitetailed"].invIconMaleSkel = "Item_Skeleton_Deer_Stag";
+AnimalDefinitions.breeds["deer"].breeds["whitetailed"].invIconFemaleSkel = "Item_Skeleton_Deer_Doe";
+AnimalDefinitions.breeds["deer"].breeds["whitetailed"].invIconBabySkel = "Item_Skeleton_Deer_Fawn";
 
 
 -- animals

@@ -4,7 +4,8 @@ local birch_forest = {
             { f = worldgen.features.GROUND.light_grass, p = 1.0 }
         },
         PLANT = {
-            { f = worldgen.features.PLANT.grass_overlay, p = 0.4 },
+            { f = worldgen.features.PLANT.grass_medium, p = 0.3 },
+            { f = worldgen.features.PLANT.grass_high, p = 0.3 },
             { f = worldgen.features.PLANT.generic_plant, p = 0.1 },
             { f = worldgen.features.PLANT.floor_leaves, p = 0.1 },
         },

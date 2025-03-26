@@ -67,6 +67,8 @@ function ISStatsAndBody:createChildren()
     op.title = getText("IGUI_StatsAndBody_TimeSinceLastSmoke");
     op = self:addSliderOption(body,"BoredomLevel", 0, 100, 1);
     op.title = getText("IGUI_StatsAndBody_BoredomLevel");
+    op = self:addSliderOption(stats,"Idleness", 0, 1, 0.001);
+    op.title = getText("IGUI_StatsAndBody_Idleness");
     op = self:addSliderOption(body,"UnhappynessLevel", 0, 100, 1);
     op.title = getText("IGUI_StatsAndBody_UnhappynessLevel");
     op = self:addSliderOption(stats,"Sanity", 0, 1);

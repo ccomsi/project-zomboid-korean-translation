@@ -15,6 +15,8 @@ function ISWidgetIngredientsInputs:initialise()
 end
 
 function ISWidgetIngredientsInputs:createChildren()
+    self:setScrollChildren(true)
+    self:addScrollBars()
     ISPanelJoypad.createChildren(self);
 
     --[[
@@ -34,6 +36,31 @@ function ISWidgetIngredientsInputs:createChildren()
     self.inputsLabel:initialise();
     self.inputsLabel:instantiate();
     self:addChild(self.inputsLabel);
+    
+    -- create scroll panel for input slots
+    self.panel = ISPanel:new(0, self.inputsLabel:getHeight() + UI_BORDER_SPACING, 30, 10)
+    self.panel.prerender = function(self)
+        self:setStencilRect(0, 0, self:getWidth(), self:getHeight())
+        ISPanel.prerender(self)
+    end
+    self.panel.render = function(self)
+        ISPanel.render(self)
+        self:clearStencilRect()
+    end
+    self.panel.onMouseWheel = function(self, del)
+        if self:getScrollHeight() > 0 then
+            self:setYScroll(self:getYScroll() - (del * 40))
+            return true
+        end
+        return false
+    end
+    self.panel:initialise()
+    self.panel:instantiate()
+    self.panel:noBackground()
+    self.panel:setScrollChildren(true)
+    self.panel:addScrollBars();
+    self:addChild(self.panel)
+    --
     
     self.inputs = {};
 
@@ -80,7 +107,7 @@ function ISWidgetIngredientsInputs:addInput(_inputScript)
     end
     input:initialise();
     input:instantiate();
-    self:addChild(input);
+    self.panel:addChild(input);
     table.insert(self.inputs, input);
 end
 
@@ -109,15 +136,30 @@ function ISWidgetIngredientsInputs:calculateLayout(_preferredWidth, _preferredHe
     local inputCols = 4;
     local inputRows = math.ceil(inputCount / inputCols);
     inputRows = math.max(1, inputRows);
-
+    
     local margins = inputRows * self.margin;
-    minHeight = minHeight + (minInputHeight * inputRows) + margins;
+    local contentHeight = (minInputHeight * inputRows) + margins;
+    
+    local inputRowsToShow = math.min(2, inputRows)
+    margins = inputRowsToShow * self.margin;
+    local panelHeight = (minInputHeight * inputRowsToShow) + margins;
+    minHeight = minHeight + panelHeight;
 
     minWidth = math.max(minWidth, (self.itemMargin*2)+(minInputWidth*inputCols)+(self.itemSpacing*(inputCols - 1)));
-
+    if inputRows > inputRowsToShow then
+        minWidth = minWidth + self.margin;
+    end
+        
     width = math.max(width, minWidth);
     height = math.max(height, minHeight);
 
+    self.panel.vscroll:setX(minWidth - self.panel.vscroll.width)
+    self.panel.vscroll:setY(0)
+    self.panel.vscroll:setHeight(panelHeight)
+    self.panel:setScrollHeight(contentHeight);
+    self.panel:setWidth(width);
+    self.panel:setHeight(panelHeight);
+    
     local x = self.margin;
     local y = self.margin;
 
@@ -135,7 +177,7 @@ function ISWidgetIngredientsInputs:calculateLayout(_preferredWidth, _preferredHe
     self.joypadButtons = {}
     self.joypadButtonsY = {}
 
-    local inputTop = self.inputsLabel:getY() + self.inputsLabel:getHeight() + self.margin;
+    local inputTop = self.margin;
     local column = 0;
     local row = 0;
     for k,v in ipairs(self.inputs) do

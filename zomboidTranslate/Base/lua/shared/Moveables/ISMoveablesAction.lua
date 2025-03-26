@@ -123,8 +123,9 @@ function ISMoveablesAction:start()
     if self.mode and (self.mode=="scrap" or self.mode=="repair") then
         if self.mode == "scrap" then
             local hc = getCore():getBadHighlitedColor();
-            self.moveProps.object:setHighlightColor(hc);
-            self.moveProps.object:setHighlighted(true, false);
+            self.moveProps.object:setHighlightColor(self.playerNum, hc);
+            self.moveProps.object:setHighlighted(self.playerNum, true, false);
+            ISInventoryPage.OnObjectHighlighted(self.playerNum, self.moveProps.object, true)
         end;
         local isFloor = self.moveProps and self.moveProps.object and self.moveProps.object:isFloor()
         if self.moveProps and self.mode=="scrap" and self.moveProps:startScrapAction(self) then
@@ -148,7 +149,8 @@ end
 
 function ISMoveablesAction:stop()
     if self.mode and self.mode=="scrap" then
-		self.moveProps.object:setHighlighted(false);
+		self.moveProps.object:setHighlighted(self.playerNum, false);
+		ISInventoryPage.OnObjectHighlighted(self.playerNum, self.moveProps.object, false)
 	end
     if self.sound and self.sound ~= 0 then
         self.character:stopOrTriggerSound(self.sound);
@@ -162,7 +164,8 @@ end
 function ISMoveablesAction:perform()
     if self.mode then
         if self.mode=="scrap" then
-		    self.moveProps.object:setHighlighted(false);
+		    self.moveProps.object:setHighlighted(self.playerNum, false);
+		    ISInventoryPage.OnObjectHighlighted(self.playerNum, self.moveProps.object, false)
 		end
 		if self.mode == "pickup" then
             getSoundManager():playUISound("UIObjectMenuObjectPickup")
@@ -217,6 +220,7 @@ end
 
 function ISMoveablesAction:new(character, square, mode, origSpriteName, object, direction, item, moveCursor )
     local o = ISBaseTimedAction.new(self, character)
+    o.playerNum = character:getPlayerNum()
     o.square            = square;
     o.origSpriteName    = origSpriteName;
     o.spriteFrame       = 0;
@@ -248,7 +252,15 @@ function ISMoveablesAction:new(character, square, mode, origSpriteName, object, 
         o.moveProps = ISMoveableSpriteProps.fromObjectForRepair( object );
     end
     if o.mode == "place" then
-        local _moveProps = ISMoveableSpriteProps.new( item:getWorldSprite() );
+        local worldSpriteName = item:getWorldSprite();
+        local worldSprite = getSprite(worldSpriteName); -- this may be any sprite in a sprite grid, we want the sprite at 0,0 in the grid
+        if worldSprite ~= nil and worldSprite:getSpriteGrid() ~= nil then
+            worldSprite = worldSprite:getSpriteGrid():getSprite(0, 0)
+            if worldSprite ~= nil then
+                worldSpriteName = worldSprite:getName()
+            end
+        end
+        local _moveProps = ISMoveableSpriteProps.new( worldSpriteName );
         local faces = _moveProps:getFaces();
         if faces[direction] then
             _moveProps = ISMoveableSpriteProps.new( faces[direction] );

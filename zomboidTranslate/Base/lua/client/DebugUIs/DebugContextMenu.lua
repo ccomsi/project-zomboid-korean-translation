@@ -169,6 +169,8 @@ DebugContextMenu.doDebugMenu = function(player, context, worldobjects, test)
 
 	DebugContextMenu.doDebugAnimalMenu(playerObj, debugMenu, worldobjects, test, square)
 	DebugContextMenu.doSurvivorSwapMenu(player, debugMenu, worldobjects, test)
+
+	DebugContextMenu.doForageMenu(player, debugMenu, worldobjects, test)
 	--	if not DebugContextMenu.staggerBacking then
 	--		subMenu:addOption("Start Stagger Back", playerObj, DebugContextMenu.stagger, true);
 	--	else
@@ -407,9 +409,11 @@ function DebugContextMenu.doDebugObjectMenu(player, context, worldobjects, test)
 			local obj = square:getObjects():get(i-1)
 			if BentFences.getInstance():isBentObject(obj) then
 				subMenu:addOption("Un-bend Fence", worldobjects, DebugContextMenu.OnUnbendFence, obj)
+				subMenu:addOption("Reset Fence", worldobjects, DebugContextMenu.OnResetFence, obj)
 			end
 			if BentFences.getInstance():isUnbentObject(obj) then
 				subMenu:addOption("Bend Fence", worldobjects, DebugContextMenu.OnBendFence, obj)
+				subMenu:addOption("Bend Fence Towards Player", worldobjects, DebugContextMenu.OnBendFence, obj, true)
 			end
 			if BrokenFences.getInstance():isBreakableObject(obj) then
 				subMenu:addOption("Break Fence", worldobjects, DebugContextMenu.OnBreakFence, obj)
@@ -828,7 +832,7 @@ function DebugContextMenu.pickSquare(x, y)
 	return getCell():getGridSquare(worldX, worldY, z), worldX, worldY, z
 end
 
-function DebugContextMenu.OnBendFence(worldobjects, fence)
+function DebugContextMenu.OnBendFence(worldobjects, fence, towards)
 	local playerObj = getSpecificPlayer(0)
 	local props = fence:getProperties()
 	local dir = nil
@@ -839,11 +843,16 @@ function DebugContextMenu.OnBendFence(worldobjects, fence)
 	else
 		dir = (playerObj:getX() >= fence:getX()) and IsoDirections.W or IsoDirections.E
 	end
+	if towards then dir = IsoDirections.reverse(dir); end;
 	BentFences.getInstance():bendFence(fence, dir)
 end
 
 function DebugContextMenu.OnUnbendFence(worldobjects, fence)
 	BentFences.getInstance():unbendFence(fence)
+end
+
+function DebugContextMenu.OnResetFence(worldobjects, fence)
+	BentFences.getInstance():resetFence(fence)
 end
 
 function DebugContextMenu.OnBreakFence(worldobjects, fence)
@@ -1304,6 +1313,29 @@ DebugContextMenu.doSurvivorSwapMenu = function(player, context, worldobjects, te
 	for id, data in pairs(SurvivorSwap.Loadouts) do
 		submenu:addOption(id, playerObj, SurvivorSwap.applyLoadout, data)
 	end
+end
+
+DebugContextMenu.onTick = function()
+	if DebugContextMenu.staggerBacking then
+		DebugContextMenu.stagTime = DebugContextMenu.stagTime - 1;
+		if DebugContextMenu.stagTime < 0 then
+			local chr = IsoPlayer.getInstance();
+			DebugContextMenu.stagTime = 300;
+			chr:setBumpType("stagger");
+			chr:setVariable("BumpDone", false);
+			chr:setVariable("BumpFall", true);
+			chr:setVariable("BumpFallType", "pushedFront");
+		end
+	end
+end
+
+DebugContextMenu.doForageMenu = function(player, context, worldobjects, test)
+	local character = getSpecificPlayer(player);
+	local manager = ISSearchManager.getManager(character);
+	local clickedX = screenToIsoX(player, context.x, context.y, character:getZ());
+	local clickedY = screenToIsoY(player, context.x, context.y, character:getZ());
+	local square = getCell():getGridSquare(clickedX, clickedY, character:getZ());
+	ISSearchManager.createDebugContextMenu(player, context, manager, square)
 end
 
 DebugContextMenu.onTick = function()

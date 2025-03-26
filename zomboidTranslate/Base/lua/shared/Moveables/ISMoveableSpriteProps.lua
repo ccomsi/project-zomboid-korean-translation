@@ -3277,7 +3277,7 @@ function ISMoveableSpriteProps:scrapObjectInternal( _character, _scrapDef, _squa
 
         local deviceData = object.getDeviceData and object:getDeviceData();
 
-        if object:isFloor() and (_square:getZ() == 0) then
+        if (_square:getZ() <= 0) and (object:isFloor() or (object:getSprite() and object:getSprite():getProperties():Is(IsoFlagType.solidfloor))) then
             local floor = _square:getFloor();
             if floor then
                 floor:setSpriteFromName("blends_natural_01_64");
@@ -3720,8 +3720,6 @@ function ISThumpableSpriteProps.new(object)
     o.sprite = object:getSprite()
     if o.sprite then
         o.spriteName = o.sprite:getName()
-        o.canScrap = true
-        o.scrapThumpable = true
         o.isFromObject = true
         o.object = object
         o.name = "Scrapable object"
@@ -3743,6 +3741,8 @@ function ISThumpableSpriteProps.new(object)
             o.material2 = props:Is("Material2") and props:Val("Material2")~="Undefined" and props:Val("Material2");
             o.material3 = props:Is("Material3") and props:Val("Material3")~="Undefined" and props:Val("Material3");
         end
+        o.canScrap = ISMoveableDefinitions:getInstance().isScrapDefinitionValid( o.material );
+        o.scrapThumpable = o.canScrap;
     end
     return o
 end
